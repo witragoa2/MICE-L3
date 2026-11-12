@@ -1,12 +1,14 @@
 """Convierte el PDF oficial de horarios del L3 en data/horarios.json.
 
+Normalmente no se usa solo: scripts/actualizar_semestre.py lo llama y además
+actualiza los profesores y revisa los datos.
+
 Uso:
     python scripts/generar_json.py
     python scripts/generar_json.py pdf_origen/Horarios_L3_2027-I.pdf data/horarios.json
 
-El script detecta las columnas a partir del encabezado de cada página, agrupa
-todas las sesiones de un mismo grupo y guarda metadatos del semestre, de modo
-que cada semestre solo hay que dejar el PDF en pdf_origen/ y volver a ejecutar.
+Detecta las columnas a partir del encabezado de cada página y agrupa todas las
+sesiones de un mismo grupo.
 """
 
 import argparse
@@ -46,14 +48,28 @@ def normalizar_columna(texto):
     return limpio
 
 
+ROMANOS = {"I": 1, "II": 2, "III": 3, "IV": 4, "V": 5}
+
+
+def semestre_de_nombre(ruta):
+    """(año, periodo) del nombre del archivo, p. ej. 'Horarios_L3_2027-II.pdf' -> (2027, 2)."""
+    m = re.search(r"(\d{4})-(IV|V|I{1,3})(?![IVX])", Path(ruta).stem, re.IGNORECASE)
+    return (int(m.group(1)), ROMANOS[m.group(2).upper()]) if m else (0, 0)
+
+
+def pdfs_de_horarios():
+    """PDFs de pdf_origen/, del semestre más reciente al más antiguo."""
+    candidatos = list(DIR_PDF.glob("*.pdf"))
+    # Primero el semestre del nombre; si no lo trae, la fecha del archivo.
+    return sorted(candidatos, key=lambda p: (semestre_de_nombre(p), p.stat().st_mtime), reverse=True)
+
+
 def localizar_pdf():
     """Devuelve el PDF de horarios más reciente dentro de pdf_origen/."""
-    candidatos = sorted(DIR_PDF.glob("Horarios_L3_*.pdf"), key=lambda p: p.stat().st_mtime)
-    if not candidatos:
-        candidatos = sorted(DIR_PDF.glob("*.pdf"), key=lambda p: p.stat().st_mtime)
+    candidatos = pdfs_de_horarios()
     if not candidatos:
         sys.exit("No se encontró ningún PDF en pdf_origen/")
-    return candidatos[-1]
+    return candidatos[0]
 
 
 def detectar_columnas(fila):
@@ -166,6 +182,29 @@ def leer_grupos(ruta_pdf):
     return list(grupos.values()), filas_leidas, semestre
 
 
+def construir_horarios(ruta_pdf):
+    """Lee el PDF y devuelve (datos de horarios.json, filas leídas), sin guardar."""
+    grupos, filas, semestre = leer_grupos(ruta_pdf)
+    grupos.sort(key=lambda g: (int(g["grupo"]), g["materia"]))
+    salida = {
+        "meta": {
+            "semestre": semestre,
+            "fuente": Path(ruta_pdf).name,
+            "generado": date.today().isoformat(),
+            "total_grupos": len(grupos),
+            "total_sesiones": sum(len(g["sesiones"]) for g in grupos),
+        },
+        "grupos": grupos,
+    }
+    return salida, filas
+
+
+def guardar_horarios(salida, ruta_salida=SALIDA):
+    ruta_salida = Path(ruta_salida)
+    ruta_salida.parent.mkdir(parents=True, exist_ok=True)
+    ruta_salida.write_text(json.dumps(salida, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Genera data/horarios.json desde el PDF oficial.")
     parser.add_argument("pdf", nargs="?", help="Ruta del PDF de horarios")
@@ -174,42 +213,15 @@ def main():
 
     ruta_pdf = Path(args.pdf).resolve() if args.pdf else localizar_pdf()
     ruta_salida = Path(args.salida).resolve() if args.salida else SALIDA
-
     if not ruta_pdf.exists():
         sys.exit(f"No existe el PDF: {ruta_pdf}")
 
-    grupos, filas, semestre = leer_grupos(ruta_pdf)
-    grupos.sort(key=lambda g: (int(g["grupo"]), g["materia"]))
-
-    sin_sesion = [g["grupo"] for g in grupos if not g["sesiones"]]
-    repetidos = {}
-    for grupo in grupos:
-        repetidos.setdefault(grupo["grupo"], []).append(grupo)
-
-    salida = {
-        "meta": {
-            "semestre": semestre,
-            "fuente": ruta_pdf.name,
-            "generado": date.today().isoformat(),
-            "total_grupos": len(grupos),
-            "total_sesiones": sum(len(g["sesiones"]) for g in grupos),
-        },
-        "grupos": grupos,
-    }
-
-    ruta_salida.parent.mkdir(parents=True, exist_ok=True)
-    ruta_salida.write_text(json.dumps(salida, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-
-    print(f"Semestre: {semestre or '(sin detectar)'}")
-    print(f"Filas leídas: {filas}")
-    print(f"Grupos generados: {len(grupos)}")
-    print(f"Sesiones: {salida['meta']['total_sesiones']}")
-    if sin_sesion:
-        print(f"Aviso: {len(sin_sesion)} grupos sin día/hora: {', '.join(sin_sesion[:10])}")
-    duplicados = {k: v for k, v in repetidos.items() if len(v) > 1}
-    if duplicados:
-        print(f"Aviso: grupos con más de un registro: {', '.join(sorted(duplicados)[:10])}")
+    salida, filas = construir_horarios(ruta_pdf)
+    guardar_horarios(salida, ruta_salida)
+    print(f"Semestre: {salida['meta']['semestre'] or '(sin detectar)'}")
+    print(f"Filas leídas: {filas} · grupos: {salida['meta']['total_grupos']} · sesiones: {salida['meta']['total_sesiones']}")
     print(f"Guardado en: {ruta_salida}")
+    print("Para actualizar también profesores y revisar los datos usa: python scripts/actualizar_semestre.py")
 
 
 if __name__ == "__main__":

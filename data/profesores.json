@@ -1,7 +1,9 @@
 {
   "meta": {
+    "semestre": "2027-I",
+    "actualizado": "2026-11-12",
     "total": 55,
-    "nota": "correo y foto son opcionales; si faltan se usa la foto genérica y no se muestra correo"
+    "nota": "Se genera con scripts/actualizar_semestre.py: solo los profesores del semestre. correo y foto se pueden editar a mano y se conservan al actualizar. Sin foto se usa la genérica; sin correo no se muestra."
   },
   "profesores": [
     {
@@ -51,7 +53,7 @@
     },
     {
       "nombre": "GARZON ACEVES MAX OSWALDO",
-      "correo": "maxgarzonaceves@gmail.com",
+      "correo": "maxgarzon6t5@aragon.unam.mx",
       "foto": "img/profesores/garzon_aceves_max_oswaldo.jpg"
     },
     {
@@ -196,7 +198,7 @@
     },
     {
       "nombre": "RAMIREZ RAMIREZ SERGIO",
-      "correo": null,
+      "correo": "sergioramirezrar@aragon.unam.mx",
       "foto": null
     },
     {
