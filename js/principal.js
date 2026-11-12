@@ -994,6 +994,9 @@ function actualizarLineaTiempo() {
   $("ltMarca").classList.toggle("fuera", !dentro);
   const n = sesionesDelDia(dia).filter((s) => s.inicio <= minutos && minutos < s.fin).length;
   $("ltHora").textContent = `${DIAS_LARGO[dia]} · ${formatoHora(minutos)}${elegida ? " (hora elegida)" : ""}`;
+  // Sin hora elegida, el cuadro muestra la hora actual en gris oscuro como ejemplo.
+  const cuadro = $("ltHoraInput");
+  if (cuadro) cuadro.placeholder = formatoHora(actual);
   $("ltEstado").textContent = dentro
     ? `${n} clase(s) ${elegida ? "a esa hora" : "en curso"}`
     : "Fuera del horario del L3";
@@ -1025,6 +1028,40 @@ function mostrarClasesDeLaLinea() {
   clasesAhora();
 }
 
+/** Lista de horarios: las horas en que empiezan clases hoy, con cuántas hay. */
+function mostrarOpcionesHora() {
+  const lista = $("ltOpciones");
+  if (!lista) return;
+  const { dia, minutos } = ahora();
+  let sesiones = sesionesDelDia(dia);
+  let nota = "Horarios de hoy";
+  if (!sesiones.length) {
+    // Fin de semana: se muestran los horarios de toda la semana.
+    sesiones = ["LUN", "MAR", "MIE", "JUE", "VIE", "SAB"].flatMap(sesionesDelDia);
+    nota = "Hoy no hay clases · horarios de la semana";
+  }
+  const conteo = new Map();
+  for (const s of sesiones) conteo.set(s.inicio, (conteo.get(s.inicio) || 0) + 1);
+  const inicios = [...conteo.keys()].sort((a, b) => a - b);
+  const elegida = estado.horaElegida;
+  lista.innerHTML = `
+    <p class="lt-opciones-titulo">${nota}</p>
+    <button type="button" class="lt-opcion lt-opcion-ahora" data-minutos="ahora">Ahora · ${formatoHora(minutos)}</button>
+    ${inicios
+      .map(
+        (m) => `<button type="button" class="lt-opcion${m === elegida ? " activa" : ""}${m < minutos ? " pasada" : ""}" data-minutos="${m}">
+          <span>${formatoHora(m)}</span><span class="lt-opcion-n">${conteo.get(m)} clase${conteo.get(m) === 1 ? "" : "s"}</span>
+        </button>`
+      )
+      .join("")}`;
+  lista.hidden = false;
+}
+
+function ocultarOpcionesHora() {
+  const lista = $("ltOpciones");
+  if (lista) lista.hidden = true;
+}
+
 /** Arrastrar el marcador (o hacer clic en la línea) para elegir una hora. */
 function conectarLineaTiempo() {
   const pista = $("ltPista");
@@ -1053,13 +1090,46 @@ function conectarLineaTiempo() {
   pista.addEventListener("pointerup", soltar);
   pista.addEventListener("pointercancel", soltar);
 
-  $("ltHoraInput")?.addEventListener("change", (e) => {
-    const valor = e.target.value;
+  // Cuadro de hora: se escribe (HH:MM) o se elige de la lista de horarios.
+  const cuadro = $("ltHoraInput");
+  const aplicarCuadro = () => {
+    const valor = cuadro.value.trim();
     if (!valor) {
-      volverAhora({ mostrar: true });
+      if (estado.horaElegida !== null) volverAhora({ mostrar: true });
       return;
     }
-    elegirHora(aMinutos(valor), { mostrar: true });
+    const m = /^(\d{1,2})(?::?(\d{2}))?$/.exec(valor);
+    if (!m || Number(m[1]) > 23 || Number(m[2] || 0) > 59) {
+      cuadro.classList.add("error");
+      return;
+    }
+    cuadro.classList.remove("error");
+    ocultarOpcionesHora();
+    elegirHora(Number(m[1]) * 60 + Number(m[2] || 0), { mostrar: true });
+  };
+  cuadro?.addEventListener("focus", mostrarOpcionesHora);
+  cuadro?.addEventListener("click", mostrarOpcionesHora);
+  cuadro?.addEventListener("input", () => cuadro.classList.remove("error"));
+  cuadro?.addEventListener("change", aplicarCuadro);
+  cuadro?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      aplicarCuadro();
+      cuadro.blur();
+    } else if (e.key === "Escape") {
+      ocultarOpcionesHora();
+      cuadro.blur();
+    }
+  });
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".lt-hora-wrap")) ocultarOpcionesHora();
+  });
+  $("ltOpciones")?.addEventListener("click", (e) => {
+    const opcion = e.target.closest("[data-minutos]");
+    if (!opcion) return;
+    ocultarOpcionesHora();
+    if (opcion.dataset.minutos === "ahora") volverAhora({ mostrar: true });
+    else elegirHora(Number(opcion.dataset.minutos), { mostrar: true });
   });
   $("ltResetBtn")?.addEventListener("click", () => volverAhora({ mostrar: true }));
 }
@@ -1108,7 +1178,7 @@ function actualizarFotoProfesor(nombre, varios = false) {
 async function iniciarVisor() {
   if (!estado.modelo) return;
   try {
-    const { VisorEdificio } = await import("./escena3d.js?v=30");
+    const { VisorEdificio } = await import("./escena3d.js?v=32");
     estado.visor = new VisorEdificio($("visor3d"));
     estado.visor.cargar(estado.modelo);
     estado.visor.alSeleccionar = mostrarArea;

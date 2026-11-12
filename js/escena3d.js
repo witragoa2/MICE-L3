@@ -88,7 +88,8 @@ export class VisorEdificio {
     this.techo = null;
     this.tapas = []; // muro que cierra los huecos de ventana cuando se apagan
     this.etiquetasPiso = []; // nombres de salones pintados en el piso
-    this.etiquetasVolteadas = false;
+    this.etiquetasVolteadas = null;
+    this.etiquetasFlotan = null;
     this.areas = {}; // id -> datos del área
     this.porCodigo = {};
     this.resaltados = []; // salones resaltados (uno o varios)
@@ -497,15 +498,19 @@ export class VisorEdificio {
       new THREE.MeshBasicMaterial({
         map: textura,
         transparent: true,
-        depthWrite: false,
+        alphaTest: 0.2, // las esquinas transparentes no tapan nada
         polygonOffset: true,
         polygonOffsetFactor: -4,
         polygonOffsetUnits: -4,
       })
     );
     // Acostada sobre el piso, leyéndose como en los planos (se voltea con la cámara).
+    // En 2D va acostada sobre el piso; en 3D flota dentro del salón mirando a
+    // la cámara (con el mismo tamaño, para que no se encime con las vecinas).
     malla.rotation.set(-Math.PI / 2, 0, Math.PI);
     malla.position.set(area.centro[0], area.bbox[1] + 0.06, area.centro[2]);
+    malla.userData.yPiso = area.bbox[1] + 0.06;
+    malla.userData.yFlotante = area.bbox[4] + 0.6; // en 3D, por encima del techo del salón (como antes)
     malla.renderOrder = 4;
     malla.userData.areaId = area.id; // clic en la etiqueta = clic en el salón
     malla.userData.esEtiqueta = true;
@@ -675,8 +680,11 @@ export class VisorEdificio {
   }
 
   _mostrarEtiquetas(nivelId) {
+    // En "Edificio" se ven si los pisos están separados o no hay techo
+    // (antes se ocultaban siempre y por eso no aparecían los nombres).
+    const edificioAbierto = nivelId === "todos" && (this.separado || !this.techoVisible);
     for (const area of Object.values(this.areas)) {
-      area.etiqueta.visible = nivelId !== "todos" && area.nivel === Number(nivelId);
+      area.etiqueta.visible = edificioAbierto || (nivelId !== "todos" && area.nivel === Number(nivelId));
     }
   }
 
@@ -926,11 +934,28 @@ export class VisorEdificio {
       this.camara.updateProjectionMatrix();
     }
 
-    // Las etiquetas del piso se voltean para no verse de cabeza.
-    const voltear = Math.cos(theta) > 0;
-    if (voltear !== this.etiquetasVolteadas) {
-      this.etiquetasVolteadas = voltear;
-      for (const e of this.etiquetasPiso) e.rotation.z = voltear ? 0 : Math.PI;
+    // Etiquetas: en 2D, sobre el piso (volteadas para no verse de cabeza);
+    // en 3D, flotando dentro del salón y siempre de frente a quien mira.
+    const flotan = !this.modo2D;
+    if (flotan !== this.etiquetasFlotan) {
+      this.etiquetasFlotan = flotan;
+      this.etiquetasVolteadas = null; // obliga a recalcular la orientación en 2D
+      for (const e of this.etiquetasPiso) {
+        e.position.y = flotan ? e.userData.yFlotante : e.userData.yPiso;
+        // En 3D se ven a través de los muros (como antes); en 2D, sobre su piso.
+        e.material.depthTest = !flotan;
+        e.material.depthWrite = !flotan;
+        e.renderOrder = flotan ? 10 : 4;
+      }
+    }
+    if (flotan) {
+      for (const e of this.etiquetasPiso) if (e.visible) e.quaternion.copy(this.camara.quaternion);
+    } else {
+      const voltear = Math.cos(theta) > 0;
+      if (voltear !== this.etiquetasVolteadas) {
+        this.etiquetasVolteadas = voltear;
+        for (const e of this.etiquetasPiso) e.rotation.set(-Math.PI / 2, 0, voltear ? 0 : Math.PI);
+      }
     }
 
     if (this.resaltados.length) {

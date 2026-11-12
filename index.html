@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Mapa Interactivo de Clases del Laboratorio 3, FES Aragón, UNAM.">
   <title>MICE L3 · FES Aragón</title>
-  <link rel="stylesheet" href="css/estilos.css?v=30">
+  <link rel="stylesheet" href="css/estilos.css?v=32">
 </head>
 
 <body>
@@ -29,7 +29,10 @@
       </div>
       <div class="lt-acciones">
         <button type="button" id="ahoraBtn" class="ahora-btn">Clases en este momento</button>
-        <input type="time" id="ltHoraInput" class="lt-input" min="07:00" max="23:59" step="300" aria-label="Escribe una hora">
+        <div class="lt-hora-wrap">
+          <input type="text" id="ltHoraInput" class="lt-input" inputmode="numeric" maxlength="5" autocomplete="off" aria-label="Escribe o elige una hora (HH:MM)">
+          <div id="ltOpciones" class="lt-opciones" role="listbox" aria-label="Horarios de clase de hoy" hidden></div>
+        </div>
         <button type="button" id="ltResetBtn" class="lt-reset" title="Volver a la hora actual" hidden>Ahora</button>
       </div>
     </div>
@@ -144,6 +147,6 @@
       }
     }
   </script>
-  <script type="module" src="js/principal.js?v=30"></script>
+  <script type="module" src="js/principal.js?v=32"></script>
 </body>
 </html>
