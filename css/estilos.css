@@ -1080,6 +1080,70 @@ body {
   pointer-events: none;
 }
 
+/* Botones que solo aparecen en celular */
+.solo-movil {
+  display: none;
+}
+
+/* Botón flotante para ir al mapa (celular) */
+.ir-mapa {
+  position: fixed;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 30;
+  padding: 12px 18px;
+  background: var(--dorado);
+  border: 0;
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+  color: var(--azul);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.ir-mapa[hidden] {
+  display: none;
+}
+
+/* Instructivo de gestos sobre el mapa (solo celular y tableta) */
+.instructivo {
+  display: none;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  scroll-margin-top: 8px;
+}
+
+.instructivo li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 6px;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-top: 3px solid var(--dorado);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.instructivo b {
+  color: var(--azul);
+  font-size: 12px;
+}
+
+.instructivo .gesto {
+  font-size: 20px;
+  line-height: 1;
+}
+
 /* ---------- Responsivo ---------- */
 
 @media (max-width: 980px) {
@@ -1108,6 +1172,11 @@ body {
   .panel-mapa {
     height: 62vh;
     min-height: 420px;
+  }
+
+  .instructivo {
+    display: grid;
+    margin-bottom: -8px; /* pegado al mapa */
   }
 
   .vistas {
@@ -1167,15 +1236,81 @@ body {
     width: 100%;
   }
 
+  .app-header {
+    gap: 8px 12px;
+    padding: 10px 14px;
+  }
+
+  .logo-mice {
+    width: 48px;
+    height: 48px;
+  }
+
+  /* Profesor centrado: foto pequeña y nombre en una fila, correo debajo. */
+  .panel-foto {
+    justify-content: center;
+  }
+
+  .foto-nombre {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    column-gap: 10px;
+    row-gap: 2px;
+  }
+
+  .panel-foto img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .foto-nombre p {
+    max-width: calc(100% - 50px);
+    text-align: center;
+  }
+
+  .correo-box {
+    flex-basis: 100%;
+    max-width: none;
+    text-align: center;
+  }
+
+  .layout {
+    padding: 12px;
+  }
+
+  .panel-mapa {
+    height: 72svh;
+    min-height: 440px;
+  }
+
+  .mapa-estado {
+    right: 14px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
   .niveles {
     right: 14px;
   }
 
+  /* La rosa de vistas se abre con el botón "Vistas". */
+  .solo-movil {
+    display: block;
+  }
+
   .vistas {
+    display: none;
     left: 14px;
     right: 14px;
     bottom: 62px;
     width: auto;
+  }
+
+  .vistas.abiertas {
+    display: grid;
   }
 
   .nivelBtn {
@@ -1197,8 +1332,6 @@ body {
     padding: 7px 4px;
     font-size: 10px;
   }
-
-  
 }
 
 @media (prefers-reduced-motion: reduce) {

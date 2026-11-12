@@ -6,7 +6,7 @@
   <meta name="description" content="Mapa Interactivo de Clases para Estudiantes del Laboratorio 3, FES Aragón, UNAM.">
   <title>MICE L3 · FES Aragón</title>
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
-  <link rel="stylesheet" href="css/estilos.css?v=35">
+  <link rel="stylesheet" href="css/estilos.css?v=40">
   <script type="importmap">
     {
       "imports": {
@@ -15,7 +15,7 @@
     }
   </script>
   <link rel="modulepreload" href="https://unpkg.com/three@0.160.0/build/three.module.js" crossorigin>
-  <link rel="modulepreload" href="js/escena3d.js?v=35">
+  <link rel="modulepreload" href="js/escena3d.js?v=40">
 </head>
 
 <body>
@@ -113,6 +113,13 @@
       </section>
     </div>
 
+    <!-- Instructivo de gestos (celular) -->
+    <ul class="instructivo" aria-label="Cómo usar el mapa">
+      <li><span class="gesto" aria-hidden="true">☝️</span><b>1 dedo</b> girar</li>
+      <li><span class="gesto" aria-hidden="true">✌️</span><b>2 dedos</b> mover, acercar y alejar</li>
+      <li><span class="gesto" aria-hidden="true">👆</span><b>Toque</b> seleccionar salón</li>
+    </ul>
+
     <section class="panel-mapa" aria-label="Modelo 3D del Laboratorio 3">
       <div id="visor3d" class="visor3d">
         <p class="visor-cargando" id="visorEstado">Cargando modelo 3D…</p>
@@ -130,10 +137,11 @@
         <button type="button" class="ctrlBtn" id="separarBtn">Separar pisos</button>
         <button type="button" class="ctrlBtn activo" id="techoBtn">Techo: sí</button>
         <button type="button" class="ctrlBtn activo" id="ventanasBtn">Ventanas: sí</button>
+        <button type="button" class="ctrlBtn solo-movil" id="vistasBtn" aria-expanded="false" aria-controls="vistas">Vistas</button>
       </div>
 
       <!-- Rosa de los vientos: NO N NE / O Entrada E / SO S SE -->
-      <div class="vistas" role="group" aria-label="Vistas predeterminadas">
+      <div class="vistas" id="vistas" role="group" aria-label="Vistas predeterminadas">
         <button type="button" class="vistaBtn" data-vista="no" title="Isométrica noroeste">NO</button>
         <button type="button" class="vistaBtn" data-vista="n" title="Vista desde el norte">N</button>
         <button type="button" class="vistaBtn" data-vista="ne" title="Isométrica noreste">NE</button>
@@ -149,6 +157,8 @@
     </section>
   </main>
 
-  <script type="module" src="js/principal.js?v=35"></script>
+  <button type="button" id="irMapaBtn" class="ir-mapa" hidden>Ver mapa ↓</button>
+
+  <script type="module" src="js/principal.js?v=40"></script>
 </body>
 </html>

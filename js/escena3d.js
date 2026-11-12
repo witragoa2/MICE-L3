@@ -39,6 +39,7 @@ const COLORES_ESTRUCTURA = {
 const COLOR_ESCALERA_EMERGENCIA = "#d98b4a";
 const COLOR_VIDRIO = "#5d8aa8";
 
+const ASPECTO_REFERENCIA = 1.35; // ancho/alto con el que se diseñaron las distancias de cámara
 const RADIO_NIVEL = 52; // distancia de la vista de un piso y máximo alejamiento en ella
 const FOV_3D = 40;
 const FOV_2D = 12; // lente estrecha: el plano 2D casi no tiene perspectiva
@@ -531,19 +532,46 @@ export class VisorEdificio {
     lienzo.style.cursor = "grab";
     lienzo.style.touchAction = "none";
     let arrastre = null;
+    let gesto = null; // dos dedos: pellizco para acercar y arrastre para mover
+    const punteros = new Map();
+
+    const medirGesto = () => {
+      const [a, b] = [...punteros.values()];
+      return { dist: Math.hypot(a.x - b.x, a.y - b.y) || 1, x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    };
 
     lienzo.addEventListener("pointerdown", (e) => {
+      punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      try {
+        lienzo.setPointerCapture(e.pointerId);
+      } catch {
+        // puntero que ya no existe
+      }
+      if (punteros.size === 2) {
+        arrastre = null;
+        gesto = medirGesto();
+        return;
+      }
+      if (punteros.size > 2) return;
       const pan = e.button === 2 || e.button === 1 || e.shiftKey;
       arrastre = { pan, x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY };
       lienzo.style.cursor = pan ? "move" : "grabbing";
-      lienzo.setPointerCapture(e.pointerId);
     });
 
     lienzo.addEventListener("pointermove", (e) => {
+      if (punteros.has(e.pointerId)) punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (gesto && punteros.size >= 2) {
+        const g = medirGesto();
+        this._zoom(gesto.dist / g.dist);
+        this._panear(g.x - gesto.x, g.y - gesto.y);
+        gesto = g;
+        this._marcar();
+        return;
+      }
       if (!arrastre) {
-        // Cursor de mano sobre los salones (como máximo cada 50 ms).
+        // Cursor de mano sobre los salones (solo mouse, como máximo cada 50 ms).
         const t = performance.now();
-        if (t - this._ultimoHover > 50) {
+        if (e.pointerType === "mouse" && t - this._ultimoHover > 50) {
           this._ultimoHover = t;
           lienzo.style.cursor = this._areaBajo(e) ? "pointer" : "grab";
         }
@@ -564,8 +592,16 @@ export class VisorEdificio {
       this._marcar();
     });
 
-    lienzo.addEventListener("pointerup", (e) => {
-      if (arrastre && Math.hypot(e.clientX - arrastre.x0, e.clientY - arrastre.y0) < 5) {
+    const soltar = (e, cancelado) => {
+      punteros.delete(e.pointerId);
+      if (gesto) {
+        // Al levantar un dedo del pellizco, el otro sigue girando sin contar como clic.
+        if (punteros.size < 2) gesto = null;
+        const [resto] = punteros.values();
+        arrastre = resto ? { pan: false, x: resto.x, y: resto.y, x0: -1e4, y0: -1e4 } : null;
+        return;
+      }
+      if (!cancelado && arrastre && Math.hypot(e.clientX - arrastre.x0, e.clientY - arrastre.y0) < 8) {
         const area = this._areaBajo(e);
         if (area) {
           this.enfocarSalon(area.id);
@@ -574,22 +610,28 @@ export class VisorEdificio {
       }
       arrastre = null;
       lienzo.style.cursor = "grab";
-    });
+    };
+    lienzo.addEventListener("pointerup", (e) => soltar(e, false));
+    lienzo.addEventListener("pointercancel", (e) => soltar(e, true));
 
     lienzo.addEventListener("contextmenu", (e) => e.preventDefault());
     lienzo.addEventListener(
       "wheel",
       (e) => {
         e.preventDefault();
-        // Con un piso seleccionado no se aleja más que la vista del piso.
-        const k = this.modo2D ? ESCALA_2D : 1;
-        const maximo = (this.nivelActivo === "todos" ? 220 : RADIO_NIVEL) * k;
-        this.deseado.radio = THREE.MathUtils.clamp(this.deseado.radio * Math.exp(e.deltaY * 0.001), 6 * k, maximo);
+        this._zoom(Math.exp(e.deltaY * 0.001));
         this._marcar();
       },
       { passive: false }
     );
     lienzo.addEventListener("dblclick", () => this.verEdificio());
+  }
+
+  /** Acerca (factor < 1) o aleja la cámara; con un piso elegido no se aleja más que su vista. */
+  _zoom(factor) {
+    const k = this.modo2D ? ESCALA_2D : 1;
+    const maximo = (this.nivelActivo === "todos" ? 220 : RADIO_NIVEL) * k;
+    this.deseado.radio = THREE.MathUtils.clamp(this.deseado.radio * factor, 6 * k, maximo);
   }
 
   /** Objetos que pueden recibir el clic (se recalcula solo si cambia la escena). */
@@ -617,7 +659,7 @@ export class VisorEdificio {
 
   _panear(dx, dy) {
     const alto = this.renderer.domElement.clientHeight || 1;
-    const factor = (2 * this.deseado.radio * Math.tan(THREE.MathUtils.degToRad(this.camara.fov / 2))) / alto;
+    const factor = (2 * this.deseado.radio * this._factorAspecto * Math.tan(THREE.MathUtils.degToRad(this.camara.fov / 2))) / alto;
     const derecha = new THREE.Vector3().setFromMatrixColumn(this.camara.matrixWorld, 0);
     const arriba = new THREE.Vector3().setFromMatrixColumn(this.camara.matrixWorld, 1);
     this.deseado.objetivo.addScaledVector(derecha, -dx * factor).addScaledVector(arriba, dy * factor);
@@ -862,6 +904,8 @@ export class VisorEdificio {
     const alto = this.contenedor.clientHeight || 480;
     this.camara.aspect = ancho / alto;
     this.camara.updateProjectionMatrix();
+    // Pantalla vertical (celular): la cámara se aleja para que el edificio quepa a lo ancho.
+    this._factorAspecto = THREE.MathUtils.clamp(ASPECTO_REFERENCIA / this.camara.aspect, 1, 2.6);
     this.renderer.setSize(ancho, alto, false);
     this._marcar();
   }
@@ -908,15 +952,16 @@ export class VisorEdificio {
     if (!camaraMovida && !this._pendiente && !this.resaltados.length) return;
     this._pendiente = false;
 
+    const radio = a.radio * this._factorAspecto;
     this.camara.position.set(
-      a.objetivo.x + a.radio * Math.sin(a.phi) * Math.sin(a.theta),
-      a.objetivo.y + a.radio * Math.cos(a.phi),
-      a.objetivo.z + a.radio * Math.sin(a.phi) * Math.cos(a.theta)
+      a.objetivo.x + radio * Math.sin(a.phi) * Math.sin(a.theta),
+      a.objetivo.y + radio * Math.cos(a.phi),
+      a.objetivo.z + radio * Math.sin(a.phi) * Math.cos(a.theta)
     );
     this.camara.lookAt(a.objetivo);
 
     // Plano "near" más lejos en 2D para que el piso no se mezcle con la losa.
-    const near = this.modo2D ? Math.max(0.5, a.radio * 0.6) : 0.3;
+    const near = this.modo2D ? Math.max(0.5, radio * 0.6) : 0.3;
     if (Math.abs(this.camara.near - near) > 0.05) {
       this.camara.near = near;
       this.camara.updateProjectionMatrix();

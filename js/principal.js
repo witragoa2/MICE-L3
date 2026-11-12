@@ -2,7 +2,7 @@
 // MICE L3 · búsqueda, horarios, secciones y visor 3D
 // ============================================================
 
-const VERSION = "35";
+const VERSION = "40";
 const $ = (id) => document.getElementById(id);
 
 const estado = {
@@ -58,12 +58,23 @@ const NOMBRE_VISTA = {
   so: "Isométrica suroeste",
 };
 
-const TEXTO_INICIO = "Vista desde la entrada · elige un piso o haz clic en un salón";
-const AYUDA_MAPA = "Arrastra para girar · clic derecho, botón central o Shift+arrastrar para mover · rueda para acercar";
+// Pantalla táctil: los textos de ayuda hablan de dedos en lugar de mouse.
+const TACTIL = window.matchMedia("(pointer: coarse)").matches;
+const TEXTO_INICIO = `Vista desde la entrada · elige un piso o ${TACTIL ? "toca" : "haz clic en"} un salón`;
+const AYUDA_MAPA = TACTIL
+  ? "Un dedo para girar · dos dedos para mover y acercar"
+  : "Arrastra para girar · clic derecho, botón central o Shift+arrastrar para mover · rueda para acercar";
+const AYUDA_MOVER = TACTIL ? "dos dedos para mover" : "clic derecho para mover";
+const AYUDA_2D = TACTIL ? "un dedo para mover · pellizca para acercar" : "arrastra para mover · rueda para acercar";
 const FOTO_GENERICA = "img/profesor_generico.png";
 const SIN_BUSQUEDA = "<p class='placeholder'>Aún no hay búsqueda.</p>";
 
 // ---------- utilidades ----------
+
+/** Pone el cursor en un campo, salvo en pantallas táctiles (ahí abriría el teclado). */
+function enfocar(campo) {
+  if (!TACTIL) campo.focus();
+}
 
 function escapar(valor) {
   return String(valor ?? "")
@@ -361,15 +372,41 @@ function conectarInterfaz() {
       estado.visor.vista(btn.dataset.vista);
       marcarVistaActiva(btn.dataset.vista);
       marcarNivelActivo("todos");
-      estadoMapa(`${NOMBRE_VISTA[btn.dataset.vista] || "Vista del edificio"} · clic derecho para mover`);
+      estadoMapa(`${NOMBRE_VISTA[btn.dataset.vista] || "Vista del edificio"} · ${AYUDA_MOVER}`);
+      abrirVistas(false);
     });
   });
+
+  $("vistasBtn").addEventListener("click", () => abrirVistas(!$("vistas").classList.contains("abiertas")));
+  iniciarBotonMapa();
+}
+
+/** Celular: la rosa de vistas se abre con el botón "Vistas". */
+function abrirVistas(abrir) {
+  $("vistas").classList.toggle("abiertas", abrir);
+  $("vistasBtn").classList.toggle("activo", abrir);
+  $("vistasBtn").setAttribute("aria-expanded", String(abrir));
+}
+
+/** Celular: botón flotante "Ver mapa" mientras el mapa está fuera de la pantalla. */
+function iniciarBotonMapa() {
+  const boton = $("irMapaBtn");
+  const mapa = document.querySelector(".panel-mapa");
+  const angosta = window.matchMedia("(max-width: 980px)");
+  let mapaVisible = true;
+  const actualizar = () => (boton.hidden = !angosta.matches || mapaVisible);
+  new IntersectionObserver(([e]) => {
+    mapaVisible = e.intersectionRatio > 0.35;
+    actualizar();
+  }, { threshold: [0, 0.35, 1] }).observe(mapa);
+  angosta.addEventListener("change", actualizar);
+  boton.addEventListener("click", () => document.querySelector(".instructivo").scrollIntoView({ behavior: "smooth", block: "start" }));
 }
 
 function textoNivel(nivel) {
   return estado.visor?.modo2D
-    ? `Plano 2D · ${nombreNivel(nivel)} · arrastra para mover · rueda para acercar`
-    : `${nombreNivel(nivel)} · haz clic en un salón`;
+    ? `Plano 2D · ${nombreNivel(nivel)} · ${AYUDA_2D}`
+    : `${nombreNivel(nivel)} · ${TACTIL ? "toca" : "haz clic en"} un salón`;
 }
 
 // ---------- enlaces directos (?grupo=, ?maestro=, ?materia=, ?ahora, ?nivel=, ?vista=) ----------
@@ -415,7 +452,7 @@ function cambiarModo(modo) {
   ocultarAutocompletado();
   $("result").innerHTML = SIN_BUSQUEDA;
   actualizarFotoProfesor(null);
-  input.focus();
+  enfocar(input);
 }
 
 // ---------- autocompletado ----------
@@ -518,6 +555,7 @@ function alPresionarTecla(e) {
 
 function buscar() {
   if (!estado.grupos.length) return;
+  if (TACTIL) $("searchInput").blur(); // cierra el teclado del celular
   if (estado.modo === "grupo") buscarPorGrupo();
   else if (estado.modo === "materia") buscarPorMateria();
   else buscarPorMaestro();
@@ -797,7 +835,7 @@ function limpiarBusqueda() {
     $("detalleSeccion").hidden = true;
     renderListaSeccion();
     limpiarMapa();
-    $("filtroSeccion").focus();
+    enfocar($("filtroSeccion"));
     return;
   }
   $("searchInput").value = "";
@@ -806,7 +844,7 @@ function limpiarBusqueda() {
   actualizarFotoProfesor(null);
   limpiarMapa();
   if (window.location.search) history.replaceState(null, "", window.location.pathname);
-  $("searchInput").focus();
+  enfocar($("searchInput"));
 }
 
 // ---------- clases a una hora ----------
