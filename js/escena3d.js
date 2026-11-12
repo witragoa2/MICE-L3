@@ -40,6 +40,10 @@ const COLORES_ESTRUCTURA = {
 };
 
 const RADIO_NIVEL = 52; // distancia de la vista de un piso = máximo alejamiento en ese modo
+// Plano 2D: cámara cenital con lente estrecha (casi sin perspectiva, como un plano).
+const FOV_3D = 40;
+const FOV_2D = 12;
+const ESCALA_2D = Math.tan(THREE.MathUtils.degToRad(FOV_3D / 2)) / Math.tan(THREE.MathUtils.degToRad(FOV_2D / 2));
 const SEPARACION = 6; // metros extra entre pisos al separarlos
 const DORADO = 0xffc21a;
 
@@ -49,7 +53,10 @@ export class VisorEdificio {
     this.alSeleccionar = null; // callback(area) al hacer clic en un salón
 
     this.escena = new THREE.Scene();
-    this.camara = new THREE.PerspectiveCamera(40, 1, 0.1, 2000);
+    this.camara = new THREE.PerspectiveCamera(FOV_3D, 1, 0.1, 2000);
+    this.modo2D = false;
+    this.fovDeseado = FOV_3D;
+    this.alCambiar2D = null; // callback(activo) para actualizar botones
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -63,6 +70,7 @@ export class VisorEdificio {
     const sol = new THREE.DirectionalLight(0xffffff, 2.0);
     sol.position.set(30, 60, 25);
     sol.castShadow = true;
+    this.sol = sol; // en el plano 2D se apagan las sombras
     sol.shadow.mapSize.set(2048, 2048);
     Object.assign(sol.shadow.camera, { left: -45, right: 45, top: 45, bottom: -45, near: 1, far: 200 });
     sol.shadow.bias = -0.0005;
@@ -79,6 +87,8 @@ export class VisorEdificio {
     this.niveles = []; // {id, nombre, piso, grupo, offset, offsetDeseado}
     this.techo = null;
     this.tapas = []; // muro que cierra los huecos de ventana cuando se apagan
+    this.etiquetasPiso = []; // nombres de salones pintados en el piso
+    this.etiquetasVolteadas = false;
     this.areas = {}; // id -> datos del área
     this.porCodigo = {};
     this.resaltados = []; // salones resaltados (uno o varios)
@@ -404,14 +414,104 @@ export class VisorEdificio {
     destino.add(contorno);
 
     const texto = area.etiqueta || area.codigo || area.nombre;
-    const etiqueta = this._crearEtiqueta(texto, area.codigo ? "salon" : area.tipo);
-    etiqueta.position.set(area.centro[0], area.bbox[4] + 0.6, area.centro[2]);
+    const etiqueta = this._crearEtiquetaPiso(area, texto, area.codigo ? "salon" : area.tipo);
     etiqueta.visible = false;
     destino.add(etiqueta);
 
     const datos = { ...area, piso, volumen, contorno, etiqueta, colorBase: color };
     this.areas[area.id] = datos;
     if (area.codigo) this.porCodigo[area.codigo] = datos;
+  }
+
+  /**
+   * Etiqueta pintada sobre el piso del salón, en una caja compacta que cabe
+   * dentro del propio salón. Como los salones no se enciman, sus etiquetas
+   * tampoco, en ninguna vista. El texto se reparte en varias líneas
+   * ("Baño / Mujeres / P1") eligiendo el acomodo que permite la letra más grande.
+   */
+  _crearEtiquetaPiso(area, texto, tipo) {
+    const ancho = (area.bbox[3] - area.bbox[0]) * 0.86; // espacio libre del salón (m)
+    const fondo = (area.bbox[5] - area.bbox[2]) * 0.8;
+    const esSalon = tipo === "salon";
+    const LETRA = 64; // px de la letra en la textura
+    const ALTO_LINEA = 74;
+    const PAD_X = 22;
+    const PAD_Y = 14;
+    const maxLetra = esSalon ? 0.75 : 0.55; // m: tamaño máximo de la letra
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const fuente = `bold ${LETRA}px Segoe UI, Arial`;
+    ctx.font = fuente;
+
+    const palabras = texto.replace(/ · /g, " ").split(/\s+/).filter(Boolean);
+    const repartir = (n) => {
+      // Reparte las palabras en n líneas de largo parecido.
+      const total = palabras.join(" ").length;
+      const lineas = [];
+      let actual = [];
+      for (let i = 0; i < palabras.length; i++) {
+        actual.push(palabras[i]);
+        const quedan = palabras.length - i - 1;
+        const faltan = n - lineas.length - 1;
+        if (faltan > 0 && (actual.join(" ").length >= total / n || quedan === faltan)) {
+          lineas.push(actual.join(" "));
+          actual = [];
+        }
+      }
+      if (actual.length) lineas.push(actual.join(" "));
+      return lineas;
+    };
+
+    let mejor = null;
+    for (let n = 1; n <= Math.min(palabras.length, 4); n++) {
+      const lineas = repartir(n);
+      const w = Math.max(...lineas.map((l) => ctx.measureText(l).width)) + PAD_X * 2;
+      const h = lineas.length * ALTO_LINEA + PAD_Y * 2;
+      const escala = Math.min(maxLetra / LETRA, ancho / w, fondo / h); // m por px
+      if (!mejor || escala > mejor.escala * 1.05) mejor = { lineas, w, h, escala };
+    }
+
+    canvas.width = Math.ceil(mejor.w);
+    canvas.height = Math.ceil(mejor.h);
+    ctx.fillStyle = esSalon ? "rgba(0, 43, 92, 0.94)" : "rgba(255, 255, 255, 0.94)";
+    ctx.beginPath();
+    ctx.roundRect(2, 2, canvas.width - 4, canvas.height - 4, 16);
+    ctx.fill();
+    ctx.strokeStyle = esSalon ? "#d4a72c" : "#002b5c";
+    ctx.lineWidth = 5;
+    ctx.stroke();
+    ctx.font = fuente;
+    ctx.fillStyle = esSalon ? "#ffffff" : "#002b5c";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    mejor.lineas.forEach((linea, i) => {
+      ctx.fillText(linea, canvas.width / 2, PAD_Y + ALTO_LINEA * (i + 0.5) + 2);
+    });
+
+    const textura = new THREE.CanvasTexture(canvas);
+    textura.colorSpace = THREE.SRGBColorSpace;
+    textura.anisotropy = 8;
+    const malla = new THREE.Mesh(
+      new THREE.PlaneGeometry(canvas.width * mejor.escala, canvas.height * mejor.escala),
+      new THREE.MeshBasicMaterial({
+        map: textura,
+        transparent: true,
+        depthWrite: false,
+        polygonOffset: true,
+        polygonOffsetFactor: -4,
+        polygonOffsetUnits: -4,
+      })
+    );
+    // Acostada sobre el piso, leyéndose como en los planos (se voltea con la cámara).
+    malla.rotation.set(-Math.PI / 2, 0, Math.PI);
+    malla.position.set(area.centro[0], area.bbox[1] + 0.06, area.centro[2]);
+    malla.renderOrder = 4;
+    malla.userData.areaId = area.id; // clic en la etiqueta = clic en el salón
+    malla.userData.esEtiqueta = true;
+    malla.userData.base = malla.scale.clone();
+    this.etiquetasPiso.push(malla);
+    return malla;
   }
 
   _crearEtiqueta(texto, tipo) {
@@ -473,7 +573,8 @@ export class VisorEdificio {
       const dy = e.clientY - arrastre.y;
       arrastre.x = e.clientX;
       arrastre.y = e.clientY;
-      if (arrastre.pan) {
+      if (arrastre.pan || this.modo2D) {
+        // En el plano 2D arrastrar mueve el plano (no lo gira).
         this._panear(dx, dy);
       } else {
         this.deseado.theta -= dx * 0.006;
@@ -501,8 +602,9 @@ export class VisorEdificio {
       (e) => {
         e.preventDefault();
         // Con un piso seleccionado no se aleja más que la vista del piso.
-        const maximo = this.nivelActivo === "todos" ? 220 : RADIO_NIVEL;
-        this.deseado.radio = THREE.MathUtils.clamp(this.deseado.radio * Math.exp(e.deltaY * 0.001), 6, maximo);
+        const k = this.modo2D ? ESCALA_2D : 1;
+        const maximo = (this.nivelActivo === "todos" ? 220 : RADIO_NIVEL) * k;
+        this.deseado.radio = THREE.MathUtils.clamp(this.deseado.radio * Math.exp(e.deltaY * 0.001), 6 * k, maximo);
       },
       { passive: false }
     );
@@ -624,8 +726,48 @@ export class VisorEdificio {
     return theta + Math.round((actual - theta) / vuelta) * vuelta;
   }
 
+  /* ---------------- plano 2D ---------------- */
+
+  /** Activa o desactiva el plano 2D (vista cenital de un piso, como los planos). */
+  set2D(activo) {
+    activo = Boolean(activo);
+    if (activo === this.modo2D) return;
+    this.modo2D = activo;
+    this.fovDeseado = activo ? FOV_2D : FOV_3D;
+    // Sin sombras en el plano: cada muro proyectaba una franja que parecía otro muro.
+    this.sol.castShadow = !activo;
+    if (activo) {
+      if (this.separado) {
+        this.separado = false;
+        this._aplicarOffsets();
+      }
+      if (this.nivelActivo === "todos") {
+        this.enfocarNivel(0, { conservarResaltado: true });
+      } else {
+        this.deseado.radio = Math.min(this.deseado.radio, RADIO_NIVEL);
+        this._actualizarVisibilidad();
+        this._ajustar2D();
+      }
+    } else {
+      this.deseado.radio /= ESCALA_2D;
+      this.deseado.phi = 0.72;
+      this._actualizarVisibilidad();
+    }
+    if (this.alCambiar2D) this.alCambiar2D(activo);
+  }
+
+  /** Coloca la cámara arriba, orientada como los planos (Jefatura a la derecha). */
+  _ajustar2D() {
+    if (!this.modo2D) return;
+    this.deseado.phi = 0.0015;
+    this.deseado.theta = this._anguloCercano(Math.PI);
+    this.deseado.radio *= ESCALA_2D;
+    this.techo.visible = false;
+  }
+
   vista(nombre) {
     const v = VISTAS[nombre] || VISTAS.entrada;
+    this.set2D(false); // las vistas N, S, E… son en 3D
     this.limpiarResaltado();
     this.nivelActivo = "todos";
     this._actualizarVisibilidad();
@@ -655,6 +797,7 @@ export class VisorEdificio {
     this.deseado.objetivo.set(0, this._alturaPiso(id) + 1.5, 0);
     this.deseado.radio = RADIO_NIVEL;
     this.deseado.phi = 0.72;
+    this._ajustar2D();
   }
 
   enfocarSalon(codigoOId) {
@@ -666,6 +809,7 @@ export class VisorEdificio {
     this.deseado.objetivo.set(area.centro[0], area.centro[1] + nivel.offsetDeseado + 1.2, area.centro[2]);
     this.deseado.radio = 21;
     this.deseado.phi = 0.8;
+    this._ajustar2D();
     return true;
   }
 
@@ -681,7 +825,12 @@ export class VisorEdificio {
       this.enfocarSalon(areas[0].id);
       return 1;
     }
-    const niveles = [...new Set(areas.map((a) => a.nivel))];
+    let niveles = [...new Set(areas.map((a) => a.nivel))];
+    if (this.modo2D && niveles.length > 1) {
+      // En el plano solo se ve un piso: el que tiene más salones resaltados.
+      const conteo = (n) => areas.filter((a) => a.nivel === n).length;
+      niveles = [niveles.sort((a, b) => conteo(b) - conteo(a))[0]];
+    }
     if (niveles.length === 1) {
       this.enfocarNivel(niveles[0]);
     } else {
@@ -749,6 +898,10 @@ export class VisorEdificio {
     this.actual.phi += (this.deseado.phi - this.actual.phi) * s;
     this.actual.radio += (this.deseado.radio - this.actual.radio) * s;
     this.actual.objetivo.lerp(this.deseado.objetivo, s);
+    if (Math.abs(this.camara.fov - this.fovDeseado) > 0.01) {
+      this.camara.fov += (this.fovDeseado - this.camara.fov) * s;
+      this.camara.updateProjectionMatrix();
+    }
 
     for (const n of this.niveles) {
       n.offset += (n.offsetDeseado - n.offset) * s;
@@ -764,6 +917,21 @@ export class VisorEdificio {
       objetivo.z + radio * Math.sin(phi) * Math.cos(theta)
     );
     this.camara.lookAt(objetivo);
+
+    // Precisión de profundidad: con la cámara lejos (plano 2D) se acerca el
+    // plano "near" para que el piso de un salón no se mezcle con la losa.
+    const near = this.modo2D ? Math.max(0.5, radio * 0.6) : 0.3;
+    if (Math.abs(this.camara.near - near) > 0.05) {
+      this.camara.near = near;
+      this.camara.updateProjectionMatrix();
+    }
+
+    // Las etiquetas del piso se voltean para no verse de cabeza.
+    const voltear = Math.cos(theta) > 0;
+    if (voltear !== this.etiquetasVolteadas) {
+      this.etiquetasVolteadas = voltear;
+      for (const e of this.etiquetasPiso) e.rotation.z = voltear ? 0 : Math.PI;
+    }
 
     if (this.resaltados.length) {
       const t = this.reloj.getElapsedTime() * 4;

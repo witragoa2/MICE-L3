@@ -423,9 +423,71 @@ body {
   opacity: 0.4;
 }
 
+.lt-pista {
+  cursor: pointer;
+  touch-action: none;
+}
+
+.lt-marca {
+  cursor: grab;
+}
+
+.lt-pista.arrastrando,
+.lt-pista.arrastrando .lt-marca {
+  cursor: grabbing;
+}
+
+/* Hora actual: línea blanca delgada (el marcador dorado es la hora elegida). */
+.lt-ahora {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  margin-left: -1px;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 1;
+}
+
+.lt-acciones {
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+
+.lt-input {
+  flex: 0 0 auto;
+  width: 112px;
+  padding: 4px 8px;
+  border: 1px solid var(--dorado);
+  border-radius: 4px;
+  background: var(--blanco);
+  color: var(--azul);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.lt-reset {
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 4px;
+  color: var(--blanco);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.lt-reset:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
 .ahora-btn {
   display: block;
-  width: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
   padding: 7px 10px;
   background: var(--dorado);
   border: 0;
@@ -1047,6 +1109,47 @@ body {
   color: var(--blanco);
 }
 
+/* Opciones de la vista (2D/3D, separar, techo, ventanas): arriba a la derecha. */
+.controles-visor {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+  max-width: calc(100% - 320px);
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--linea);
+  border-radius: 4px;
+  box-shadow: var(--sombra);
+}
+
+.ctrlBtn {
+  padding: 6px 10px;
+  background: transparent;
+  border: 1px solid #c9d0da;
+  border-radius: 3px;
+  color: var(--azul);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ctrlBtn:hover {
+  background: var(--azul-claro);
+}
+
+/* Seleccionado: amarillo intenso con letras negras. */
+.ctrlBtn.activo {
+  background: #ffd400;
+  border-color: #e6bf00;
+  color: #000000;
+}
+
 .vistas {
   position: absolute;
   right: 14px;
@@ -1282,6 +1385,20 @@ body {
   }
 
   .nivelBtn {
+    flex: 1;
+    padding: 7px 4px;
+    font-size: 10px;
+  }
+
+  /* En celular, las opciones de vista bajan debajo del letrero de estado. */
+  .controles-visor {
+    top: 46px;
+    left: 14px;
+    max-width: none;
+    justify-content: stretch;
+  }
+
+  .ctrlBtn {
     flex: 1;
     padding: 7px 4px;
     font-size: 10px;

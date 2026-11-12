@@ -17,6 +17,7 @@ const estado = {
   techoVisible: true,
   separado: false,
   seccion: "busqueda", // busqueda | grupos | servicios
+  horaElegida: null, // minutos elegidos en la línea del tiempo (null = ahora)
   secciones: { grupos: [], servicios: [] },
   areasPorId: {},
 };
@@ -257,10 +258,8 @@ function conectarInterfaz() {
     buscar();
   });
 
-  $("ahoraBtn")?.addEventListener("click", () => {
-    if (estado.seccion !== "busqueda") cambiarSeccion("busqueda");
-    clasesAhora();
-  });
+  $("ahoraBtn")?.addEventListener("click", mostrarClasesDeLaLinea);
+  conectarLineaTiempo();
 
   document.querySelectorAll(".seccionBtn").forEach((btn) => {
     btn.addEventListener("click", () => cambiarSeccion(btn.dataset.seccion));
@@ -285,13 +284,29 @@ function conectarInterfaz() {
         estado.visor.enfocarNivel(nivel);
         marcarNivelActivo(nivel);
         marcarVistaActiva(null);
-        $("mapaEstado").textContent = `${nombreNivel(Number(nivel))} · haz clic en un salón`;
+        $("mapaEstado").textContent = estado.visor.modo2D
+          ? `Plano 2D · ${nombreNivel(Number(nivel))} · arrastra para mover`
+          : `${nombreNivel(Number(nivel))} · haz clic en un salón`;
       }
     });
   });
 
+  $("plano2dBtn")?.addEventListener("click", () => {
+    if (!estado.visor) return;
+    estado.visor.set2D(!estado.visor.modo2D);
+    estado.separado = estado.visor.separado;
+    actualizarBotonesVisor();
+    const nivel = estado.visor.nivelActivo;
+    marcarNivelActivo(String(nivel));
+    marcarVistaActiva(null);
+    $("mapaEstado").textContent = estado.visor.modo2D
+      ? `Plano 2D · ${nombreNivel(Number(nivel))} · arrastra para mover · rueda para acercar`
+      : `${nombreNivel(Number(nivel))} · haz clic en un salón`;
+  });
+
   $("separarBtn")?.addEventListener("click", () => {
     if (!estado.visor) return;
+    estado.visor.set2D(false); // separar pisos solo tiene sentido en 3D
     estado.separado = !estado.separado;
     estado.visor.separar(estado.separado);
     actualizarBotonesVisor();
@@ -872,7 +887,9 @@ function limpiarBusqueda() {
 function clasesAhora() {
   if (!estado.grupos.length) return;
   ocultarAutocompletado();
-  const { dia, minutos } = ahora();
+  const { dia } = ahora();
+  const minutos = minutosConsulta(); // hora elegida en la línea del tiempo, o la actual
+  const elegida = estado.horaElegida !== null;
   const hoy = sesionesDelDia(dia);
   const enCurso = hoy.filter((s) => s.inicio <= minutos && minutos < s.fin);
   const siguienteInicio = hoy.filter((s) => s.inicio > minutos).map((s) => s.inicio)[0];
@@ -888,15 +905,17 @@ function clasesAhora() {
       })
       .join("");
 
-  let html = `<div class="ficha-grupo"><span class="ficha-materia ficha-materia-grande">Clases en este momento</span></div>
-    <p>${escapar(DIAS_LARGO[dia])} · ${formatoHora(minutos)}</p>`;
+  let html = `<div class="ficha-grupo"><span class="ficha-materia ficha-materia-grande">${
+    elegida ? `Clases a las ${formatoHora(minutos)}` : "Clases en este momento"
+  }</span></div>
+    <p>${escapar(DIAS_LARGO[dia])} · ${formatoHora(minutos)}${elegida ? " (hora elegida)" : ""}</p>`;
 
   if (!hoy.length) {
     html += `<p class="placeholder">Hoy no hay clases registradas en el L3.</p>`;
   } else if (enCurso.length) {
-    html += `<p><strong>${enCurso.length}</strong> clase(s) en curso.</p><div class="clase-lista">${tarjetas(enCurso, true)}</div>`;
+    html += `<p><strong>${enCurso.length}</strong> clase(s) ${elegida ? "a esa hora" : "en curso"}.</p><div class="clase-lista">${tarjetas(enCurso, true)}</div>`;
   } else {
-    html += `<p class="placeholder">No hay clases en este momento.</p>`;
+    html += `<p class="placeholder">No hay clases ${elegida ? "a esa hora" : "en este momento"}.</p>`;
   }
   if (siguientes.length) {
     html += `<p class="sugerencia-titulo">Siguientes, a las ${formatoHora(siguienteInicio)}</p>
@@ -908,7 +927,7 @@ function clasesAhora() {
 
   const resaltar = (enCurso.length ? enCurso : siguientes).map((s) => s.grupo.salon);
   if (resaltar.length) {
-    ubicarSalones(resaltar, enCurso.length ? `${enCurso.length} clase(s) en curso` : `Siguientes clases · ${formatoHora(siguienteInicio)}`);
+    ubicarSalones(resaltar, enCurso.length ? `${enCurso.length} clase(s) ${elegida ? `a las ${formatoHora(minutos)}` : "en curso"}` : `Siguientes clases · ${formatoHora(siguienteInicio)}`);
   } else if (estado.visor) {
     estado.visor.limpiarResaltado();
   }
@@ -954,17 +973,95 @@ function iniciarLineaTiempo() {
   setInterval(actualizarLineaTiempo, 30000);
 }
 
+function posicionEnLinea(minutos) {
+  return Math.min(Math.max((minutos - INICIO_DIA) / (FIN_DIA - INICIO_DIA), 0), 1) * 100;
+}
+
+/** Hora que se consulta: la elegida en la línea del tiempo o, si no hay, la actual. */
+function minutosConsulta() {
+  return estado.horaElegida ?? ahora().minutos;
+}
+
 function actualizarLineaTiempo() {
-  const { dia, minutos } = ahora();
-  const total = FIN_DIA - INICIO_DIA;
+  const { dia, minutos: actual } = ahora();
+  const elegida = estado.horaElegida !== null && estado.horaElegida !== undefined;
+  const minutos = elegida ? estado.horaElegida : actual;
   const dentro = minutos >= INICIO_DIA && minutos <= FIN_DIA;
-  const pos = Math.min(Math.max((minutos - INICIO_DIA) / total, 0), 1) * 100;
-  $("ltMarca").style.left = `${pos}%`;
-  $("ltPasado").style.width = `${pos}%`;
+  $("ltMarca").style.left = `${posicionEnLinea(minutos)}%`;
+  $("ltPasado").style.width = `${posicionEnLinea(actual)}%`;
+  $("ltAhora").style.left = `${posicionEnLinea(actual)}%`;
+  $("ltAhora").hidden = !elegida; // la línea blanca solo hace falta si se eligió otra hora
   $("ltMarca").classList.toggle("fuera", !dentro);
-  const enCurso = sesionesDelDia(dia).filter((s) => s.inicio <= minutos && minutos < s.fin).length;
-  $("ltHora").textContent = `${DIAS_LARGO[dia]} · ${formatoHora(minutos)}`;
-  $("ltEstado").textContent = dentro ? `${enCurso} clase(s) en curso` : "Fuera del horario del L3";
+  const n = sesionesDelDia(dia).filter((s) => s.inicio <= minutos && minutos < s.fin).length;
+  $("ltHora").textContent = `${DIAS_LARGO[dia]} · ${formatoHora(minutos)}${elegida ? " (hora elegida)" : ""}`;
+  $("ltEstado").textContent = dentro
+    ? `${n} clase(s) ${elegida ? "a esa hora" : "en curso"}`
+    : "Fuera del horario del L3";
+}
+
+/** Elige una hora (minutos desde medianoche) para consultar las clases. */
+function elegirHora(minutos, { mostrar = false } = {}) {
+  const redondeada = Math.round(minutos / 5) * 5;
+  estado.horaElegida = Math.min(Math.max(redondeada, INICIO_DIA), FIN_DIA - 5);
+  $("ltHoraInput").value = formatoHora(estado.horaElegida);
+  $("ahoraBtn").textContent = "Clases a esa hora";
+  $("ltResetBtn").hidden = false;
+  actualizarLineaTiempo();
+  if (mostrar) mostrarClasesDeLaLinea();
+}
+
+/** Regresa a la hora actual. */
+function volverAhora({ mostrar = false } = {}) {
+  estado.horaElegida = null;
+  $("ltHoraInput").value = "";
+  $("ahoraBtn").textContent = "Clases en este momento";
+  $("ltResetBtn").hidden = true;
+  actualizarLineaTiempo();
+  if (mostrar) mostrarClasesDeLaLinea();
+}
+
+function mostrarClasesDeLaLinea() {
+  if (estado.seccion !== "busqueda") cambiarSeccion("busqueda");
+  clasesAhora();
+}
+
+/** Arrastrar el marcador (o hacer clic en la línea) para elegir una hora. */
+function conectarLineaTiempo() {
+  const pista = $("ltPista");
+  if (!pista) return;
+  const minutosEn = (evento) => {
+    const r = pista.getBoundingClientRect();
+    const t = Math.min(Math.max((evento.clientX - r.left) / r.width, 0), 1);
+    return INICIO_DIA + t * (FIN_DIA - INICIO_DIA);
+  };
+  let arrastrando = false;
+  pista.addEventListener("pointerdown", (e) => {
+    arrastrando = true;
+    pista.classList.add("arrastrando");
+    pista.setPointerCapture(e.pointerId);
+    elegirHora(minutosEn(e));
+  });
+  pista.addEventListener("pointermove", (e) => {
+    if (arrastrando) elegirHora(minutosEn(e));
+  });
+  const soltar = () => {
+    if (!arrastrando) return;
+    arrastrando = false;
+    pista.classList.remove("arrastrando");
+    mostrarClasesDeLaLinea(); // al soltar se muestran las clases de esa hora
+  };
+  pista.addEventListener("pointerup", soltar);
+  pista.addEventListener("pointercancel", soltar);
+
+  $("ltHoraInput")?.addEventListener("change", (e) => {
+    const valor = e.target.value;
+    if (!valor) {
+      volverAhora({ mostrar: true });
+      return;
+    }
+    elegirHora(aMinutos(valor), { mostrar: true });
+  });
+  $("ltResetBtn")?.addEventListener("click", () => volverAhora({ mostrar: true }));
 }
 
 // ---------- panel de profesor ----------
@@ -1011,10 +1108,11 @@ function actualizarFotoProfesor(nombre, varios = false) {
 async function iniciarVisor() {
   if (!estado.modelo) return;
   try {
-    const { VisorEdificio } = await import("./escena3d.js?v=27");
+    const { VisorEdificio } = await import("./escena3d.js?v=30");
     estado.visor = new VisorEdificio($("visor3d"));
     estado.visor.cargar(estado.modelo);
     estado.visor.alSeleccionar = mostrarArea;
+    estado.visor.alCambiar2D = () => actualizarBotonesVisor();
 
     // Capa opcional de ventanas: si falta data/fachada.json, solo hay muros.
     try {
@@ -1102,6 +1200,11 @@ function marcarVistaActiva(vista) {
 }
 
 function actualizarBotonesVisor() {
+  const plano = $("plano2dBtn");
+  if (plano && estado.visor) {
+    plano.textContent = estado.visor.modo2D ? "Vista 3D" : "Plano 2D";
+    plano.classList.toggle("activo", estado.visor.modo2D);
+  }
   const techo = $("techoBtn");
   if (techo) {
     techo.textContent = estado.techoVisible ? "Techo: sí" : "Techo: no";
