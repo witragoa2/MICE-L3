@@ -456,7 +456,8 @@ body {
 
 .lt-input {
   flex: 0 0 auto;
-  width: 112px;
+  width: 86px;
+  text-align: center;
   padding: 4px 8px;
   border: 1px solid var(--dorado);
   border-radius: 4px;
@@ -1416,4 +1417,87 @@ body {
     scroll-behavior: auto !important;
     transition: none !important;
   }
+}
+
+/* Cuadro de hora: sin hora elegida muestra la actual como ejemplo, en gris oscuro. */
+.lt-hora-wrap {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+}
+
+.lt-input::placeholder {
+  color: #555b63;
+  font-weight: 500;
+  opacity: 1;
+}
+
+.lt-input.error {
+  border-color: #c62828;
+  box-shadow: 0 0 0 2px rgba(198, 40, 40, 0.35);
+}
+
+/* Lista de horarios (al hacer clic en el cuadro). */
+.lt-opciones {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 50;
+  width: 200px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 4px;
+  background: var(--blanco);
+  border: 1px solid var(--azul);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 20, 50, 0.3);
+}
+
+.lt-opciones-titulo {
+  margin: 4px 6px 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.lt-opcion {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 7px 8px;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  color: var(--azul);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+  cursor: pointer;
+}
+
+.lt-opcion:hover,
+.lt-opcion.activa {
+  background: var(--azul-claro);
+}
+
+.lt-opcion.activa {
+  box-shadow: inset 3px 0 0 var(--dorado);
+}
+
+.lt-opcion.pasada {
+  color: #7a8597;
+}
+
+.lt-opcion-n {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.lt-opcion-ahora {
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--linea);
+  border-radius: 4px 4px 0 0;
 }
