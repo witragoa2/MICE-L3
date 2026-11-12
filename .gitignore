@@ -1,0 +1,18 @@
+# --- Python ---
+__pycache__/
+*.pyc
+
+# --- Respaldos locales ---
+# Con Git el historial ya guarda cada versión; los respaldos se quedan solo en tu disco.
+scripts/_respaldo/
+
+# --- Modelo antiguo (ya no se usa, 30 MB) ---
+# El modelo actual sale de modelos/Laboratorio_3_Edificio_Completo_3D.dxf
+modelos/Laboratorio_3_Mallas_3D.dxf
+
+# --- Archivos del sistema y editores ---
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.claude/
