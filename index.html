@@ -1,0 +1,139 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Mapa Interactivo de Clases del Laboratorio 3, FES Aragón, UNAM.">
+  <title>MICE L3 · FES Aragón</title>
+  <link rel="stylesheet" href="css/estilos.css?v=27">
+</head>
+
+<body>
+  <header class="app-header">
+    <img class="logo-mice" src="img/MICE.png" alt="Logo del MICE L3">
+
+    <div class="texto-encabezado">
+      <h1>MICE L3</h1>
+      <p>Mapa Interactivo de Clases para Estudiantes del Laboratorio 3 · FES Aragón</p>
+    </div>
+
+    <div class="linea-tiempo" aria-label="Línea del tiempo de hoy, de 7:00 a 24:00">
+      <div class="lt-cabecera">
+        <span id="ltHora">—</span>
+        <span id="ltEstado" class="lt-estado"></span>
+      </div>
+      <div class="lt-pista" id="ltPista">
+        <span class="lt-pasado" id="ltPasado"></span>
+        <span class="lt-marca" id="ltMarca"></span>
+      </div>
+      <button type="button" id="ahoraBtn" class="ahora-btn">Clases en este momento</button>
+    </div>
+
+    <div class="panel-foto" id="panelFoto">
+      <div class="foto-nombre">
+        <img id="fotoProfesor" src="img/profesor_generico.png" alt="Foto del profesor">
+        <p id="nombreProfesorFoto">Selecciona un maestro</p>
+        <span id="correoProfesor" class="correo-box"></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <div class="columna-busqueda">
+    <!-- Pestañas tipo navegador, fuera y encima del recuadro -->
+    <div class="secciones" role="tablist" aria-label="Secciones">
+      <button type="button" class="seccionBtn activo" data-seccion="busqueda" role="tab" aria-selected="true">Búsqueda</button>
+      <button type="button" class="seccionBtn" data-seccion="grupos" role="tab" aria-selected="false">Grupos Estudiantiles</button>
+      <button type="button" class="seccionBtn" data-seccion="servicios" role="tab" aria-selected="false">Servicios para Alumnos</button>
+    </div>
+
+    <section class="panel-busqueda" aria-labelledby="tituloBusqueda">
+
+      <div class="busqueda-cabecera">
+        <p class="eyebrow" id="tituloBusqueda">Buscar</p>
+        <button type="button" id="limpiarBtn" class="limpiar-btn" title="Borra la búsqueda y regresa el mapa a la vista inicial">Limpiar búsqueda</button>
+      </div>
+
+      <!-- Sección "Búsqueda": grupo, profesor, materia -->
+      <div id="seccionBusqueda" class="seccion">
+      <div class="modo-row" role="tablist" aria-label="Criterio de búsqueda">
+        <button type="button" class="modoBtn activo" data-modo="grupo" role="tab" aria-selected="true">Grupo</button>
+        <button type="button" class="modoBtn" data-modo="maestro" role="tab" aria-selected="false">Profesor</button>
+        <button type="button" class="modoBtn" data-modo="materia" role="tab" aria-selected="false">Materia</button>
+      </div>
+
+      <div class="search-row">
+        <div class="input-wrap">
+          <label class="sr-only" for="searchInput">Buscar</label>
+          <input type="text" id="searchInput" placeholder="Número de grupo, ej. 8419" autocomplete="off" spellcheck="false">
+          <div id="autocompletado" class="autocompletado" role="listbox" aria-label="Sugerencias de profesores"></div>
+        </div>
+        <button id="searchBtn" type="button">Buscar</button>
+      </div>
+
+      <div id="result" class="resultado" aria-live="polite">
+        <p class="placeholder">Aún no hay búsqueda.</p>
+      </div>
+      </div>
+
+      <!-- Secciones "Grupos Estudiantiles" y "Servicios para Alumnos" -->
+      <div id="seccionLista" class="seccion" hidden>
+        <label class="sr-only" for="filtroSeccion">Filtrar</label>
+        <input type="text" id="filtroSeccion" class="filtro-seccion" autocomplete="off" spellcheck="false">
+        <div id="listaSeccion" class="clase-lista seccion-lista"></div>
+        <div id="detalleSeccion" class="resultado" aria-live="polite" hidden></div>
+      </div>
+
+      <ul class="leyenda-areas" aria-label="Códigos de color">
+        <li><span style="background:#f3e2c7"></span>Salón de clases</li>
+        <li><span style="background:#1f5f73"></span>Áreas de gestión de apoyo</li>
+        <li><span style="background:#8cc063"></span>Grupos estudiantiles</li>
+        <li><span style="background:#f2c94c"></span>Servicio para alumnos</li>
+        <li><span style="background:#5f5f5f"></span>Solo personal autorizado</li>
+        <li><span style="background:#ffc21a"></span>Salón seleccionado</li>
+      </ul>
+    </section>
+    </div>
+
+    <section class="panel-mapa" aria-label="Modelo 3D del Laboratorio 3">
+      <div id="visor3d" class="visor3d">
+        <p class="visor-cargando" id="visorEstado">Cargando modelo 3D…</p>
+      </div>
+
+      <div class="niveles" role="group" aria-label="Niveles del edificio">
+        <button type="button" class="nivelBtn activo" data-nivel="todos">Edificio</button>
+        <button type="button" class="nivelBtn" data-nivel="0">Planta baja</button>
+        <button type="button" class="nivelBtn" data-nivel="1">Primer piso</button>
+        <button type="button" class="nivelBtn" data-nivel="2">Segundo piso</button>
+        <button type="button" class="nivelBtn" id="separarBtn">Separar pisos</button>
+        <button type="button" class="nivelBtn activo" id="techoBtn">Techo: sí</button>
+        <button type="button" class="nivelBtn activo" id="ventanasBtn">Ventanas: sí</button>
+      </div>
+
+      <div class="vistas" role="group" aria-label="Vistas predeterminadas">
+        <!-- Rosa de los vientos: NO N NE / O Entrada E / SO S SE -->
+        <button type="button" class="vistaBtn" data-vista="no" title="Isométrica noroeste">NO</button>
+        <button type="button" class="vistaBtn" data-vista="n" title="Vista desde el norte">N</button>
+        <button type="button" class="vistaBtn" data-vista="ne" title="Isométrica noreste">NE</button>
+        <button type="button" class="vistaBtn" data-vista="o" title="Vista desde el oeste">O</button>
+        <button type="button" class="vistaBtn activo" data-vista="entrada" title="Vista desde la entrada del edificio">Entrada</button>
+        <button type="button" class="vistaBtn" data-vista="e" title="Vista desde el este">E</button>
+        <button type="button" class="vistaBtn" data-vista="so" title="Isométrica suroeste">SO</button>
+        <button type="button" class="vistaBtn" data-vista="s" title="Vista desde el sur">S</button>
+        <button type="button" class="vistaBtn" data-vista="se" title="Isométrica sureste">SE</button>
+      </div>
+
+      <p class="mapa-estado" id="mapaEstado">Vista desde la entrada · clic derecho para mover</p>
+    </section>
+  </main>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+      }
+    }
+  </script>
+  <script type="module" src="js/principal.js?v=27"></script>
+</body>
+</html>

@@ -1,0 +1,3446 @@
+{
+  "meta": {
+    "semestre": "2027-I",
+    "fuente": "Horarios_L3_2027-I.pdf",
+    "generado": "2026-11-04",
+    "total_grupos": 229,
+    "total_sesiones": 229
+  },
+  "grupos": [
+    {
+      "clave": "8726",
+      "materia": "LAB AMPLIFICADORES ELECTRONICOS",
+      "profesor": "VILLANUEVA ORTEGA JUAN ANTONIO",
+      "grupo": "8400",
+      "salon": "L31011",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "12:00-14:00"
+        }
+      ]
+    },
+    {
+      "clave": "8726",
+      "materia": "LAB AMPLIFICADORES ELECTRONICOS",
+      "profesor": "VILLANUEVA ORTEGA JUAN ANTONIO",
+      "grupo": "8401",
+      "salon": "L31010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "12:00-14:00"
+        }
+      ]
+    },
+    {
+      "clave": "8726",
+      "materia": "LAB AMPLIFICADORES ELECTRONICOS",
+      "profesor": "ZUÑIGA VILLEGAS BENITO",
+      "grupo": "8402",
+      "salon": "L31010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "16:00-18:00"
+        }
+      ]
+    },
+    {
+      "clave": "8510",
+      "materia": "LAB ANALISIS DE CIRCUITOS",
+      "profesor": "RODRIGUEZ ARGUMEDO URIEL",
+      "grupo": "8403",
+      "salon": "L30011",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "13:00-15:00"
+        }
+      ]
+    },
+    {
+      "clave": "8510",
+      "materia": "LAB ANALISIS DE CIRCUITOS",
+      "profesor": "RODRIGUEZ ARGUMEDO URIEL",
+      "grupo": "8404",
+      "salon": "L30011",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8510",
+      "materia": "LAB ANALISIS DE CIRCUITOS",
+      "profesor": "RODRIGUEZ ARGUMEDO URIEL",
+      "grupo": "8405",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "08:00-10:00"
+        }
+      ]
+    },
+    {
+      "clave": "8510",
+      "materia": "LAB ANALISIS DE CIRCUITOS",
+      "profesor": "ARELLANO RIVERA ESTEBAN",
+      "grupo": "8406",
+      "salon": "L30011",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "08:00-10:00"
+        }
+      ]
+    },
+    {
+      "clave": "8510",
+      "materia": "LAB ANALISIS DE CIRCUITOS",
+      "profesor": "RODRIGUEZ ARGUMEDO URIEL",
+      "grupo": "8407",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "14:00-16:00"
+        }
+      ]
+    },
+    {
+      "clave": "8510",
+      "materia": "LAB ANALISIS DE CIRCUITOS",
+      "profesor": "RODRIGUEZ ARGUMEDO URIEL",
+      "grupo": "8408",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "14:00-16:00"
+        }
+      ]
+    },
+    {
+      "clave": "8510",
+      "materia": "LAB ANALISIS DE CIRCUITOS",
+      "profesor": "PEREZ GARCIA CHRISTIAN JAIR",
+      "grupo": "8409",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "08:00-10:00"
+        }
+      ]
+    },
+    {
+      "clave": "8510",
+      "materia": "LAB ANALISIS DE CIRCUITOS",
+      "profesor": "ARELLANO RIVERA ESTEBAN",
+      "grupo": "8410",
+      "salon": "L30011",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8510",
+      "materia": "LAB ANALISIS DE CIRCUITOS",
+      "profesor": "SUAREZ PINEDA MANUEL",
+      "grupo": "8411",
+      "salon": "L30011",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "16:00-18:00"
+        }
+      ]
+    },
+    {
+      "clave": "8024",
+      "materia": "LAB ANALISIS DE CIRCUITOS ELECTRICOS",
+      "profesor": "ZUÑIGA VILLEGAS BENITO",
+      "grupo": "8412",
+      "salon": "L30011",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "14:00-16:00"
+        }
+      ]
+    },
+    {
+      "clave": "8109",
+      "materia": "LAB COMUNICACIONES DIGITALES",
+      "profesor": "VEGA SALOME RAUL",
+      "grupo": "8413",
+      "salon": "L32020",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8109",
+      "materia": "LAB COMUNICACIONES DIGITALES",
+      "profesor": "GARCIA GUZMAN ENRIQUE",
+      "grupo": "8414",
+      "salon": "L32020",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8109",
+      "materia": "LAB COMUNICACIONES DIGITALES",
+      "profesor": "VEGA SALOME RAUL",
+      "grupo": "8415",
+      "salon": "L32020",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8109",
+      "materia": "LAB COMUNICACIONES DIGITALES",
+      "profesor": "MARQUEZ RAMIREZ RAFAEL ANTONIO",
+      "grupo": "8416",
+      "salon": "L32020",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "15:30-17:30"
+        }
+      ]
+    },
+    {
+      "clave": "8109",
+      "materia": "LAB COMUNICACIONES DIGITALES",
+      "profesor": "GARCIA GUZMAN ENRIQUE",
+      "grupo": "8417",
+      "salon": "L32020",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "10:00-12:00"
+        }
+      ]
+    },
+    {
+      "clave": "8109",
+      "materia": "LAB COMUNICACIONES DIGITALES",
+      "profesor": "GARCIA GUZMAN ENRIQUE",
+      "grupo": "8418",
+      "salon": "L32020",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "12:00-14:00"
+        }
+      ]
+    },
+    {
+      "clave": "8109",
+      "materia": "LAB COMUNICACIONES DIGITALES",
+      "profesor": "GARCIA GUZMAN ENRIQUE",
+      "grupo": "8419",
+      "salon": "L32020",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "14:00-16:00"
+        }
+      ]
+    },
+    {
+      "clave": "8109",
+      "materia": "LAB COMUNICACIONES DIGITALES",
+      "profesor": "GARCIA GUZMAN ENRIQUE",
+      "grupo": "8420",
+      "salon": "L32020",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "16:00-18:00"
+        }
+      ]
+    },
+    {
+      "clave": "8109",
+      "materia": "LAB COMUNICACIONES DIGITALES",
+      "profesor": "GARCIA GUZMAN ENRIQUE",
+      "grupo": "8421",
+      "salon": "L32020",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8109",
+      "materia": "LAB COMUNICACIONES DIGITALES",
+      "profesor": "VEGA SALOME RAUL",
+      "grupo": "8422",
+      "salon": "L32020",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8109",
+      "materia": "LAB COMUNICACIONES DIGITALES",
+      "profesor": "GARCIA GUZMAN ENRIQUE",
+      "grupo": "8424",
+      "salon": "L32020",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "10:00-12:00"
+        }
+      ]
+    },
+    {
+      "clave": "8109",
+      "materia": "LAB COMUNICACIONES DIGITALES",
+      "profesor": "GARCIA GUZMAN ENRIQUE",
+      "grupo": "8425",
+      "salon": "L32020",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "12:00-14:00"
+        }
+      ]
+    },
+    {
+      "clave": "8597",
+      "materia": "LAB DISEÑO DE SISTEMAS CON MICROPROCESADORES",
+      "profesor": "MORENO ESPINOZA OSCAR GUADALUPE",
+      "grupo": "8426",
+      "salon": "L32012",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8597",
+      "materia": "LAB DISEÑO DE SISTEMAS CON MICROPROCESADORES",
+      "profesor": "MORENO ESPINOZA OSCAR GUADALUPE",
+      "grupo": "8427",
+      "salon": "L32012",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8597",
+      "materia": "LAB DISEÑO DE SISTEMAS CON MICROPROCESADORES",
+      "profesor": "MORENO ESPINOZA OSCAR GUADALUPE",
+      "grupo": "8428",
+      "salon": "L32012",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8721",
+      "materia": "LAB DISEÑO DE SISTEMAS DIGITALES",
+      "profesor": "MARQUEZ RAMIREZ RAFAEL ANTONIO",
+      "grupo": "8429",
+      "salon": "L32021",
+      "tipo": "P",
+      "cupo": 20,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "11:30-13:30"
+        }
+      ]
+    },
+    {
+      "clave": "8721",
+      "materia": "LAB DISEÑO DE SISTEMAS DIGITALES",
+      "profesor": "MARQUEZ RAMIREZ RAFAEL ANTONIO",
+      "grupo": "8430",
+      "salon": "L32021",
+      "tipo": "P",
+      "cupo": 20,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "13:30-15:30"
+        }
+      ]
+    },
+    {
+      "clave": "8721",
+      "materia": "LAB DISEÑO DE SISTEMAS DIGITALES",
+      "profesor": "ZEPEDA CERVANTES ERIKA ANDREA",
+      "grupo": "8431",
+      "salon": "L32021",
+      "tipo": "P",
+      "cupo": 20,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "19:00-21:00"
+        }
+      ]
+    },
+    {
+      "clave": "8721",
+      "materia": "LAB DISEÑO DE SISTEMAS DIGITALES",
+      "profesor": "MARQUEZ RAMIREZ RAFAEL ANTONIO",
+      "grupo": "8432",
+      "salon": "L31015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "11:30-13:30"
+        }
+      ]
+    },
+    {
+      "clave": "8721",
+      "materia": "LAB DISEÑO DE SISTEMAS DIGITALES",
+      "profesor": "ZEPEDA CERVANTES ERIKA ANDREA",
+      "grupo": "8433",
+      "salon": "L31015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "19:00-21:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "GONZALEZ MAXINEZ DAVID JAIME",
+      "grupo": "8434",
+      "salon": "L31010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "PATIÑO RODRIGUEZ RAMON",
+      "grupo": "8435",
+      "salon": "L31014",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "VILLEGAS JIMENEZ ERNESTO ALONSO",
+      "grupo": "8436",
+      "salon": "L31016",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "VILLEGAS JIMENEZ ERNESTO ALONSO",
+      "grupo": "8437",
+      "salon": "L31016",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "PATIÑO RODRIGUEZ RAMON",
+      "grupo": "8438",
+      "salon": "L31014",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "13:00-15:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "VILLEGAS JIMENEZ ERNESTO ALONSO",
+      "grupo": "8439",
+      "salon": "L31016",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "13:00-15:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "GONZALEZ BETANCOURT NORA ABIGAIL",
+      "grupo": "8440",
+      "salon": "L31016",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "15:00-17:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "HERNANDEZ HERNANDEZ MARTIN",
+      "grupo": "8441",
+      "salon": "L31016",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "17:00-19:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "GONZALEZ BETANCOURT NORA ABIGAIL",
+      "grupo": "8442",
+      "salon": "L31013",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "19:00-21:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "PATIÑO RODRIGUEZ RAMON",
+      "grupo": "8443",
+      "salon": "L31014",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "VILLEGAS JIMENEZ ERNESTO ALONSO",
+      "grupo": "8444",
+      "salon": "L31016",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "VILLEGAS JIMENEZ ERNESTO ALONSO",
+      "grupo": "8445",
+      "salon": "L31016",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "PATIÑO RODRIGUEZ RAMON",
+      "grupo": "8446",
+      "salon": "L31014",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "13:00-15:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "VILLEGAS JIMENEZ ERNESTO ALONSO",
+      "grupo": "8447",
+      "salon": "L31016",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "13:00-15:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "OLMOS HERNANDEZ MONICA JAZMIN",
+      "grupo": "8448",
+      "salon": "L31016",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "16:00-18:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "HERNANDEZ HERNANDEZ MARTIN",
+      "grupo": "8449",
+      "salon": "L31014",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "15:00-17:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "VILLAFUERTE GARCIA ALEJANDRO",
+      "grupo": "8450",
+      "salon": "L31013",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "17:00-19:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "MUNGUIA MOLINA JUAN",
+      "grupo": "8451",
+      "salon": "L31010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "18:00-20:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "PATIÑO RODRIGUEZ RAMON",
+      "grupo": "8452",
+      "salon": "L31014",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "VILLEGAS JIMENEZ ERNESTO ALONSO",
+      "grupo": "8453",
+      "salon": "L31016",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "VILLEGAS JIMENEZ ERNESTO ALONSO",
+      "grupo": "8454",
+      "salon": "L31014",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "MARQUEZ RAMIREZ RAFAEL ANTONIO",
+      "grupo": "8455",
+      "salon": "L31016",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "11:30-13:30"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "PATIÑO RODRIGUEZ RAMON",
+      "grupo": "8456",
+      "salon": "L31014",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "13:00-15:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "VILLEGAS JIMENEZ ERNESTO ALONSO",
+      "grupo": "8458",
+      "salon": "L31013",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "13:00-15:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "HERNANDEZ HERNANDEZ MARTIN",
+      "grupo": "8459",
+      "salon": "L31014",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "15:00-17:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "GONZALEZ BETANCOURT NORA ABIGAIL",
+      "grupo": "8460",
+      "salon": "L31016",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "19:00-21:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "PATIÑO RODRIGUEZ RAMON",
+      "grupo": "8461",
+      "salon": "L31014",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "VILLEGAS JIMENEZ ERNESTO ALONSO",
+      "grupo": "8462",
+      "salon": "L31016",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "VILLEGAS JIMENEZ ERNESTO ALONSO",
+      "grupo": "8463",
+      "salon": "L31016",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "MARQUEZ RAMIREZ RAFAEL ANTONIO",
+      "grupo": "8464",
+      "salon": "L31013",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "13:30-15:30"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "PATIÑO RODRIGUEZ RAMON",
+      "grupo": "8465",
+      "salon": "L31014",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "13:00-15:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "OLMOS HERNANDEZ MONICA JAZMIN",
+      "grupo": "8466",
+      "salon": "L31010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "16:00-18:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "VILLEGAS JIMENEZ ERNESTO ALONSO",
+      "grupo": "8467",
+      "salon": "L31016",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "13:00-15:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "HERNANDEZ HERNANDEZ MARTIN",
+      "grupo": "8468",
+      "salon": "L31016",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "15:00-17:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "ABREU GONZALEZ MARIA BRENDA",
+      "grupo": "8469",
+      "salon": "L31016",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "17:00-19:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "ZEPEDA CERVANTES ERIKA ANDREA",
+      "grupo": "8470",
+      "salon": "L31010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "19:00-21:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "SOTO DURAN CHARLIE MICHEL EDUARDO",
+      "grupo": "8471",
+      "salon": "L31016",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "08:00-10:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "PATIÑO RODRIGUEZ RAMON",
+      "grupo": "8472",
+      "salon": "L31014",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "ROMERO BADILLO NORMA ANGELICA",
+      "grupo": "8473",
+      "salon": "L31010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "PISCIL RUBIO ULISES TADEO",
+      "grupo": "8474",
+      "salon": "L31014",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "16:00-18:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "MARQUEZ RAMIREZ RAFAEL ANTONIO",
+      "grupo": "8475",
+      "salon": "L31013",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "15:30-17:30"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "ABREU GONZALEZ MARIA BRENDA",
+      "grupo": "8476",
+      "salon": "L31014",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "17:00-19:00"
+        }
+      ]
+    },
+    {
+      "clave": "8720",
+      "materia": "LAB DISEÑO LOGICO",
+      "profesor": "PISCIL RUBIO ULISES TADEO",
+      "grupo": "8477",
+      "salon": "L31014",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "18:00-20:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "ORTEGA NAVA CARLOS FERNANDO",
+      "grupo": "8478",
+      "salon": "L31010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "MARTINEZ ROMERO KARINA",
+      "grupo": "8479",
+      "salon": "L31014",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "15:00-17:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "ROMERO BADILLO NORMA ANGELICA",
+      "grupo": "8480",
+      "salon": "L32010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "15:00-17:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "PEREZ GARCIA CHRISTIAN JAIR",
+      "grupo": "8481",
+      "salon": "L31013",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "ROMERO BADILLO NORMA ANGELICA",
+      "grupo": "8482",
+      "salon": "L32010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "17:00-19:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "ORTEGA NAVA CARLOS FERNANDO",
+      "grupo": "8483",
+      "salon": "L31010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "13:00-15:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "MARTINEZ ROMERO KARINA",
+      "grupo": "8484",
+      "salon": "L31013",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "15:00-17:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "MARTINEZ CASTILLO GERARDO",
+      "grupo": "8485",
+      "salon": "L31010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "16:00-18:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "ORTEGA NAVA CARLOS FERNANDO",
+      "grupo": "8486",
+      "salon": "L31013",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "ORTEGA NAVA CARLOS FERNANDO",
+      "grupo": "8487",
+      "salon": "L31013",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "17:00-19:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "GONZALEZ BETANCOURT NORA ABIGAIL",
+      "grupo": "8488",
+      "salon": "L31010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "15:00-17:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "ORTEGA NAVA CARLOS FERNANDO",
+      "grupo": "8489",
+      "salon": "L31013",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "15:00-17:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "ORTEGA NAVA CARLOS FERNANDO",
+      "grupo": "8490",
+      "salon": "L31013",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "17:00-19:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "PEREZ LUIS CARLOS JAVIER",
+      "grupo": "8491",
+      "salon": "L31010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "GARZON ACEVES MAX OSWALDO",
+      "grupo": "8492",
+      "salon": "L31010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "14:00-16:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "ORTEGA NAVA CARLOS FERNANDO",
+      "grupo": "8493",
+      "salon": "L31010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "13:00-15:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "MARTINEZ CASTILLO GERARDO",
+      "grupo": "8494",
+      "salon": "L31014",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "16:00-18:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "PEREZ LUIS CARLOS JAVIER",
+      "grupo": "8495",
+      "salon": "L31013",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "ORTEGA NAVA CARLOS FERNANDO",
+      "grupo": "8496",
+      "salon": "L31013",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "ORTEGA NAVA CARLOS FERNANDO",
+      "grupo": "8497",
+      "salon": "L31013",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "13:00-15:00"
+        }
+      ]
+    },
+    {
+      "clave": "8138",
+      "materia": "LAB DISPOSITIVOS ELECTRONICOS",
+      "profesor": "ORTEGA NAVA CARLOS FERNANDO",
+      "grupo": "8498",
+      "salon": "L31013",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "15:00-17:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "ARELLANO RIVERA ESTEBAN",
+      "grupo": "8499",
+      "salon": "L30011",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "08:00-10:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "GARZON ACEVES MAX OSWALDO",
+      "grupo": "8500",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "10:00-12:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "RAMIREZ FLORES ANTONIO",
+      "grupo": "8501",
+      "salon": "L30011",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "10:00-12:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "GARZON ACEVES MAX OSWALDO",
+      "grupo": "8502",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "12:00-14:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "RAMIREZ FLORES ANTONIO",
+      "grupo": "8503",
+      "salon": "L30011",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "17:00-19:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "ARELLANO RIVERA ESTEBAN",
+      "grupo": "8504",
+      "salon": "L30011",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "16:00-18:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "LECHUGA ALARCON LUIS ALBERTO",
+      "grupo": "8505",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "18:00-20:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "GARZON ACEVES MAX OSWALDO",
+      "grupo": "8506",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "08:00-10:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "GARZON ACEVES MAX OSWALDO",
+      "grupo": "8507",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "12:00-14:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "RAMIREZ FLORES ANTONIO",
+      "grupo": "8508",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "RAMIREZ FLORES ANTONIO",
+      "grupo": "8509",
+      "salon": "L30011",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "13:00-15:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "GONZALEZ MONDRAGON VICTOR MANUEL",
+      "grupo": "8510",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "14:00-16:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "GONZALEZ MONDRAGON VICTOR MANUEL",
+      "grupo": "8511",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "12:00-14:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "LECHUGA ALARCON LUIS ALBERTO",
+      "grupo": "8512",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "18:00-20:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "GONZALEZ MONDRAGON NOE",
+      "grupo": "8513",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "08:00-10:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "GARZON ACEVES MAX OSWALDO",
+      "grupo": "8514",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "10:00-12:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "RAMIREZ FLORES ANTONIO",
+      "grupo": "8515",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "15:00-17:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "GONZALEZ HERNANDEZ GERARDO",
+      "grupo": "8516",
+      "salon": "L30011",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "12:00-14:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "SUAREZ PINEDA MANUEL",
+      "grupo": "8517",
+      "salon": "L30011",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "GONZALEZ HERNANDEZ GERARDO",
+      "grupo": "8518",
+      "salon": "L30011",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "14:00-16:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "ARELLANO RIVERA ESTEBAN",
+      "grupo": "8519",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "16:00-18:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "LECHUGA ALARCON LUIS ALBERTO",
+      "grupo": "8520",
+      "salon": "L30011",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "17:00-19:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "LECHUGA ALARCON LUIS ALBERTO",
+      "grupo": "8521",
+      "salon": "L30011",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "19:00-21:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "RAMIREZ RAMIREZ SERGIO",
+      "grupo": "8522",
+      "salon": "L30011",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "RAMIREZ RAMIREZ SERGIO",
+      "grupo": "8523",
+      "salon": "L30011",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "GONZALEZ MONDRAGON NOE",
+      "grupo": "8524",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "SUAREZ PINEDA MANUEL",
+      "grupo": "8525",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "15:00-17:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "GONZALEZ MONDRAGON VICTOR MANUEL",
+      "grupo": "8526",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "13:00-15:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "LECHUGA ALARCON LUIS ALBERTO",
+      "grupo": "8527",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "18:00-20:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "GARZON ACEVES MAX OSWALDO",
+      "grupo": "8528",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "10:00-12:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "RAMIREZ FLORES ANTONIO",
+      "grupo": "8529",
+      "salon": "L30011",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "GARZON ACEVES MAX OSWALDO",
+      "grupo": "8530",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "12:00-14:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "GONZALEZ MONDRAGON VICTOR MANUEL",
+      "grupo": "8531",
+      "salon": "L30010",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "16:00-18:00"
+        }
+      ]
+    },
+    {
+      "clave": "8071",
+      "materia": "LAB ELECTRICIDAD Y MAGNETISMO",
+      "profesor": "ARELLANO RIVERA ESTEBAN",
+      "grupo": "8532",
+      "salon": "L30011",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "16:00-18:00"
+        }
+      ]
+    },
+    {
+      "clave": "8759",
+      "materia": "LAB ELECTRONICA APLICADA",
+      "profesor": "OCON VALDEZ RODRIGO",
+      "grupo": "8533",
+      "salon": "L31010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "18:30-20:30"
+        }
+      ]
+    },
+    {
+      "clave": "8759",
+      "materia": "LAB ELECTRONICA APLICADA",
+      "profesor": "ROMERO BADILLO NORMA ANGELICA",
+      "grupo": "8534",
+      "salon": "L31010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "19:00-21:00"
+        }
+      ]
+    },
+    {
+      "clave": "8145",
+      "materia": "LAB ELECTRONICA DE POTENCIA",
+      "profesor": "VILLANUEVA ORTEGA JUAN ANTONIO",
+      "grupo": "8536",
+      "salon": "L31011",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "10:00-12:00"
+        }
+      ]
+    },
+    {
+      "clave": "8145",
+      "materia": "LAB ELECTRONICA DE POTENCIA",
+      "profesor": "GONZALEZ MONDRAGON VICTOR MANUEL",
+      "grupo": "8537",
+      "salon": "L31011",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "14:30-16:30"
+        }
+      ]
+    },
+    {
+      "clave": "8145",
+      "materia": "LAB ELECTRONICA DE POTENCIA",
+      "profesor": "GONZALEZ MONDRAGON VICTOR MANUEL",
+      "grupo": "8538",
+      "salon": "L31011",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "16:30-18:30"
+        }
+      ]
+    },
+    {
+      "clave": "8145",
+      "materia": "LAB ELECTRONICA DE POTENCIA",
+      "profesor": "ESTRIBERO GONZALEZ FRANCISCO",
+      "grupo": "8539",
+      "salon": "L31011",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "10:00-12:00"
+        }
+      ]
+    },
+    {
+      "clave": "8145",
+      "materia": "LAB ELECTRONICA DE POTENCIA",
+      "profesor": "ESTRIBERO GONZALEZ FRANCISCO",
+      "grupo": "8540",
+      "salon": "L31011",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "14:00-16:00"
+        }
+      ]
+    },
+    {
+      "clave": "8145",
+      "materia": "LAB ELECTRONICA DE POTENCIA",
+      "profesor": "GONZALEZ MONDRAGON VICTOR MANUEL",
+      "grupo": "8541",
+      "salon": "L31011",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "16:00-18:00"
+        }
+      ]
+    },
+    {
+      "clave": "8145",
+      "materia": "LAB ELECTRONICA DE POTENCIA",
+      "profesor": "VILLANUEVA ORTEGA JUAN ANTONIO",
+      "grupo": "8542",
+      "salon": "L31011",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "10:00-12:00"
+        }
+      ]
+    },
+    {
+      "clave": "8145",
+      "materia": "LAB ELECTRONICA DE POTENCIA",
+      "profesor": "GONZALEZ MONDRAGON VICTOR MANUEL",
+      "grupo": "8543",
+      "salon": "L31011",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "12:00-14:00"
+        }
+      ]
+    },
+    {
+      "clave": "8145",
+      "materia": "LAB ELECTRONICA DE POTENCIA",
+      "profesor": "PEREZ GARCIA CHRISTIAN JAIR",
+      "grupo": "8544",
+      "salon": "L31011",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "16:30-18:30"
+        }
+      ]
+    },
+    {
+      "clave": "8145",
+      "materia": "LAB ELECTRONICA DE POTENCIA",
+      "profesor": "ESTRIBERO GONZALEZ FRANCISCO",
+      "grupo": "8545",
+      "salon": "L31011",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8145",
+      "materia": "LAB ELECTRONICA DE POTENCIA",
+      "profesor": "ESTRIBERO GONZALEZ FRANCISCO",
+      "grupo": "8546",
+      "salon": "L31011",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "13:00-15:00"
+        }
+      ]
+    },
+    {
+      "clave": "8145",
+      "materia": "LAB ELECTRONICA DE POTENCIA",
+      "profesor": "GONZALEZ MONDRAGON VICTOR MANUEL",
+      "grupo": "8547",
+      "salon": "L31011",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "15:00-17:00"
+        }
+      ]
+    },
+    {
+      "clave": "8145",
+      "materia": "LAB ELECTRONICA DE POTENCIA",
+      "profesor": "VILLANUEVA ORTEGA JUAN ANTONIO",
+      "grupo": "8548",
+      "salon": "L31011",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "10:00-12:00"
+        }
+      ]
+    },
+    {
+      "clave": "8145",
+      "materia": "LAB ELECTRONICA DE POTENCIA",
+      "profesor": "ESTRIBERO GONZALEZ FRANCISCO",
+      "grupo": "8549",
+      "salon": "L31011",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "12:00-14:00"
+        }
+      ]
+    },
+    {
+      "clave": "8300",
+      "materia": "LABORARTORIO DE ELECTRONICA DIGITAL",
+      "profesor": "ARELLANO RIVERA ESTEBAN",
+      "grupo": "8550",
+      "salon": "L31021",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "10:00-12:00"
+        }
+      ]
+    },
+    {
+      "clave": "8300",
+      "materia": "LABORARTORIO DE ELECTRONICA DIGITAL",
+      "profesor": "SERAPIO CARMONA ALEJANDRO ANDRES",
+      "grupo": "8551",
+      "salon": "L32015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "14:00-16:00"
+        }
+      ]
+    },
+    {
+      "clave": "8300",
+      "materia": "LABORARTORIO DE ELECTRONICA DIGITAL",
+      "profesor": "HERNANDEZ CONTRERAS JUAN MANUEL",
+      "grupo": "8552",
+      "salon": "L31021",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8300",
+      "materia": "LABORARTORIO DE ELECTRONICA DIGITAL",
+      "profesor": "GONZALEZ LEDESMA ALBERTO",
+      "grupo": "8553",
+      "salon": "L31021",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8300",
+      "materia": "LABORARTORIO DE ELECTRONICA DIGITAL",
+      "profesor": "ROMERO BADILLO NORMA ANGELICA",
+      "grupo": "8554",
+      "salon": "L32015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "17:00-19:00"
+        }
+      ]
+    },
+    {
+      "clave": "8300",
+      "materia": "LABORARTORIO DE ELECTRONICA DIGITAL",
+      "profesor": "SERAPIO CARMONA ALEJANDRO ANDRES",
+      "grupo": "8555",
+      "salon": "L32015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "14:00-16:00"
+        }
+      ]
+    },
+    {
+      "clave": "8300",
+      "materia": "LABORARTORIO DE ELECTRONICA DIGITAL",
+      "profesor": "GONZALEZ LEDESMA ALBERTO",
+      "grupo": "8556",
+      "salon": "L31021",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8300",
+      "materia": "LABORARTORIO DE ELECTRONICA DIGITAL",
+      "profesor": "SERAPIO CARMONA ALEJANDRO ANDRES",
+      "grupo": "8557",
+      "salon": "L32015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "15:00-17:00"
+        }
+      ]
+    },
+    {
+      "clave": "8300",
+      "materia": "LABORARTORIO DE ELECTRONICA DIGITAL",
+      "profesor": "GONZALEZ LEDESMA ALBERTO",
+      "grupo": "8558",
+      "salon": "L31021",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8300",
+      "materia": "LABORARTORIO DE ELECTRONICA DIGITAL",
+      "profesor": "HERNANDEZ CONTRERAS JUAN MANUEL",
+      "grupo": "8559",
+      "salon": "L31021",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "13:00-15:00"
+        }
+      ]
+    },
+    {
+      "clave": "8300",
+      "materia": "LABORARTORIO DE ELECTRONICA DIGITAL",
+      "profesor": "ROMERO BADILLO NORMA ANGELICA",
+      "grupo": "8560",
+      "salon": "L32021",
+      "tipo": "P",
+      "cupo": 20,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8300",
+      "materia": "LABORARTORIO DE ELECTRONICA DIGITAL",
+      "profesor": "ARELLANO RIVERA ESTEBAN",
+      "grupo": "8561",
+      "salon": "L32015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "18:00-20:00"
+        }
+      ]
+    },
+    {
+      "clave": "8426",
+      "materia": "LAB ELECTRONICA INDUSTRIAL",
+      "profesor": "HERRERA HIDALGO ENRIQUE",
+      "grupo": "8562",
+      "salon": "L31013",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "07:00-09:00"
+        }
+      ]
+    },
+    {
+      "clave": "8708",
+      "materia": "LAB FILTRADO Y MODULACION",
+      "profesor": "VEGA SALOME RAUL",
+      "grupo": "8563",
+      "salon": "L32022",
+      "tipo": "P",
+      "cupo": 20,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8730",
+      "materia": "LAB INSTRUMENTACION DE PROCESOS INDUSTRIALES",
+      "profesor": "ROMERO BADILLO NORMA ANGELICA",
+      "grupo": "8564",
+      "salon": "L32010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "19:00-21:00"
+        }
+      ]
+    },
+    {
+      "clave": "8528",
+      "materia": "LAB MAQUINAS ELECTRICAS",
+      "profesor": "ESTRADA GARCIA JOSE LUIS",
+      "grupo": "8565",
+      "salon": "L30021",
+      "tipo": "P",
+      "cupo": 18,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "20:00-22:00"
+        }
+      ]
+    },
+    {
+      "clave": "8528",
+      "materia": "LAB MAQUINAS ELECTRICAS",
+      "profesor": "ESTRADA GARCIA JOSE LUIS",
+      "grupo": "8566",
+      "salon": "L30021",
+      "tipo": "P",
+      "cupo": 18,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "17:00-19:00"
+        }
+      ]
+    },
+    {
+      "clave": "8422",
+      "materia": "LAB MEDICION E INSTRUMENTACION",
+      "profesor": "PAREDES ROMERO ADRIAN",
+      "grupo": "8567",
+      "salon": "L31021",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "11:30-13:30"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "GARCIA CASTREJON ROBERTO AGUSTIN",
+      "grupo": "8568",
+      "salon": "L31015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "HERNANDEZ CONTRERAS JUAN MANUEL",
+      "grupo": "8569",
+      "salon": "L32015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "VILLAR PEREZ ILEBARDO JOEL",
+      "grupo": "8570",
+      "salon": "L32021",
+      "tipo": "P",
+      "cupo": 20,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "VILLAR PEREZ ILEBARDO JOEL",
+      "grupo": "8571",
+      "salon": "L32021",
+      "tipo": "P",
+      "cupo": 20,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "REYES ESCALERA OSCAR",
+      "grupo": "8572",
+      "salon": "L31015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "12:00-14:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "ESTRIBERO GONZALEZ FRANCISCO",
+      "grupo": "8573",
+      "salon": "L32021",
+      "tipo": "P",
+      "cupo": 20,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "14:00-16:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "ORTEGA NAVA CARLOS FERNANDO",
+      "grupo": "8574",
+      "salon": "L31015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "14:00-16:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "PEREZ GARCIA CHRISTIAN JAIR",
+      "grupo": "8575",
+      "salon": "L32021",
+      "tipo": "P",
+      "cupo": 20,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "ORTEGA NAVA CARLOS FERNANDO",
+      "grupo": "8576",
+      "salon": "L31015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "16:00-18:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "ORTEGA NAVA CARLOS FERNANDO",
+      "grupo": "8577",
+      "salon": "L31015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "18:00-20:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "GARCIA CASTREJON ROBERTO AGUSTIN",
+      "grupo": "8578",
+      "salon": "L31015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "GONZALEZ MAXINEZ DAVID JAIME",
+      "grupo": "8579",
+      "salon": "L32015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "ESTRIBERO GONZALEZ FRANCISCO",
+      "grupo": "8580",
+      "salon": "L31015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "12:00-14:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "RODRIGUEZ GARCIA ARTURO",
+      "grupo": "8581",
+      "salon": "L31015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "17:00-19:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "ONTIVEROS SALGADO MAURICIO",
+      "grupo": "8582",
+      "salon": "L31015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "19:00-21:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "HERNANDEZ HERNANDEZ HORACIO ALDO",
+      "grupo": "8583",
+      "salon": "L32015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "08:00-10:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "GONZALEZ MAXINEZ DAVID JAIME",
+      "grupo": "8584",
+      "salon": "L31015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "HERNANDEZ HERNANDEZ HORACIO ALDO",
+      "grupo": "8585",
+      "salon": "L32015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "10:00-12:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "ESTRIBERO GONZALEZ FRANCISCO",
+      "grupo": "8586",
+      "salon": "L31015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "HERNANDEZ HERNANDEZ HORACIO ALDO",
+      "grupo": "8587",
+      "salon": "L32021",
+      "tipo": "P",
+      "cupo": 20,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "12:00-14:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "REYES ESCALERA OSCAR",
+      "grupo": "8588",
+      "salon": "L32015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "12:00-14:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "PEREZ GARCIA CHRISTIAN JAIR",
+      "grupo": "8589",
+      "salon": "L32015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "16:00-18:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "HERNANDEZ HERNANDEZ HORACIO ALDO",
+      "grupo": "8590",
+      "salon": "L32021",
+      "tipo": "P",
+      "cupo": 20,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "14:00-16:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "ESTRIBERO GONZALEZ FRANCISCO",
+      "grupo": "8591",
+      "salon": "L31015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "14:00-16:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "HERNANDEZ HERNANDEZ HORACIO ALDO",
+      "grupo": "8592",
+      "salon": "L32021",
+      "tipo": "P",
+      "cupo": 20,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "16:00-18:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "VILLAR PEREZ ILEBARDO JOEL",
+      "grupo": "8593",
+      "salon": "L32015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "HERNANDEZ CONTRERAS JUAN MANUEL",
+      "grupo": "8594",
+      "salon": "L31015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "LOZANO MENDEZ EFREN",
+      "grupo": "8595",
+      "salon": "L32021",
+      "tipo": "P",
+      "cupo": 20,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "VILLAR PEREZ ILEBARDO JOEL",
+      "grupo": "8596",
+      "salon": "L32015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "LOZANO MENDEZ EFREN",
+      "grupo": "8597",
+      "salon": "L32021",
+      "tipo": "P",
+      "cupo": 20,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "13:00-15:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "VILLAR PEREZ ILEBARDO JOEL",
+      "grupo": "8598",
+      "salon": "L32015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "13:00-15:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "LOZANO MENDEZ EFREN",
+      "grupo": "8599",
+      "salon": "L32021",
+      "tipo": "P",
+      "cupo": 20,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "15:00-17:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "LOZANO MENDEZ EFREN",
+      "grupo": "8629",
+      "salon": "L32021",
+      "tipo": "P",
+      "cupo": 20,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "17:00-19:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "RODRIGUEZ GARCIA ARTURO",
+      "grupo": "8630",
+      "salon": "L31015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "17:00-19:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "REYES ESCALERA OSCAR",
+      "grupo": "8631",
+      "salon": "L32015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "10:00-12:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "ESTRIBERO GONZALEZ FRANCISCO",
+      "grupo": "8632",
+      "salon": "L31015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "10:00-12:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "MORENO ESPINOZA OSCAR GUADALUPE",
+      "grupo": "8633",
+      "salon": "L32021",
+      "tipo": "P",
+      "cupo": 20,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "REYES ESCALERA OSCAR",
+      "grupo": "8634",
+      "salon": "L32015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "12:00-14:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "MORENO ESPINOZA OSCAR GUADALUPE",
+      "grupo": "8635",
+      "salon": "L32021",
+      "tipo": "P",
+      "cupo": 20,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "13:00-15:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "VAZQUEZ MARTINEZ FERNANDO XAVIER",
+      "grupo": "8636",
+      "salon": "L31015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "14:00-16:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "ESTRIBERO GONZALEZ FRANCISCO",
+      "grupo": "8637",
+      "salon": "L32015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "14:00-16:00"
+        }
+      ]
+    },
+    {
+      "clave": "8800",
+      "materia": "LAB MICROPROCESADORES Y MICROCONTROLADOR",
+      "profesor": "VAZQUEZ MARTINEZ FERNANDO XAVIER",
+      "grupo": "8638",
+      "salon": "L31015",
+      "tipo": "P",
+      "cupo": 15,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "16:00-18:00"
+        }
+      ]
+    },
+    {
+      "clave": "8636",
+      "materia": "LAB PROTECCION DE SISTEMAS ELECTRICOS",
+      "profesor": "VERDE CRUZ ABEL",
+      "grupo": "8639",
+      "salon": "L30023",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "15:15-17:15"
+        }
+      ]
+    },
+    {
+      "clave": "8636",
+      "materia": "LAB PROTECCION DE SISTEMAS ELECTRICOS",
+      "profesor": "VERDE CRUZ ABEL",
+      "grupo": "8640",
+      "salon": "L30023",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "15:15-17:15"
+        }
+      ]
+    },
+    {
+      "clave": "8636",
+      "materia": "LAB PROTECCION DE SISTEMAS ELECTRICOS",
+      "profesor": "GONZALEZ MONDRAGON VICTOR MANUEL",
+      "grupo": "8641",
+      "salon": "L30023",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "19:00-21:00"
+        }
+      ]
+    },
+    {
+      "clave": "8802",
+      "materia": "LAB SISTEMAS DE CONTROL",
+      "profesor": "ZUÑIGA VILLEGAS BENITO",
+      "grupo": "8642",
+      "salon": "L32010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "09:30-11:30"
+        }
+      ]
+    },
+    {
+      "clave": "8802",
+      "materia": "LAB SISTEMAS DE CONTROL",
+      "profesor": "ZUÑIGA VILLEGAS BENITO",
+      "grupo": "8643",
+      "salon": "L32010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "09:30-11:30"
+        }
+      ]
+    },
+    {
+      "clave": "8802",
+      "materia": "LAB SISTEMAS DE CONTROL",
+      "profesor": "ZUÑIGA VILLEGAS BENITO",
+      "grupo": "8644",
+      "salon": "L32010",
+      "tipo": "P",
+      "cupo": 12,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "11:30-13:30"
+        }
+      ]
+    },
+    {
+      "clave": "8734",
+      "materia": "LAB SISTEMAS ELECTRICOS DE POTENCIA II",
+      "profesor": "OCON VALDEZ RODRIGO",
+      "grupo": "8645",
+      "salon": "L30023",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "16:30-18:30"
+        }
+      ]
+    },
+    {
+      "clave": "8734",
+      "materia": "LAB SISTEMAS ELECTRICOS DE POTENCIA II",
+      "profesor": "OCON VALDEZ RODRIGO",
+      "grupo": "8646",
+      "salon": "L30022",
+      "tipo": "P",
+      "cupo": 10,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "16:30-18:30"
+        }
+      ]
+    },
+    {
+      "clave": "8051",
+      "materia": "LAB SISTEMAS DE DISTRIBUCION",
+      "profesor": "OCON VALDEZ RODRIGO",
+      "grupo": "8647",
+      "salon": "L30023",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "18:30-20:30"
+        }
+      ]
+    },
+    {
+      "clave": "8524",
+      "materia": "LAB TRANSFORMADORES Y MOTORES DE INDUCCION",
+      "profesor": "GARCIA HERNANDEZ SERGIO",
+      "grupo": "8648",
+      "salon": "L30021",
+      "tipo": "P",
+      "cupo": 18,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "08:00-10:00"
+        }
+      ]
+    },
+    {
+      "clave": "8524",
+      "materia": "LAB TRANSFORMADORES Y MOTORES DE INDUCCION",
+      "profesor": "ESTRIBERO GONZALEZ FRANCISCO",
+      "grupo": "8649",
+      "salon": "L30021",
+      "tipo": "P",
+      "cupo": 18,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "10:00-12:00"
+        }
+      ]
+    },
+    {
+      "clave": "8524",
+      "materia": "LAB TRANSFORMADORES Y MOTORES DE INDUCCION",
+      "profesor": "ESTRIBERO GONZALEZ FRANCISCO",
+      "grupo": "8650",
+      "salon": "L30021",
+      "tipo": "P",
+      "cupo": 18,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "12:00-14:00"
+        }
+      ]
+    },
+    {
+      "clave": "8524",
+      "materia": "LAB TRANSFORMADORES Y MOTORES DE INDUCCION",
+      "profesor": "GARCIA HERNANDEZ SERGIO",
+      "grupo": "8651",
+      "salon": "L30021",
+      "tipo": "P",
+      "cupo": 18,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "15:00-17:00"
+        }
+      ]
+    },
+    {
+      "clave": "8524",
+      "materia": "LAB TRANSFORMADORES Y MOTORES DE INDUCCION",
+      "profesor": "ESTRADA GARCIA JOSE LUIS",
+      "grupo": "8652",
+      "salon": "L30021",
+      "tipo": "P",
+      "cupo": 18,
+      "sesiones": [
+        {
+          "dia": "LUN",
+          "hora": "17:00-19:00"
+        }
+      ]
+    },
+    {
+      "clave": "8524",
+      "materia": "LAB TRANSFORMADORES Y MOTORES DE INDUCCION",
+      "profesor": "GARCIA HERNANDEZ SERGIO",
+      "grupo": "8653",
+      "salon": "L30021",
+      "tipo": "P",
+      "cupo": 18,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "09:00-11:00"
+        }
+      ]
+    },
+    {
+      "clave": "8524",
+      "materia": "LAB TRANSFORMADORES Y MOTORES DE INDUCCION",
+      "profesor": "GARCIA HERNANDEZ SERGIO",
+      "grupo": "8654",
+      "salon": "L30021",
+      "tipo": "P",
+      "cupo": 18,
+      "sesiones": [
+        {
+          "dia": "MAR",
+          "hora": "15:00-17:00"
+        }
+      ]
+    },
+    {
+      "clave": "8524",
+      "materia": "LAB TRANSFORMADORES Y MOTORES DE INDUCCION",
+      "profesor": "AGUIRRE GUTIERREZ SALVADOR",
+      "grupo": "8655",
+      "salon": "L30023",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "16:00-18:00"
+        }
+      ]
+    },
+    {
+      "clave": "8524",
+      "materia": "LAB TRANSFORMADORES Y MOTORES DE INDUCCION",
+      "profesor": "CLEMENTE DE BLAS SINUE SAMUEL",
+      "grupo": "8656",
+      "salon": "L30021",
+      "tipo": "P",
+      "cupo": 18,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "14:00-16:00"
+        }
+      ]
+    },
+    {
+      "clave": "8524",
+      "materia": "LAB TRANSFORMADORES Y MOTORES DE INDUCCION",
+      "profesor": "ESTRADA GARCIA JOSE LUIS",
+      "grupo": "8657",
+      "salon": "L30021",
+      "tipo": "P",
+      "cupo": 18,
+      "sesiones": [
+        {
+          "dia": "MIE",
+          "hora": "17:00-19:00"
+        }
+      ]
+    },
+    {
+      "clave": "8524",
+      "materia": "LAB TRANSFORMADORES Y MOTORES DE INDUCCION",
+      "profesor": "CLEMENTE DE BLAS SINUE SAMUEL",
+      "grupo": "8658",
+      "salon": "L30021",
+      "tipo": "P",
+      "cupo": 18,
+      "sesiones": [
+        {
+          "dia": "JUE",
+          "hora": "14:00-16:00"
+        }
+      ]
+    },
+    {
+      "clave": "8524",
+      "materia": "LAB TRANSFORMADORES Y MOTORES DE INDUCCION",
+      "profesor": "LOREDO LOPEZ GERARDO",
+      "grupo": "8659",
+      "salon": "L30021",
+      "tipo": "P",
+      "cupo": 18,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "11:00-13:00"
+        }
+      ]
+    },
+    {
+      "clave": "8524",
+      "materia": "LAB TRANSFORMADORES Y MOTORES DE INDUCCION",
+      "profesor": "LOREDO LOPEZ GERARDO",
+      "grupo": "8660",
+      "salon": "L30023",
+      "tipo": "P",
+      "cupo": 25,
+      "sesiones": [
+        {
+          "dia": "VIE",
+          "hora": "13:00-15:00"
+        }
+      ]
+    }
+  ]
+}

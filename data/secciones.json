@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "actualizado": "2026-11-11",
+    "nota": "Información de las secciones 'Grupos Estudiantiles' y 'Servicios para Alumnos'. 'area' es el id del área en edificio.json (no cambiarlo). Los campos vacíos se muestran como 'Información pendiente'. Para agregar uno nuevo, copia un bloque y cambia sus datos."
+  },
+  "grupos": [
+    { "area": "Grupo IMED", "nombre": "LIMA", "descripcion": "", "responsable": "", "contacto": "", "horario": "", "redes": "" },
+    { "area": "L30022", "nombre": "IASE", "descripcion": "", "responsable": "", "contacto": "", "horario": "", "redes": "" },
+    { "area": "L30024", "nombre": "AMPERIO Aprendices", "descripcion": "", "responsable": "", "contacto": "", "horario": "", "redes": "" },
+    { "area": "ARX", "nombre": "ARX", "descripcion": "", "responsable": "", "contacto": "", "horario": "", "redes": "" },
+    { "area": "Club de mecatrónica", "nombre": "Club de Mecatrónica", "descripcion": "", "responsable": "", "contacto": "", "horario": "", "redes": "" },
+    { "area": "Grupo IDEA", "nombre": "Grupo IDEA", "descripcion": "", "responsable": "", "contacto": "", "horario": "", "redes": "" },
+    { "area": "L32012", "nombre": "Grupo REX", "descripcion": "", "responsable": "", "contacto": "", "horario": "", "redes": "" }
+  ],
+  "servicios": [
+    { "area": "Centro de Canje", "nombre": "Centro de Canje", "descripcion": "", "responsable": "", "contacto": "", "horario": "", "redes": "" },
+    { "area": "MAKER", "nombre": "MAKER", "descripcion": "", "responsable": "", "contacto": "", "horario": "", "redes": "" }
+  ]
+}
