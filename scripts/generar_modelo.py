@@ -122,6 +122,8 @@ AREA_PLANTA = {
 
 # Baños de los descansos de la escalera: piso con el que viajan, ubicación y descripción.
 NIVEL_FORZADO = {"Baño Hombres P1": 0, "Baño Mujeres P1": 0, "Baño Hombres P2": 1, "Baño Mujeres P2": 1}
+# Pisos extra en los que también se muestra la etiqueta (los baños P2 se ven desde el segundo piso).
+ETIQUETA_TAMBIEN_EN = {"Baño Hombres P2": [2], "Baño Mujeres P2": [2]}
 _DESCANSO_1 = "Descanso de la escalera, entre planta baja y primer piso"
 _DESCANSO_2 = "Descanso de la escalera, entre primer y segundo piso"
 UBICACION = {
@@ -548,6 +550,7 @@ def construir_area(nombre, caras, centro):
         "etiqueta": " · ".join(p for p in (codigo, visible if visible != codigo else None, alias_corto) if p),
         "tipo": categoria_plano or categoria,
         "nivel": NIVEL_FORZADO.get(nombre, nivel_por_altura(zmin)),
+        "nivelesEtiqueta": ETIQUETA_TAMBIEN_EN.get(nombre),
         "ubicacion": UBICACION.get(nombre),
         "descripcion": DESCRIPCION.get(nombre),
         "vertices": volumen.vertices,

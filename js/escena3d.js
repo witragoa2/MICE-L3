@@ -697,11 +697,16 @@ export class VisorEdificio {
     });
   }
 
+  /** ¿La etiqueta del área va en este piso? (los baños P2 también se ven desde el segundo piso) */
+  _etiquetaEnPiso(area, nivel) {
+    return area.nivel === nivel || (!this.separado && Boolean(area.nivelesEtiqueta?.includes(nivel)));
+  }
+
   /** Nombres visibles: los del piso activo; en "Edificio", si está abierto. */
   _mostrarEtiquetas(nivelId) {
     const edificioAbierto = nivelId === "todos" && (this.separado || !this.techoVisible);
     for (const area of Object.values(this.areas)) {
-      area.etiqueta.visible = edificioAbierto || (nivelId !== "todos" && area.nivel === Number(nivelId));
+      area.etiqueta.visible = edificioAbierto || (nivelId !== "todos" && this._etiquetaEnPiso(area, Number(nivelId)));
     }
   }
 
@@ -871,7 +876,9 @@ export class VisorEdificio {
     const lista = Array.isArray(areas) ? areas : [areas];
     if (etiquetasDelPiso) {
       const niveles = new Set(lista.map((a) => a.nivel));
-      for (const otra of Object.values(this.areas)) if (niveles.has(otra.nivel)) otra.etiqueta.visible = true;
+      for (const otra of Object.values(this.areas)) {
+        if ([...niveles].some((n) => this._etiquetaEnPiso(otra, n))) otra.etiqueta.visible = true;
+      }
     }
     for (const area of lista) {
       area.contorno.visible = true;
