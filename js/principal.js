@@ -1,25 +1,28 @@
 ﻿// ============================================================
-// MICE L3 · lógica de búsqueda, datos y visor 3D
+// MICE L3 · búsqueda, horarios, secciones y visor 3D
 // ============================================================
 
+const VERSION = "35";
 const $ = (id) => document.getElementById(id);
 
 const estado = {
   grupos: [],
   gruposOrdenados: [],
+  materias: [],
+  nombresProfesores: [],
   profesores: [],
   salones: {},
-  modelo: null,
+  areasPorId: {},
+  secciones: { grupos: [], servicios: [] },
   semestre: "",
   modo: "grupo",
+  seccion: "busqueda",
   indiceResaltado: -1,
+  horaElegida: null,
   visor: null,
   techoVisible: true,
   separado: false,
-  seccion: "busqueda", // busqueda | grupos | servicios
-  horaElegida: null, // minutos elegidos en la línea del tiempo (null = ahora)
-  secciones: { grupos: [], servicios: [] },
-  areasPorId: {},
+  ventanas: null,
 };
 
 const SECCIONES = {
@@ -28,7 +31,37 @@ const SECCIONES = {
   servicios: { titulo: "Servicios para alumnos", filtro: "Filtrar servicios, ej. MAKER", vacio: "servicios para alumnos" },
 };
 
+const PLACEHOLDER_MODO = {
+  grupo: "Número de grupo, ej. 8419",
+  maestro: "Nombre del profesor, ej. GARCIA",
+  materia: "Materia o clave, ej. DISEÑO LOGICO",
+};
+
+const NOMBRE_TIPO = {
+  salon: "Salón de clases",
+  apoyo: "Área de gestión de apoyo",
+  grupo: "Grupo estudiantil",
+  servicio: "Servicio para alumnos",
+  restringido: "Solo personal autorizado",
+  bano: "Sanitarios",
+};
+
+const NOMBRE_VISTA = {
+  entrada: "Vista desde la entrada · poniente",
+  n: "Vista norte",
+  s: "Vista sur",
+  e: "Vista este",
+  o: "Vista oeste",
+  ne: "Isométrica noreste",
+  no: "Isométrica noroeste",
+  se: "Isométrica sureste",
+  so: "Isométrica suroeste",
+};
+
+const TEXTO_INICIO = "Vista desde la entrada · elige un piso o haz clic en un salón";
 const AYUDA_MAPA = "Arrastra para girar · clic derecho, botón central o Shift+arrastrar para mover · rueda para acercar";
+const FOTO_GENERICA = "img/profesor_generico.png";
+const SIN_BUSQUEDA = "<p class='placeholder'>Aún no hay búsqueda.</p>";
 
 // ---------- utilidades ----------
 
@@ -41,11 +74,7 @@ function escapar(valor) {
     .replaceAll("'", "&#39;");
 }
 
-function normalizar(texto) {
-  return String(texto ?? "").trim().toUpperCase();
-}
-
-/** Para comparar sin importar acentos, mayúsculas ni espacios de más. */
+/** Texto sin acentos, en mayúsculas y sin signos (para comparar). */
 function plano(texto) {
   return String(texto ?? "")
     .normalize("NFD")
@@ -56,19 +85,19 @@ function plano(texto) {
     .trim();
 }
 
-/** Todas las palabras de la búsqueda aparecen en el texto (en cualquier orden). */
+/** Todas las palabras de la búsqueda aparecen en el texto, en cualquier orden. */
 function coincidePalabras(texto, busqueda) {
   const objetivo = plano(texto);
   const palabras = plano(busqueda).split(" ").filter(Boolean);
   return palabras.length > 0 && palabras.every((p) => objetivo.includes(p));
 }
 
-/** "08419", "84-19", " 8419 " -> "8419". */
+/** "08419", "84-19" -> "8419". */
 function limpiarGrupo(texto) {
   return String(texto ?? "").replace(/\D/g, "").replace(/^0+(?=\d{3})/, "");
 }
 
-/** Distancia de edición (para sugerir el nombre más parecido). */
+/** Distancia de edición entre dos palabras. */
 function distancia(a, b) {
   const fila = Array.from({ length: b.length + 1 }, (_, j) => j);
   for (let i = 1; i <= a.length; i++) {
@@ -83,15 +112,15 @@ function distancia(a, b) {
   return fila[b.length];
 }
 
-/** Las opciones más parecidas a la búsqueda (para "¿Quisiste decir…?"). */
+/** Opciones más parecidas a la búsqueda ("¿Quisiste decir…?"). */
 function masParecidos(busqueda, opciones, cuantos = 4) {
-  const q = plano(busqueda);
-  if (!q) return [];
+  const q = plano(busqueda).split(" ").filter(Boolean);
+  if (!q.length) return [];
   return opciones
     .map((op) => {
       const palabras = plano(op).split(" ");
-      const mejor = Math.min(...q.split(" ").map((w) => Math.min(...palabras.map((p) => distancia(w, p.slice(0, w.length + 1))))));
-      return { op, d: mejor };
+      const d = Math.min(...q.map((w) => Math.min(...palabras.map((p) => distancia(w, p.slice(0, w.length + 1))))));
+      return { op, d };
     })
     .filter((x) => x.d <= 2)
     .sort((a, b) => a.d - b.d)
@@ -99,12 +128,40 @@ function masParecidos(busqueda, opciones, cuantos = 4) {
     .map((x) => x.op);
 }
 
-// ---------- horario de hoy ----------
+async function cargarJSON(ruta) {
+  const respuesta = await fetch(ruta, { cache: "no-cache" });
+  if (!respuesta.ok) throw new Error(`${ruta}: HTTP ${respuesta.status}`);
+  return respuesta.json();
+}
+
+function nivelDeSalon(codigo) {
+  const m = /^L3(\d)/.exec(codigo || "");
+  return m ? Number(m[1]) : null;
+}
+
+/** "L30022" -> "L30022 · IASE" si el salón tiene un segundo nombre. */
+function nombreSalon(codigo) {
+  const area = estado.salones[codigo];
+  if (!area) return codigo || "";
+  const otro = area.alias || (area.nombre !== area.codigo ? area.nombre : null);
+  return otro ? `${codigo} · ${otro}` : codigo;
+}
+
+function nombreNivel(id) {
+  return ["Planta baja", "Primer piso", "Segundo piso"][id] ?? "Nivel";
+}
+
+function estadoMapa(texto) {
+  $("mapaEstado").textContent = texto;
+}
+
+// ---------- horarios ----------
 
 const DIAS = ["DOM", "LUN", "MAR", "MIE", "JUE", "VIE", "SAB"];
 const DIAS_LARGO = { DOM: "Domingo", LUN: "Lunes", MAR: "Martes", MIE: "Miércoles", JUE: "Jueves", VIE: "Viernes", SAB: "Sábado" };
-const INICIO_DIA = 7 * 60;   // 7:00
-const FIN_DIA = 24 * 60;     // 24:00
+const INICIO_DIA = 7 * 60;
+const FIN_DIA = 24 * 60;
+const sesionesPorDia = new Map();
 
 function aMinutos(hhmm) {
   const [h, m] = String(hhmm).split(":").map(Number);
@@ -120,16 +177,28 @@ function formatoHora(min) {
   return `${String(Math.floor(min / 60)).padStart(2, "0")}:${String(min % 60).padStart(2, "0")}`;
 }
 
-/** Sesiones de un día: [{grupo, inicio, fin}] */
+function horarioTexto(grupo) {
+  return (grupo.sesiones || []).map((s) => `${s.dia} ${s.hora}`).join(" · ");
+}
+
+/** Sesiones de un día [{grupo, inicio, fin}], calculadas una sola vez por día. */
 function sesionesDelDia(dia) {
-  const salida = [];
-  for (const g of estado.grupos) {
-    for (const s of g.sesiones || []) {
-      const r = s.dia === dia ? rango(s.hora) : null;
-      if (r) salida.push({ grupo: g, inicio: r[0], fin: r[1] });
+  if (!sesionesPorDia.has(dia)) {
+    const salida = [];
+    for (const g of estado.grupos) {
+      for (const s of g.sesiones || []) {
+        const r = s.dia === dia ? rango(s.hora) : null;
+        if (r) salida.push({ grupo: g, inicio: r[0], fin: r[1] });
+      }
     }
+    salida.sort((a, b) => a.inicio - b.inicio || a.grupo.salon.localeCompare(b.grupo.salon));
+    sesionesPorDia.set(dia, salida);
   }
-  return salida.sort((a, b) => a.inicio - b.inicio || a.grupo.salon.localeCompare(b.grupo.salon));
+  return sesionesPorDia.get(dia);
+}
+
+function enCursoA(sesiones, minutos) {
+  return sesiones.filter((s) => s.inicio <= minutos && minutos < s.fin);
 }
 
 function ahora() {
@@ -137,27 +206,9 @@ function ahora() {
   return { dia: DIAS[d.getDay()], minutos: d.getHours() * 60 + d.getMinutes() };
 }
 
-async function cargarJSON(ruta) {
-  const respuesta = await fetch(ruta, { cache: "no-store" });
-  if (!respuesta.ok) throw new Error(`${ruta}: HTTP ${respuesta.status}`);
-  return respuesta.json();
-}
-
-function nivelDeSalon(codigo) {
-  const coincidencia = /^L3(\d)/.exec(codigo || "");
-  return coincidencia ? Number(coincidencia[1]) : null;
-}
-
-/** "L30022" -> "L30022 · IASE" cuando el salón tiene un segundo nombre. */
-function nombreSalon(codigo) {
-  const area = estado.salones[codigo];
-  if (!area) return codigo || "";
-  const otro = area.alias || (area.nombre !== area.codigo ? area.nombre : null);
-  return otro ? `${codigo} · ${otro}` : codigo;
-}
-
-function nombreNivel(id) {
-  return ["Planta baja", "Primer piso", "Segundo piso"][id] ?? "Nivel";
+/** Hora consultada: la elegida en la línea del tiempo o la actual. */
+function minutosConsulta() {
+  return estado.horaElegida ?? ahora().minutos;
 }
 
 // ---------- arranque ----------
@@ -167,109 +218,92 @@ document.addEventListener("DOMContentLoaded", iniciar);
 async function iniciar() {
   conectarInterfaz();
 
-  try {
-    const [horarios, profesores] = await Promise.all([
-      cargarJSON("data/horarios.json"),
-      cargarJSON("data/profesores.json"),
-    ]);
+  // Datos y visor 3D se piden en paralelo.
+  const [horarios, profesores, secciones, modelo, fachada, modulo3D] = await Promise.allSettled([
+    cargarJSON("data/horarios.json"),
+    cargarJSON("data/profesores.json"),
+    cargarJSON("data/secciones.json"),
+    cargarJSON("data/edificio.json"),
+    cargarJSON("data/fachada.json"),
+    import(`./escena3d.js?v=${VERSION}`),
+  ]);
 
-    estado.grupos = Array.isArray(horarios.grupos) ? horarios.grupos : [];
-    estado.gruposOrdenados = [...estado.grupos].sort(
-      (a, b) => Number(a.grupo) - Number(b.grupo) || a.grupo.localeCompare(b.grupo)
-    );
-    estado.profesores = Array.isArray(profesores.profesores) ? profesores.profesores : [];
-    estado.materias = [...new Set(estado.grupos.map((g) => g.materia).filter(Boolean))].sort((a, b) =>
-      a.localeCompare(b, "es")
-    );
-    estado.nombresProfesores = [...new Set(estado.grupos.map((g) => g.profesor).filter(Boolean))].sort((a, b) =>
-      a.localeCompare(b, "es")
-    );
-    estado.semestre = horarios.meta?.semestre || "";
-    $("notaMapeo")?.setAttribute("hidden", "");
-
-    // Información de grupos estudiantiles y servicios (opcional).
-    try {
-      const secciones = await cargarJSON("data/secciones.json");
-      estado.secciones = { grupos: secciones.grupos || [], servicios: secciones.servicios || [] };
-    } catch (errorSecciones) {
-      console.warn("Sin data/secciones.json:", errorSecciones);
-    }
-
-    // El modelo 3D es opcional: si falta, la búsqueda sigue funcionando.
-    try {
-      estado.modelo = await cargarJSON("data/edificio.json");
-      estado.areasPorId = Object.fromEntries((estado.modelo.areas || []).map((a) => [a.id, a]));
-      const areas = (estado.modelo.areas || []).filter((area) => area.codigo);
-      estado.salones = Object.fromEntries(areas.map((area) => [area.codigo, area]));
-    } catch (errorModelo) {
-      console.warn("Modelo 3D no disponible:", errorModelo);
-      estado.modelo = null;
-      estado.salones = {};
-    }
-
-
-    console.log(
-      `MICE L3: ${estado.grupos.length} grupos, ${estado.profesores.length} profesores, ` +
-        `${estado.modelo?.niveles?.length || 0} niveles, ${estado.modelo?.areas?.length || 0} áreas, ` +
-        `${Object.keys(estado.salones).length} salones con código.`
-    );
-
-    iniciarLineaTiempo();
-    if (estado.modelo) await iniciarVisor();
-    else marcarModeloNoDisponible();
-    aplicarParametrosDeEnlace();
-  } catch (error) {
-    console.error(error);
-    mostrarErrorCarga(error);
+  if (horarios.status === "rejected") {
+    mostrarErrorCarga(horarios.reason);
+    return;
   }
+
+  estado.grupos = horarios.value.grupos || [];
+  estado.semestre = horarios.value.meta?.semestre || "";
+  estado.gruposOrdenados = [...estado.grupos].sort((a, b) => Number(a.grupo) - Number(b.grupo));
+  const ordenar = (lista) => [...new Set(lista.filter(Boolean))].sort((a, b) => a.localeCompare(b, "es"));
+  estado.materias = ordenar(estado.grupos.map((g) => g.materia));
+  estado.nombresProfesores = ordenar(estado.grupos.map((g) => g.profesor));
+  if (profesores.status === "fulfilled") estado.profesores = profesores.value.profesores || [];
+  if (secciones.status === "fulfilled") {
+    estado.secciones = { grupos: secciones.value.grupos || [], servicios: secciones.value.servicios || [] };
+  }
+
+  iniciarLineaTiempo();
+
+  if (modelo.status === "fulfilled") {
+    const areas = modelo.value.areas || [];
+    estado.areasPorId = Object.fromEntries(areas.map((a) => [a.id, a]));
+    estado.salones = Object.fromEntries(areas.filter((a) => a.codigo).map((a) => [a.codigo, a]));
+    if (modulo3D.status === "fulfilled") {
+      iniciarVisor(modulo3D.value.VisorEdificio, modelo.value, fachada.status === "fulfilled" ? fachada.value : null);
+    } else {
+      avisoVisor("No se pudo cargar el visor 3D. Revisa tu conexión (Three.js se carga desde internet).");
+    }
+  } else {
+    avisoVisor("Modelo 3D no disponible. Genera data/edificio.json con scripts/generar_modelo.py.");
+  }
+
+  aplicarParametrosDeEnlace();
 }
 
 function conectarInterfaz() {
   const input = $("searchInput");
-  const boton = $("searchBtn");
 
-  document.querySelectorAll(".modoBtn").forEach((btn) => {
-    btn.addEventListener("click", () => cambiarModo(btn.dataset.modo));
-  });
-
-  boton.addEventListener("click", buscar);
+  document.querySelectorAll(".modoBtn").forEach((btn) => btn.addEventListener("click", () => cambiarModo(btn.dataset.modo)));
+  $("searchBtn").addEventListener("click", buscar);
   input.addEventListener("input", alEscribir);
-  input.addEventListener("focus", alEnfocar);
-  input.addEventListener("click", alEnfocar);
+  input.addEventListener("focus", alEscribir);
+  input.addEventListener("click", alEscribir);
   input.addEventListener("keydown", alPresionarTecla);
 
-  document.addEventListener("click", (evento) => {
-    if (!evento.target.closest(".input-wrap")) ocultarAutocompletado();
+  $("autocompletado").addEventListener("click", (e) => {
+    const opcion = e.target.closest(".opcionAuto");
+    if (opcion) elegirOpcion(opcion.dataset.valor);
   });
 
-  $("result").addEventListener("click", (evento) => {
-    const sugerencia = evento.target.closest("[data-sugerencia]");
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".input-wrap")) ocultarAutocompletado();
+    if (!e.target.closest(".lt-hora-wrap")) ocultarOpcionesHora();
+  });
+
+  $("result").addEventListener("click", (e) => {
+    const sugerencia = e.target.closest("[data-sugerencia]");
+    const grupo = e.target.closest("[data-grupo]");
     if (sugerencia) {
       cambiarModo(sugerencia.dataset.sugerencia);
-      input.value = sugerencia.dataset.valor;
-      ocultarAutocompletado();
-      buscar();
-      return;
+      elegirOpcion(sugerencia.dataset.valor);
+    } else if (grupo) {
+      cambiarModo("grupo");
+      elegirOpcion(grupo.dataset.grupo);
     }
-    const enlace = evento.target.closest("[data-grupo]");
-    if (!enlace) return;
-    cambiarModo("grupo");
-    input.value = enlace.dataset.grupo;
-    buscar();
   });
 
-  $("ahoraBtn")?.addEventListener("click", mostrarClasesDeLaLinea);
+  $("ahoraBtn").addEventListener("click", mostrarClasesDeLaLinea);
   conectarLineaTiempo();
 
-  document.querySelectorAll(".seccionBtn").forEach((btn) => {
-    btn.addEventListener("click", () => cambiarSeccion(btn.dataset.seccion));
-  });
-  $("filtroSeccion")?.addEventListener("input", renderListaSeccion);
-  $("listaSeccion")?.addEventListener("click", (evento) => {
-    const tarjeta = evento.target.closest("[data-area]");
+  document.querySelectorAll(".seccionBtn").forEach((btn) => btn.addEventListener("click", () => cambiarSeccion(btn.dataset.seccion)));
+  $("filtroSeccion").addEventListener("input", renderListaSeccion);
+  $("listaSeccion").addEventListener("click", (e) => {
+    const tarjeta = e.target.closest("[data-area]");
     if (tarjeta) mostrarDetalleSeccion(tarjeta.dataset.area);
   });
-  $("limpiarBtn")?.addEventListener("click", limpiarBusqueda);
+  $("limpiarBtn").addEventListener("click", limpiarBusqueda);
 
   document.querySelectorAll(".nivelBtn[data-nivel]").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -279,47 +313,42 @@ function conectarInterfaz() {
         estado.visor.verEdificio();
         marcarNivelActivo("todos");
         marcarVistaActiva("entrada");
-        $("mapaEstado").textContent = "Vista desde la entrada · clic derecho para mover";
+        estadoMapa(TEXTO_INICIO);
       } else {
         estado.visor.enfocarNivel(nivel);
         marcarNivelActivo(nivel);
         marcarVistaActiva(null);
-        $("mapaEstado").textContent = estado.visor.modo2D
-          ? `Plano 2D · ${nombreNivel(Number(nivel))} · arrastra para mover`
-          : `${nombreNivel(Number(nivel))} · haz clic en un salón`;
+        estadoMapa(textoNivel(Number(nivel)));
       }
     });
   });
 
-  $("plano2dBtn")?.addEventListener("click", () => {
+  $("plano2dBtn").addEventListener("click", () => {
     if (!estado.visor) return;
     estado.visor.set2D(!estado.visor.modo2D);
     estado.separado = estado.visor.separado;
     actualizarBotonesVisor();
-    const nivel = estado.visor.nivelActivo;
-    marcarNivelActivo(String(nivel));
+    marcarNivelActivo(String(estado.visor.nivelActivo));
     marcarVistaActiva(null);
-    $("mapaEstado").textContent = estado.visor.modo2D
-      ? `Plano 2D · ${nombreNivel(Number(nivel))} · arrastra para mover · rueda para acercar`
-      : `${nombreNivel(Number(nivel))} · haz clic en un salón`;
+    estadoMapa(textoNivel(Number(estado.visor.nivelActivo)));
   });
 
-  $("separarBtn")?.addEventListener("click", () => {
+  $("separarBtn").addEventListener("click", () => {
     if (!estado.visor) return;
-    estado.visor.set2D(false); // separar pisos solo tiene sentido en 3D
+    estado.visor.set2D(false);
     estado.separado = !estado.separado;
     estado.visor.separar(estado.separado);
     actualizarBotonesVisor();
   });
 
-  $("ventanasBtn")?.addEventListener("click", () => {
+  $("ventanasBtn").addEventListener("click", () => {
     if (!estado.visor || estado.ventanas === null) return;
     estado.ventanas = !estado.ventanas;
     estado.visor.setVentanas(estado.ventanas);
     actualizarBotonesVisor();
   });
 
-  $("techoBtn")?.addEventListener("click", () => {
+  $("techoBtn").addEventListener("click", () => {
     if (!estado.visor) return;
     estado.techoVisible = !estado.techoVisible;
     estado.visor.setTecho(estado.techoVisible);
@@ -332,55 +361,46 @@ function conectarInterfaz() {
       estado.visor.vista(btn.dataset.vista);
       marcarVistaActiva(btn.dataset.vista);
       marcarNivelActivo("todos");
-      $("mapaEstado").textContent = etiquetaVista(btn.dataset.vista);
+      estadoMapa(`${NOMBRE_VISTA[btn.dataset.vista] || "Vista del edificio"} · clic derecho para mover`);
     });
   });
 }
 
-// ---------- enlaces directos ----------
+function textoNivel(nivel) {
+  return estado.visor?.modo2D
+    ? `Plano 2D · ${nombreNivel(nivel)} · arrastra para mover · rueda para acercar`
+    : `${nombreNivel(nivel)} · haz clic en un salón`;
+}
+
+// ---------- enlaces directos (?grupo=, ?maestro=, ?materia=, ?ahora, ?nivel=, ?vista=) ----------
 
 function aplicarParametrosDeEnlace() {
-  const parametros = new URLSearchParams(window.location.search);
-  const grupo = parametros.get("grupo");
-  const maestro = parametros.get("maestro");
-  const nivel = parametros.get("nivel");
-  const vista = parametros.get("vista");
-
-  if (grupo) {
-    cambiarModo("grupo");
-    $("searchInput").value = grupo;
-    buscar();
-  } else if (maestro) {
-    cambiarModo("maestro");
-    $("searchInput").value = maestro;
-    buscar();
-  } else if (parametros.get("materia")) {
-    cambiarModo("materia");
-    $("searchInput").value = parametros.get("materia");
-    buscar();
-  } else if (parametros.get("ahora") !== null) {
-    clasesAhora();
-  }
-
-  if (!grupo && !maestro && !parametros.get("materia") && parametros.get("ahora") === null && estado.visor) {
-    if (nivel !== null && nivel !== "") {
-      if (nivel === "todos") {
-        estado.visor.verEdificio();
-        marcarNivelActivo("todos");
-      } else {
-        estado.visor.enfocarNivel(nivel);
-        marcarNivelActivo(nivel);
-        $("mapaEstado").textContent = nombreNivel(Number(nivel));
-      }
-    } else if (vista) {
-      estado.visor.vista(vista);
-      marcarVistaActiva(vista);
-      $("mapaEstado").textContent = etiquetaVista(vista);
+  const p = new URLSearchParams(window.location.search);
+  for (const modo of ["grupo", "maestro", "materia"]) {
+    if (p.get(modo)) {
+      cambiarModo(modo);
+      $("searchInput").value = p.get(modo);
+      buscar();
+      return;
     }
+  }
+  if (p.has("ahora")) {
+    clasesAhora();
+    return;
+  }
+  if (!estado.visor) return;
+  const nivel = p.get("nivel");
+  if (nivel && nivel !== "todos") {
+    estado.visor.enfocarNivel(nivel);
+    marcarNivelActivo(nivel);
+    estadoMapa(textoNivel(Number(nivel)));
+  } else if (p.get("vista")) {
+    estado.visor.vista(p.get("vista"));
+    marcarVistaActiva(p.get("vista"));
   }
 }
 
-// ---------- modos ----------
+// ---------- modos de búsqueda ----------
 
 function cambiarModo(modo) {
   estado.modo = modo;
@@ -389,16 +409,11 @@ function cambiarModo(modo) {
     btn.classList.toggle("activo", activo);
     btn.setAttribute("aria-selected", String(activo));
   });
-
   const input = $("searchInput");
   input.value = "";
+  input.placeholder = PLACEHOLDER_MODO[modo];
   ocultarAutocompletado();
-  $("result").innerHTML = "<p class='placeholder'>Aún no hay búsqueda.</p>";
-  input.placeholder = {
-    grupo: "Número de grupo, ej. 8419",
-    maestro: "Nombre del profesor, ej. GARCIA",
-    materia: "Materia o clave, ej. DISEÑO LOGICO",
-  }[modo];
+  $("result").innerHTML = SIN_BUSQUEDA;
   actualizarFotoProfesor(null);
   input.focus();
 }
@@ -408,39 +423,19 @@ function cambiarModo(modo) {
 function alEscribir() {
   const texto = $("searchInput").value;
   estado.indiceResaltado = -1;
-
-  if (estado.modo === "grupo") {
-    mostrarGrupos(texto);
-    return;
-  }
-  if (estado.modo === "materia") {
-    mostrarMaterias(texto);
-    return;
-  }
-
-  mostrarProfesores(texto);
+  if (estado.modo === "grupo") mostrarGrupos(texto);
+  else if (estado.modo === "materia") mostrarMaterias(texto);
+  else mostrarProfesores(texto);
 }
 
-/** Sin texto: todos los profesores; con texto: los que coinciden. */
 function mostrarProfesores(texto) {
   const lista = plano(texto)
-    ? estado.nombresProfesores.filter((nombre) => coincidePalabras(nombre, texto))
+    ? estado.nombresProfesores.filter((n) => coincidePalabras(n, texto))
     : estado.nombresProfesores;
-  mostrarAutocompletado(lista, "maestros");
+  mostrarAutocompletado(lista.map((n) => ({ valor: n, texto: n })));
 }
 
-function alEnfocar() {
-  const texto = $("searchInput").value;
-  if (estado.modo === "grupo") {
-    mostrarGrupos(texto);
-  } else if (estado.modo === "materia") {
-    mostrarMaterias(texto); // al hacer clic se despliegan todas las materias
-  } else {
-    mostrarProfesores(texto); // al hacer clic se despliegan todos los profesores
-  }
-}
-
-/** Materias que coinciden con el texto (por nombre o por clave). */
+/** Materias que coinciden por nombre o por clave. */
 function filtrarMaterias(texto) {
   const q = plano(texto);
   if (!q) return estado.materias;
@@ -449,114 +444,74 @@ function filtrarMaterias(texto) {
 }
 
 function mostrarMaterias(texto) {
-  const items = filtrarMaterias(texto).map((materia) => ({ valor: materia, texto: materia }));
-  mostrarAutocompletado(items, "materias");
+  mostrarAutocompletado(filtrarMaterias(texto).map((m) => ({ valor: m, texto: m })));
 }
 
 function mostrarGrupos(texto) {
   const digitos = limpiarGrupo(texto);
   const grupos = estado.gruposOrdenados
-    .filter((grupo) => !digitos || grupo.grupo.startsWith(digitos))
-    .map((grupo) => ({
-      valor: grupo.grupo,
-      texto: grupo.grupo,
-      detalle: `${grupo.materia} · ${nombreSalon(grupo.salon)}`,
-    }));
-  mostrarAutocompletado(grupos, "grupos");
+    .filter((g) => !digitos || g.grupo.startsWith(digitos))
+    .map((g) => ({ valor: g.grupo, texto: g.grupo, detalle: `${g.materia} · ${nombreSalon(g.salon)}` }));
+  mostrarAutocompletado(grupos, true);
 }
 
-function mostrarAutocompletado(items, tipo = "maestros") {
+function mostrarAutocompletado(items, deGrupos = false) {
   const lista = $("autocompletado");
   if (!items.length) {
     ocultarAutocompletado();
     return;
   }
-
-  const normalizados = items.map((item) =>
-    typeof item === "string" ? { valor: item, texto: item } : item
-  );
-  const limite = normalizados.length; // la lista tiene scroll
-
-  lista.innerHTML = "";
-  lista.classList.toggle("grupos", tipo === "grupos");
-
-  normalizados.slice(0, limite).forEach((item) => {
+  const fragmento = document.createDocumentFragment();
+  for (const item of items) {
     const opcion = document.createElement("div");
     opcion.className = "opcionAuto";
     opcion.setAttribute("role", "option");
     opcion.dataset.valor = item.valor;
     opcion.textContent = item.texto;
-    if (item.extra) {
-      const extra = document.createElement("span");
-      extra.className = "opcion-extra";
-      extra.textContent = item.extra;
-      opcion.appendChild(extra);
-    }
     if (item.detalle) opcion.title = item.detalle;
-    opcion.addEventListener("click", () => {
-      $("searchInput").value = item.valor;
-      ocultarAutocompletado();
-      buscar();
-    });
-    lista.appendChild(opcion);
-  });
-
+    fragmento.appendChild(opcion);
+  }
+  lista.replaceChildren(fragmento);
+  lista.classList.toggle("grupos", deGrupos);
   lista.classList.add("visible");
 }
 
 function ocultarAutocompletado() {
   const lista = $("autocompletado");
-  lista.classList.remove("visible");
-  lista.classList.remove("grupos");
-  lista.innerHTML = "";
+  lista.classList.remove("visible", "grupos");
+  lista.replaceChildren();
 }
 
-function alPresionarTecla(evento) {
-  const lista = $("autocompletado");
-  const opciones = lista.querySelectorAll(".opcionAuto");
-  const visible = lista.classList.contains("visible");
+function elegirOpcion(valor) {
+  $("searchInput").value = valor;
+  ocultarAutocompletado();
+  buscar();
+}
 
-  if (evento.key === "Escape") {
+function alPresionarTecla(e) {
+  const opciones = $("autocompletado").querySelectorAll(".opcionAuto");
+  if (e.key === "Escape") {
     ocultarAutocompletado();
     $("searchInput").blur();
     return;
   }
-
-  if (visible && opciones.length) {
-    if (evento.key === "ArrowDown") {
-      evento.preventDefault();
-      estado.indiceResaltado = Math.min(estado.indiceResaltado + 1, opciones.length - 1);
-      resaltarOpcion(opciones);
-      return;
-    }
-    if (evento.key === "ArrowUp") {
-      evento.preventDefault();
-      estado.indiceResaltado = Math.max(estado.indiceResaltado - 1, 0);
-      resaltarOpcion(opciones);
-      return;
-    }
-    if (evento.key === "Enter" && estado.indiceResaltado >= 0) {
-      evento.preventDefault();
-      const opcion = opciones[estado.indiceResaltado];
-      $("searchInput").value = opcion.dataset.valor;
+  if (opciones.length && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+    e.preventDefault();
+    const paso = e.key === "ArrowDown" ? 1 : -1;
+    estado.indiceResaltado = Math.min(Math.max(estado.indiceResaltado + paso, 0), opciones.length - 1);
+    opciones.forEach((o, i) => o.classList.toggle("resaltada", i === estado.indiceResaltado));
+    opciones[estado.indiceResaltado].scrollIntoView({ block: "nearest" });
+    return;
+  }
+  if (e.key === "Enter") {
+    e.preventDefault();
+    const opcion = opciones[estado.indiceResaltado];
+    if (opcion) elegirOpcion(opcion.dataset.valor);
+    else {
       ocultarAutocompletado();
       buscar();
-      return;
     }
   }
-
-  if (evento.key === "Enter") {
-    ocultarAutocompletado();
-    buscar();
-  }
-}
-
-function resaltarOpcion(opciones) {
-  opciones.forEach((opcion, indice) => {
-    opcion.classList.toggle("resaltada", indice === estado.indiceResaltado);
-  });
-  const actual = opciones[estado.indiceResaltado];
-  if (actual) actual.scrollIntoView({ block: "nearest" });
 }
 
 // ---------- búsqueda ----------
@@ -568,7 +523,7 @@ function buscar() {
   else buscarPorMaestro();
 }
 
-/** Botones "¿Quisiste decir…?" (los atiende el clic del panel de resultados). */
+/** Botones "¿Quisiste decir…?". */
 function sugerencias(modo, opciones) {
   if (!opciones.length) return "";
   const botones = opciones
@@ -582,32 +537,27 @@ function sinResultados(mensaje, htmlSugerencias = "") {
   actualizarFotoProfesor(null);
   if (estado.visor) {
     estado.visor.limpiarResaltado();
-    $("mapaEstado").textContent = AYUDA_MAPA;
+    estadoMapa(AYUDA_MAPA);
   }
 }
 
 function buscarPorGrupo() {
-  const original = $("searchInput").value;
-  const texto = limpiarGrupo(original);
-
+  const texto = limpiarGrupo($("searchInput").value);
   if (!texto) {
     $("result").innerHTML = "<p class='placeholder'>Escribe un número de grupo.</p>";
     return;
   }
-
   const grupo = estado.grupos.find((g) => g.grupo === texto);
   if (!grupo) {
-    // Sugerencias: los que empiezan igual y, si no, los números más cercanos.
-    let parecidos = estado.gruposOrdenados.filter((g) => g.grupo.startsWith(texto)).map((g) => g.grupo);
+    let parecidos = estado.gruposOrdenados.filter((g) => g.grupo.startsWith(texto));
     if (!parecidos.length) {
-      parecidos = [...estado.gruposOrdenados]
-        .sort((a, b) => Math.abs(Number(a.grupo) - Number(texto)) - Math.abs(Number(b.grupo) - Number(texto)))
-        .map((g) => g.grupo);
+      parecidos = [...estado.gruposOrdenados].sort(
+        (a, b) => Math.abs(a.grupo - texto) - Math.abs(b.grupo - texto)
+      );
     }
-    sinResultados(`No se encontró el grupo ${escapar(texto)}.`, sugerencias("grupo", [...new Set(parecidos)].slice(0, 6)));
+    sinResultados(`No se encontró el grupo ${escapar(texto)}.`, sugerencias("grupo", parecidos.slice(0, 6).map((g) => g.grupo)));
     return;
   }
-
   $("searchInput").value = grupo.grupo;
   renderizarGrupo(grupo);
   actualizarFotoProfesor(grupo.profesor);
@@ -621,14 +571,14 @@ function buscarPorMateria() {
     $("result").innerHTML = "<p class='placeholder'>Elige una materia de la lista.</p>";
     return;
   }
-
   const exacta = estado.materias.find((m) => plano(m) === plano(texto));
   const candidatas = exacta ? [exacta] : filtrarMaterias(texto);
   if (candidatas.length !== 1) {
-    const opciones = candidatas.length ? candidatas : masParecidos(texto, estado.materias, 5);
     sinResultados(
-      candidatas.length ? `Hay ${candidatas.length} materias que coinciden con “${escapar(texto)}”.` : `No se encontró la materia “${escapar(texto)}”.`,
-      sugerencias("materia", opciones.slice(0, 8))
+      candidatas.length
+        ? `Hay ${candidatas.length} materias que coinciden con “${escapar(texto)}”.`
+        : `No se encontró la materia “${escapar(texto)}”.`,
+      sugerencias("materia", (candidatas.length ? candidatas : masParecidos(texto, estado.materias, 5)).slice(0, 8))
     );
     return;
   }
@@ -642,44 +592,65 @@ function buscarPorMateria() {
     porProfesor.get(g.profesor).push(g);
   }
   const salones = [...new Set(grupos.map((g) => g.salon))].sort();
-
   const bloques = [...porProfesor.entries()]
     .sort((a, b) => a[0].localeCompare(b[0], "es"))
     .map(([profesor, lista]) => `
       <section class="materia-profesor">
         <h3>${escapar(profesor)} <span>${lista.length} grupo${lista.length === 1 ? "" : "s"}</span></h3>
-        <div class="clase-lista">${lista.map(tarjetaClase).join("")}</div>
+        <div class="clase-lista">${lista.map((g) => tarjetaClase(g)).join("")}</div>
       </section>`)
     .join("");
 
   $("result").innerHTML = `
-    <div class="ficha-grupo">
-      <span class="ficha-materia ficha-materia-grande">${escapar(materia)}</span>
-    </div>
+    <div class="ficha-grupo"><span class="ficha-materia ficha-materia-grande">${escapar(materia)}</span></div>
     <p><strong>${grupos.length}</strong> grupo(s) · <strong>${porProfesor.size}</strong> profesor(es) · clave ${escapar(grupos[0]?.clave || "—")}</p>
     <p class="salones-chips">${salones.map((s) => `<span class="clase-salon">${escapar(nombreSalon(s))}</span>`).join(" ")}</p>
-    ${bloques}
-  `;
+    ${bloques}`;
 
   actualizarFotoProfesor(porProfesor.size === 1 ? grupos[0].profesor : null, porProfesor.size > 1);
   ubicarSalones(salones, `${materia} · ${salones.length} salón(es)`);
 }
 
-/** Tarjeta de una clase (se usa en maestro, materia y clases ahora). */
-function tarjetaClase(clase, extra = "") {
-  const horario = (clase.sesiones || []).map((s) => `${s.dia} ${s.hora}`).join(" · ");
+function buscarPorMaestro() {
+  const texto = $("searchInput").value;
+  if (!plano(texto)) {
+    $("result").innerHTML = "<p class='placeholder'>Escribe o elige un nombre de profesor.</p>";
+    return;
+  }
+  const clases = estado.gruposOrdenados.filter((g) => coincidePalabras(g.profesor, texto));
+  if (!clases.length) {
+    sinResultados(
+      `No se encontraron clases para “${escapar(texto)}”.`,
+      sugerencias("maestro", masParecidos(texto, estado.nombresProfesores, 5))
+    );
+    return;
+  }
+  $("result").innerHTML = `
+    <p><strong>${clases.length}</strong> clase(s) encontrada(s) para “${escapar(texto)}”.</p>
+    <div class="clase-lista">${clases.map((c) => tarjetaClase(c)).join("")}</div>`;
+
+  const nombres = [...new Set(clases.map((c) => c.profesor))];
+  actualizarFotoProfesor(nombres.length === 1 ? nombres[0] : null, nombres.length > 1);
+  if (nombres.length === 1) {
+    const salones = [...new Set(clases.map((c) => c.salon))];
+    ubicarSalones(salones, `${nombres[0]} · ${salones.length} salón(es)`);
+  }
+}
+
+/** Tarjeta de una clase. */
+function tarjetaClase(clase, extra = "", etiqueta = nombreSalon(clase.salon), meta = `${clase.profesor} · ${horarioTexto(clase) || "Horario pendiente"}`) {
   return `
     <article class="clase-card">
       <div class="clase-head">
         <button type="button" class="clase-grupo" data-grupo="${escapar(clase.grupo)}">${escapar(clase.grupo)}</button>
-        <span class="clase-salon">${escapar(nombreSalon(clase.salon))}</span>
+        <span class="clase-salon">${escapar(etiqueta)}</span>
       </div>
       <p class="clase-materia">${escapar(clase.materia)}</p>
-      <p class="clase-meta">${escapar(clase.profesor)} · ${escapar(horario || "Horario pendiente")}${extra}</p>
+      <p class="clase-meta">${escapar(meta)}${extra}</p>
     </article>`;
 }
 
-/** "En curso", "Hoy a las 19:00" o "Terminó" para una sesión de hoy. */
+/** "Hoy", "En curso" o "Terminó" para una sesión de hoy. */
 function estadoSesion(s) {
   const { dia, minutos } = ahora();
   const r = rango(s.hora);
@@ -693,14 +664,10 @@ function renderizarGrupo(grupo) {
   const sesiones = (grupo.sesiones || [])
     .map((s) => `<li>${escapar(DIAS_LARGO[s.dia] || s.dia)} · ${escapar(s.hora)} ${estadoSesion(s)}</li>`)
     .join("");
-
-  const profesor = escapar(grupo.profesor);
-  const mapeado = Boolean(estado.salones[grupo.salon]);
-  const aviso = mapeado
+  const aviso = estado.salones[grupo.salon]
     ? ""
     : `<p class="aviso">Este salón no aparece en el modelo 3D. Revisa que exista
        un sólido con su nombre en el DXF y vuelve a ejecutar generar_modelo.py.</p>`;
-
   $("result").innerHTML = `
     <div class="ficha-grupo">
       <span class="grupo-codigo">${escapar(grupo.grupo)}</span>
@@ -708,43 +675,12 @@ function renderizarGrupo(grupo) {
     </div>
     <dl class="ficha-grid">
       <dt>Clave</dt><dd>${escapar(grupo.clave)}</dd>
-      <dt>Profesor</dt><dd>${profesor}</dd>
+      <dt>Profesor</dt><dd>${escapar(grupo.profesor)}</dd>
       <dt>Salón</dt><dd>${escapar(nombreSalon(grupo.salon))}</dd>
       <dt>Tipo</dt><dd>${escapar(grupo.tipo || "—")}${grupo.cupo ? ` · Cupo ${escapar(grupo.cupo)}` : ""}</dd>
     </dl>
     <ul class="sesion-lista">${sesiones || "<li>Horario pendiente</li>"}</ul>
-    ${aviso}
-  `;
-}
-
-function buscarPorMaestro() {
-  const texto = $("searchInput").value;
-  if (!plano(texto)) {
-    $("result").innerHTML = "<p class='placeholder'>Escribe o elige un nombre de maestro.</p>";
-    return;
-  }
-
-  // Tolerante: sin acentos y con las palabras en cualquier orden ("juan villanueva").
-  const clases = estado.gruposOrdenados.filter((g) => coincidePalabras(g.profesor, texto));
-
-  if (!clases.length) {
-    sinResultados(
-      `No se encontraron clases para “${escapar(texto)}”.`,
-      sugerencias("maestro", masParecidos(texto, estado.nombresProfesores, 5))
-    );
-    return;
-  }
-
-  $("result").innerHTML = `
-    <p><strong>${clases.length}</strong> clase(s) encontrada(s) para “${escapar(texto)}”.</p>
-    <div class="clase-lista">${clases.map((c) => tarjetaClase(c)).join("")}</div>
-  `;
-
-  const nombres = [...new Set(clases.map((c) => c.profesor))];
-  actualizarFotoProfesor(nombres.length === 1 ? nombres[0] : null, nombres.length > 1);
-
-  const salones = [...new Set(clases.map((c) => c.salon))];
-  if (nombres.length === 1) ubicarSalones(salones, `${nombres[0]} · ${salones.length} salón(es)`);
+    ${aviso}`;
 }
 
 // ---------- secciones: Grupos Estudiantiles / Servicios para Alumnos ----------
@@ -771,49 +707,48 @@ function cambiarSeccion(seccion) {
   $("detalleSeccion").hidden = true;
   renderListaSeccion();
 
-  // Al entrar a la sección se iluminan todos sus lugares en el mapa.
   const ids = estado.secciones[seccion].map((item) => item.area).filter((id) => estado.areasPorId[id]);
   if (ids.length) ubicarSalones(ids, `${SECCIONES[seccion].titulo} · ${ids.length} lugar(es)`);
 }
 
 function datosLugar(item) {
   const area = estado.areasPorId[item.area];
-  const piso = area ? area.ubicacion || nombreNivel(area.nivel) : "Ubicación pendiente";
-  const salon = area?.codigo ? `Salón ${area.codigo}` : "";
-  return { area, piso, salon };
+  return {
+    area,
+    piso: area ? area.ubicacion || nombreNivel(area.nivel) : "Ubicación pendiente",
+    salon: area?.codigo ? `Salón ${area.codigo}` : "",
+  };
 }
 
 function renderListaSeccion() {
   const seccion = estado.seccion;
   if (seccion === "busqueda") return;
+  const todos = estado.secciones[seccion];
   const filtro = $("filtroSeccion").value;
-  const items = estado.secciones[seccion].filter(
-    (item) => !plano(filtro) || coincidePalabras(`${item.nombre} ${item.area} ${item.descripcion || ""}`, filtro)
-  );
+  const items = plano(filtro)
+    ? todos.filter((item) => coincidePalabras(`${item.nombre} ${item.area} ${item.descripcion || ""}`, filtro))
+    : todos;
 
-  if (!estado.secciones[seccion].length) {
+  if (!todos.length) {
     $("listaSeccion").innerHTML = `<p class="placeholder">Aún no hay ${SECCIONES[seccion].vacio} registrados.</p>`;
-    return;
-  }
-  if (!items.length) {
+  } else if (!items.length) {
     $("listaSeccion").innerHTML = `<p class="placeholder">Nada coincide con “${escapar(filtro)}”.</p>`;
-    return;
+  } else {
+    $("listaSeccion").innerHTML = items
+      .map((item) => {
+        const { piso, salon } = datosLugar(item);
+        return `
+          <button type="button" class="clase-card seccion-card" data-area="${escapar(item.area)}">
+            <span class="clase-head">
+              <span class="seccion-nombre">${escapar(item.nombre)}</span>
+              ${salon ? `<span class="clase-salon">${escapar(salon)}</span>` : ""}
+            </span>
+            <span class="clase-meta">${escapar(piso)}</span>
+            <span class="clase-meta">${escapar(item.descripcion || "Información pendiente")}</span>
+          </button>`;
+      })
+      .join("");
   }
-
-  $("listaSeccion").innerHTML = items
-    .map((item) => {
-      const { piso, salon } = datosLugar(item);
-      return `
-        <button type="button" class="clase-card seccion-card" data-area="${escapar(item.area)}">
-          <span class="clase-head">
-            <span class="seccion-nombre">${escapar(item.nombre)}</span>
-            ${salon ? `<span class="clase-salon">${escapar(salon)}</span>` : ""}
-          </span>
-          <span class="clase-meta">${escapar(piso)}</span>
-          <span class="clase-meta">${escapar(item.descripcion || "Información pendiente")}</span>
-        </button>`;
-    })
-    .join("");
 }
 
 function mostrarDetalleSeccion(id) {
@@ -829,39 +764,33 @@ function mostrarDetalleSeccion(id) {
 
   $("detalleSeccion").hidden = false;
   $("detalleSeccion").innerHTML = `
-    <div class="ficha-grupo">
-      <span class="ficha-materia ficha-materia-grande">${escapar(item.nombre)}</span>
-    </div>
+    <div class="ficha-grupo"><span class="ficha-materia ficha-materia-grande">${escapar(item.nombre)}</span></div>
     <p>${escapar([salon, piso].filter(Boolean).join(" · "))}</p>
     ${item.descripcion ? `<p>${escapar(item.descripcion)}</p>` : `<p class="placeholder">Información pendiente: se agregará próximamente.</p>`}
-    ${campos.length ? `<dl class="ficha-grid">${campos.map(([k, v]) => `<dt>${k}</dt><dd>${escapar(v)}</dd>`).join("")}</dl>` : ""}
-  `;
+    ${campos.length ? `<dl class="ficha-grid">${campos.map(([k, v]) => `<dt>${k}</dt><dd>${escapar(v)}</dd>`).join("")}</dl>` : ""}`;
   document.querySelectorAll(".seccion-card").forEach((c) => c.classList.toggle("activa", c.dataset.area === id));
   if (area && estado.visor) {
     estado.visor.enfocarSalon(area.id);
     marcarNivelActivo(String(area.nivel));
     marcarVistaActiva(null);
-    $("mapaEstado").textContent = `${item.nombre} · ${piso}`;
+    estadoMapa(`${item.nombre} · ${piso}`);
   }
 }
 
-/** Regresa el mapa a la vista inicial (sin resaltados ni pisos separados). */
+/** Mapa a la vista inicial, sin resaltados ni pisos separados. */
 function limpiarMapa() {
   if (!estado.visor) return;
-  estado.visor.limpiarResaltado();
   if (estado.separado) {
     estado.separado = false;
     estado.visor.separar(false);
   }
   estado.visor.verEdificio();
-  estado.visor.setTecho(estado.techoVisible);
   actualizarBotonesVisor();
   marcarNivelActivo("todos");
   marcarVistaActiva("entrada");
-  $("mapaEstado").textContent = "Vista desde la entrada · elige un piso o haz clic en un salón";
+  estadoMapa(TEXTO_INICIO);
 }
 
-/** Borra la búsqueda, los resaltados y regresa el mapa a la vista inicial. */
 function limpiarBusqueda() {
   if (estado.seccion !== "busqueda") {
     $("filtroSeccion").value = "";
@@ -871,49 +800,42 @@ function limpiarBusqueda() {
     $("filtroSeccion").focus();
     return;
   }
-  const input = $("searchInput");
-  input.value = "";
+  $("searchInput").value = "";
   ocultarAutocompletado();
-  $("result").innerHTML = "<p class='placeholder'>Aún no hay búsqueda.</p>";
+  $("result").innerHTML = SIN_BUSQUEDA;
   actualizarFotoProfesor(null);
   limpiarMapa();
-  // Quita ?grupo=… de la dirección para que al recargar no vuelva la búsqueda.
   if (window.location.search) history.replaceState(null, "", window.location.pathname);
-  input.focus();
+  $("searchInput").focus();
 }
 
-// ---------- clases en este momento ----------
+// ---------- clases a una hora ----------
 
 function clasesAhora() {
   if (!estado.grupos.length) return;
   ocultarAutocompletado();
   const { dia } = ahora();
-  const minutos = minutosConsulta(); // hora elegida en la línea del tiempo, o la actual
+  const minutos = minutosConsulta();
   const elegida = estado.horaElegida !== null;
   const hoy = sesionesDelDia(dia);
-  const enCurso = hoy.filter((s) => s.inicio <= minutos && minutos < s.fin);
-  const siguienteInicio = hoy.filter((s) => s.inicio > minutos).map((s) => s.inicio)[0];
+  const enCurso = enCursoA(hoy, minutos);
+  const siguienteInicio = hoy.find((s) => s.inicio > minutos)?.inicio;
   const siguientes = siguienteInicio === undefined ? [] : hoy.filter((s) => s.inicio === siguienteInicio);
+  const aEsaHora = elegida ? "a esa hora" : "en curso";
 
-  const tarjetas = (lista, conRestante) =>
+  const tarjetas = (lista, conFin) =>
     lista
-      .map((s) => {
-        const extra = conRestante
-          ? ` · <strong>termina ${formatoHora(s.fin)}</strong>`
-          : ` · <strong>empieza ${formatoHora(s.inicio)}</strong>`;
-        return tarjetaClase(s.grupo, extra);
-      })
+      .map((s) => tarjetaClase(s.grupo, ` · <strong>${conFin ? `termina ${formatoHora(s.fin)}` : `empieza ${formatoHora(s.inicio)}`}</strong>`))
       .join("");
 
   let html = `<div class="ficha-grupo"><span class="ficha-materia ficha-materia-grande">${
     elegida ? `Clases a las ${formatoHora(minutos)}` : "Clases en este momento"
   }</span></div>
     <p>${escapar(DIAS_LARGO[dia])} · ${formatoHora(minutos)}${elegida ? " (hora elegida)" : ""}</p>`;
-
   if (!hoy.length) {
     html += `<p class="placeholder">Hoy no hay clases registradas en el L3.</p>`;
   } else if (enCurso.length) {
-    html += `<p><strong>${enCurso.length}</strong> clase(s) ${elegida ? "a esa hora" : "en curso"}.</p><div class="clase-lista">${tarjetas(enCurso, true)}</div>`;
+    html += `<p><strong>${enCurso.length}</strong> clase(s) ${aEsaHora}.</p><div class="clase-lista">${tarjetas(enCurso, true)}</div>`;
   } else {
     html += `<p class="placeholder">No hay clases ${elegida ? "a esa hora" : "en este momento"}.</p>`;
   }
@@ -921,91 +843,82 @@ function clasesAhora() {
     html += `<p class="sugerencia-titulo">Siguientes, a las ${formatoHora(siguienteInicio)}</p>
       <div class="clase-lista">${tarjetas(siguientes, false)}</div>`;
   }
-
   $("result").innerHTML = html;
   actualizarFotoProfesor(null, enCurso.length > 1);
 
   const resaltar = (enCurso.length ? enCurso : siguientes).map((s) => s.grupo.salon);
   if (resaltar.length) {
-    ubicarSalones(resaltar, enCurso.length ? `${enCurso.length} clase(s) ${elegida ? `a las ${formatoHora(minutos)}` : "en curso"}` : `Siguientes clases · ${formatoHora(siguienteInicio)}`);
-  } else if (estado.visor) {
-    estado.visor.limpiarResaltado();
+    ubicarSalones(
+      resaltar,
+      enCurso.length
+        ? `${enCurso.length} clase(s) ${elegida ? `a las ${formatoHora(minutos)}` : "en curso"}`
+        : `Siguientes clases · ${formatoHora(siguienteInicio)}`
+    );
+  } else {
+    estado.visor?.limpiarResaltado();
   }
 }
 
 // ---------- línea del tiempo (encabezado) ----------
 
+function posicionEnLinea(minutos) {
+  return Math.min(Math.max((minutos - INICIO_DIA) / (FIN_DIA - INICIO_DIA), 0), 1) * 100;
+}
+
 function iniciarLineaTiempo() {
   const pista = $("ltPista");
-  if (!pista) return;
-  const total = FIN_DIA - INICIO_DIA;
+  const fragmento = document.createDocumentFragment();
 
-  // Marcas de hora (etiqueta cada 2 h).
+  // Marcas de hora (número cada 2 h).
   for (let h = 7; h <= 24; h++) {
     const marca = document.createElement("span");
-    marca.className = "lt-tick" + ((h - 7) % 2 === 0 ? " lt-tick-mayor" : "");
-    marca.style.left = `${(((h * 60) - INICIO_DIA) / total) * 100}%`;
-    if ((h - 7) % 2 === 0 || h === 24) marca.dataset.hora = h === 24 ? "24" : String(h);
-    pista.appendChild(marca);
+    const mayor = (h - 7) % 2 === 0;
+    marca.className = mayor ? "lt-tick lt-tick-mayor" : "lt-tick";
+    marca.style.left = `${posicionEnLinea(h * 60)}%`;
+    if (mayor || h === 24) marca.dataset.hora = String(h);
+    fragmento.appendChild(marca);
   }
 
-  // Densidad de clases de hoy (cada media hora), como barras tenues.
-  const { dia } = ahora();
-  const hoy = sesionesDelDia(dia);
-  const tramos = Math.ceil(total / 30);
-  const conteo = Array.from({ length: tramos }, (_, i) => {
-    const t = INICIO_DIA + i * 30 + 15;
-    return hoy.filter((s) => s.inicio <= t && t < s.fin).length;
-  });
+  // Barras de cuántas clases hay cada media hora.
+  const hoy = sesionesDelDia(ahora().dia);
+  const conteo = [];
+  for (let t = INICIO_DIA; t < FIN_DIA; t += 30) conteo.push(enCursoA(hoy, t + 15).length);
   const maximo = Math.max(1, ...conteo);
   conteo.forEach((n, i) => {
     if (!n) return;
+    const inicio = INICIO_DIA + i * 30;
     const barra = document.createElement("span");
     barra.className = "lt-barra";
-    barra.style.left = `${(i * 30 / total) * 100}%`;
-    barra.style.width = `${(30 / total) * 100}%`;
+    barra.style.left = `${posicionEnLinea(inicio)}%`;
+    barra.style.width = `${posicionEnLinea(inicio + 30) - posicionEnLinea(inicio)}%`;
     barra.style.height = `${20 + 80 * (n / maximo)}%`;
-    barra.title = `${formatoHora(INICIO_DIA + i * 30)} · ${n} clase(s)`;
-    pista.appendChild(barra);
+    barra.title = `${formatoHora(inicio)} · ${n} clase(s)`;
+    fragmento.appendChild(barra);
   });
+  pista.appendChild(fragmento);
 
   actualizarLineaTiempo();
   setInterval(actualizarLineaTiempo, 30000);
 }
 
-function posicionEnLinea(minutos) {
-  return Math.min(Math.max((minutos - INICIO_DIA) / (FIN_DIA - INICIO_DIA), 0), 1) * 100;
-}
-
-/** Hora que se consulta: la elegida en la línea del tiempo o, si no hay, la actual. */
-function minutosConsulta() {
-  return estado.horaElegida ?? ahora().minutos;
-}
-
 function actualizarLineaTiempo() {
   const { dia, minutos: actual } = ahora();
-  const elegida = estado.horaElegida !== null && estado.horaElegida !== undefined;
+  const elegida = estado.horaElegida !== null;
   const minutos = elegida ? estado.horaElegida : actual;
   const dentro = minutos >= INICIO_DIA && minutos <= FIN_DIA;
   $("ltMarca").style.left = `${posicionEnLinea(minutos)}%`;
+  $("ltMarca").classList.toggle("fuera", !dentro);
   $("ltPasado").style.width = `${posicionEnLinea(actual)}%`;
   $("ltAhora").style.left = `${posicionEnLinea(actual)}%`;
-  $("ltAhora").hidden = !elegida; // la línea blanca solo hace falta si se eligió otra hora
-  $("ltMarca").classList.toggle("fuera", !dentro);
-  const n = sesionesDelDia(dia).filter((s) => s.inicio <= minutos && minutos < s.fin).length;
+  $("ltAhora").hidden = !elegida;
   $("ltHora").textContent = `${DIAS_LARGO[dia]} · ${formatoHora(minutos)}${elegida ? " (hora elegida)" : ""}`;
-  // Sin hora elegida, el cuadro muestra la hora actual en gris oscuro como ejemplo.
-  const cuadro = $("ltHoraInput");
-  if (cuadro) cuadro.placeholder = formatoHora(actual);
-  $("ltEstado").textContent = dentro
-    ? `${n} clase(s) ${elegida ? "a esa hora" : "en curso"}`
-    : "Fuera del horario del L3";
+  $("ltHoraInput").placeholder = formatoHora(actual);
+  const n = enCursoA(sesionesDelDia(dia), minutos).length;
+  $("ltEstado").textContent = dentro ? `${n} clase(s) ${elegida ? "a esa hora" : "en curso"}` : "Fuera del horario del L3";
 }
 
-/** Elige una hora (minutos desde medianoche) para consultar las clases. */
-function elegirHora(minutos, { mostrar = false } = {}) {
-  const redondeada = Math.round(minutos / 5) * 5;
-  estado.horaElegida = Math.min(Math.max(redondeada, INICIO_DIA), FIN_DIA - 5);
+function elegirHora(minutos, mostrar = false) {
+  estado.horaElegida = Math.min(Math.max(Math.round(minutos / 5) * 5, INICIO_DIA), FIN_DIA - 5);
   $("ltHoraInput").value = formatoHora(estado.horaElegida);
   $("ahoraBtn").textContent = "Clases a esa hora";
   $("ltResetBtn").hidden = false;
@@ -1013,8 +926,7 @@ function elegirHora(minutos, { mostrar = false } = {}) {
   if (mostrar) mostrarClasesDeLaLinea();
 }
 
-/** Regresa a la hora actual. */
-function volverAhora({ mostrar = false } = {}) {
+function volverAhora(mostrar = false) {
   estado.horaElegida = null;
   $("ltHoraInput").value = "";
   $("ahoraBtn").textContent = "Clases en este momento";
@@ -1028,49 +940,46 @@ function mostrarClasesDeLaLinea() {
   clasesAhora();
 }
 
-/** Lista de horarios: las horas en que empiezan clases hoy, con cuántas hay. */
+/** Lista con las horas en que empiezan clases hoy (o en la semana, si hoy no hay). */
 function mostrarOpcionesHora() {
-  const lista = $("ltOpciones");
-  if (!lista) return;
   const { dia, minutos } = ahora();
   let sesiones = sesionesDelDia(dia);
   let nota = "Horarios de hoy";
   if (!sesiones.length) {
-    // Fin de semana: se muestran los horarios de toda la semana.
     sesiones = ["LUN", "MAR", "MIE", "JUE", "VIE", "SAB"].flatMap(sesionesDelDia);
     nota = "Hoy no hay clases · horarios de la semana";
   }
   const conteo = new Map();
   for (const s of sesiones) conteo.set(s.inicio, (conteo.get(s.inicio) || 0) + 1);
-  const inicios = [...conteo.keys()].sort((a, b) => a - b);
-  const elegida = estado.horaElegida;
-  lista.innerHTML = `
+  const opciones = [...conteo.keys()]
+    .sort((a, b) => a - b)
+    .map((m) => {
+      const n = conteo.get(m);
+      const clases = `lt-opcion${m === estado.horaElegida ? " activa" : ""}${m < minutos ? " pasada" : ""}`;
+      return `<button type="button" class="${clases}" data-minutos="${m}">
+        <span>${formatoHora(m)}</span><span class="lt-opcion-n">${n} clase${n === 1 ? "" : "s"}</span>
+      </button>`;
+    })
+    .join("");
+  $("ltOpciones").innerHTML = `
     <p class="lt-opciones-titulo">${nota}</p>
     <button type="button" class="lt-opcion lt-opcion-ahora" data-minutos="ahora">Ahora · ${formatoHora(minutos)}</button>
-    ${inicios
-      .map(
-        (m) => `<button type="button" class="lt-opcion${m === elegida ? " activa" : ""}${m < minutos ? " pasada" : ""}" data-minutos="${m}">
-          <span>${formatoHora(m)}</span><span class="lt-opcion-n">${conteo.get(m)} clase${conteo.get(m) === 1 ? "" : "s"}</span>
-        </button>`
-      )
-      .join("")}`;
-  lista.hidden = false;
+    ${opciones}`;
+  $("ltOpciones").hidden = false;
 }
 
 function ocultarOpcionesHora() {
-  const lista = $("ltOpciones");
-  if (lista) lista.hidden = true;
+  $("ltOpciones").hidden = true;
 }
 
-/** Arrastrar el marcador (o hacer clic en la línea) para elegir una hora. */
 function conectarLineaTiempo() {
   const pista = $("ltPista");
-  if (!pista) return;
-  const minutosEn = (evento) => {
+  const minutosEn = (e) => {
     const r = pista.getBoundingClientRect();
-    const t = Math.min(Math.max((evento.clientX - r.left) / r.width, 0), 1);
-    return INICIO_DIA + t * (FIN_DIA - INICIO_DIA);
+    return INICIO_DIA + Math.min(Math.max((e.clientX - r.left) / r.width, 0), 1) * (FIN_DIA - INICIO_DIA);
   };
+
+  // Arrastrar el marcador o hacer clic en la línea.
   let arrastrando = false;
   pista.addEventListener("pointerdown", (e) => {
     arrastrando = true;
@@ -1085,17 +994,17 @@ function conectarLineaTiempo() {
     if (!arrastrando) return;
     arrastrando = false;
     pista.classList.remove("arrastrando");
-    mostrarClasesDeLaLinea(); // al soltar se muestran las clases de esa hora
+    mostrarClasesDeLaLinea();
   };
   pista.addEventListener("pointerup", soltar);
   pista.addEventListener("pointercancel", soltar);
 
-  // Cuadro de hora: se escribe (HH:MM) o se elige de la lista de horarios.
+  // Cuadro de hora: se escribe HH:MM / HHMM o se elige de la lista.
   const cuadro = $("ltHoraInput");
   const aplicarCuadro = () => {
     const valor = cuadro.value.trim();
     if (!valor) {
-      if (estado.horaElegida !== null) volverAhora({ mostrar: true });
+      if (estado.horaElegida !== null) volverAhora(true);
       return;
     }
     const m = /^(\d{1,2})(?::?(\d{2}))?$/.exec(valor);
@@ -1105,13 +1014,13 @@ function conectarLineaTiempo() {
     }
     cuadro.classList.remove("error");
     ocultarOpcionesHora();
-    elegirHora(Number(m[1]) * 60 + Number(m[2] || 0), { mostrar: true });
+    elegirHora(Number(m[1]) * 60 + Number(m[2] || 0), true);
   };
-  cuadro?.addEventListener("focus", mostrarOpcionesHora);
-  cuadro?.addEventListener("click", mostrarOpcionesHora);
-  cuadro?.addEventListener("input", () => cuadro.classList.remove("error"));
-  cuadro?.addEventListener("change", aplicarCuadro);
-  cuadro?.addEventListener("keydown", (e) => {
+  cuadro.addEventListener("focus", mostrarOpcionesHora);
+  cuadro.addEventListener("click", mostrarOpcionesHora);
+  cuadro.addEventListener("input", () => cuadro.classList.remove("error"));
+  cuadro.addEventListener("change", aplicarCuadro);
+  cuadro.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
       aplicarCuadro();
@@ -1121,53 +1030,44 @@ function conectarLineaTiempo() {
       cuadro.blur();
     }
   });
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".lt-hora-wrap")) ocultarOpcionesHora();
-  });
-  $("ltOpciones")?.addEventListener("click", (e) => {
+  $("ltOpciones").addEventListener("click", (e) => {
     const opcion = e.target.closest("[data-minutos]");
     if (!opcion) return;
     ocultarOpcionesHora();
-    if (opcion.dataset.minutos === "ahora") volverAhora({ mostrar: true });
-    else elegirHora(Number(opcion.dataset.minutos), { mostrar: true });
+    if (opcion.dataset.minutos === "ahora") volverAhora(true);
+    else elegirHora(Number(opcion.dataset.minutos), true);
   });
-  $("ltResetBtn")?.addEventListener("click", () => volverAhora({ mostrar: true }));
+  $("ltResetBtn").addEventListener("click", () => volverAhora(true));
 }
 
-// ---------- panel de profesor ----------
-
-function buscarProfesor(nombre) {
-  return estado.profesores.find((p) => p.nombre === nombre) || null;
-}
+// ---------- panel del profesor ----------
 
 function actualizarFotoProfesor(nombre, varios = false) {
   const foto = $("fotoProfesor");
-  const texto = $("nombreProfesorFoto");
   const correo = $("correoProfesor");
-
   correo.classList.remove("visible");
-  correo.textContent = "";
+  correo.replaceChildren();
 
   if (!nombre) {
-    foto.src = "img/profesor_generico.png";
+    foto.src = FOTO_GENERICA;
     foto.alt = varios ? "Varios profesores" : "Foto del profesor";
-    texto.textContent = varios ? "Varios maestros" : "Selecciona un maestro";
+    $("nombreProfesorFoto").textContent = varios ? "Varios maestros" : "Selecciona un maestro";
     return;
   }
 
-  const profesor = buscarProfesor(nombre);
-  foto.src = profesor?.foto || "img/profesor_generico.png";
-  foto.alt = `Foto de ${nombre}`;
+  const profesor = estado.profesores.find((p) => p.nombre === nombre);
   foto.onerror = () => {
     foto.onerror = null;
-    foto.src = "img/profesor_generico.png";
+    foto.src = FOTO_GENERICA;
   };
-  texto.textContent = nombre;
+  foto.src = profesor?.foto || FOTO_GENERICA;
+  foto.alt = `Foto de ${nombre}`;
+  $("nombreProfesorFoto").textContent = nombre;
 
   if (profesor?.correo) {
-    // Si no cabe, que se corte solo después de la @ (no a la mitad del dominio).
+    // Corte de línea permitido solo después de la @.
     const [usuario, dominio] = profesor.correo.split("@");
-    correo.replaceChildren(dominio ? `${usuario}@` : usuario);
+    correo.append(dominio ? `${usuario}@` : usuario);
     if (dominio) correo.append(document.createElement("wbr"), dominio);
     correo.classList.add("visible");
   }
@@ -1175,71 +1075,47 @@ function actualizarFotoProfesor(nombre, varios = false) {
 
 // ---------- visor 3D ----------
 
-async function iniciarVisor() {
-  if (!estado.modelo) return;
-  try {
-    const { VisorEdificio } = await import("./escena3d.js?v=32");
-    estado.visor = new VisorEdificio($("visor3d"));
-    estado.visor.cargar(estado.modelo);
-    estado.visor.alSeleccionar = mostrarArea;
-    estado.visor.alCambiar2D = () => actualizarBotonesVisor();
-
-    // Capa opcional de ventanas: si falta data/fachada.json, solo hay muros.
-    try {
-      estado.visor.cargarFachada(await cargarJSON("data/fachada.json"));
-      estado.ventanas = true;
-      estado.visor.setVentanas(true);
-    } catch {
-      estado.ventanas = null;
-      estado.visor.setVentanas(false); // sin ventanas: los huecos quedan cerrados
-      $("ventanasBtn")?.setAttribute("hidden", "");
-    }
-    window.miceVisor = estado.visor; // para depurar desde la consola
-    estado.techoVisible = true;
-    estado.separado = false;
-    actualizarBotonesVisor();
-
-    const aviso = $("visorEstado");
-    if (aviso) aviso.remove();
-    marcarNivelActivo("todos");
-    marcarVistaActiva("entrada");
-    $("mapaEstado").textContent = "Vista desde la entrada · elige un piso o haz clic en un salón";
-  } catch (error) {
-    console.error("No se pudo iniciar el visor 3D:", error);
-    const aviso = $("visorEstado");
-    if (aviso) {
-      aviso.textContent =
-        "No se pudo cargar el modelo 3D. Revisa tu conexión (Three.js se carga desde CDN) y abre la página con un servidor local.";
-      aviso.classList.add("error");
-    }
+function iniciarVisor(VisorEdificio, modelo, fachada) {
+  estado.visor = new VisorEdificio($("visor3d"));
+  estado.visor.cargar(modelo);
+  estado.visor.alSeleccionar = mostrarArea;
+  estado.visor.alCambiar2D = actualizarBotonesVisor;
+  if (fachada) {
+    estado.visor.cargarFachada(fachada);
+    estado.ventanas = true;
+  } else {
+    $("ventanasBtn").hidden = true;
   }
+  estado.visor.setVentanas(Boolean(fachada));
+  if (new URLSearchParams(window.location.search).has("depurar")) window.miceVisor = estado.visor;
+
+  $("visorEstado")?.remove();
+  actualizarBotonesVisor();
+  marcarNivelActivo("todos");
+  marcarVistaActiva("entrada");
+  estadoMapa(TEXTO_INICIO);
 }
 
 function ubicarSalon(codigo) {
   if (!estado.visor || !codigo) return;
   const nivel = nivelDeSalon(codigo) ?? estado.areasPorId[codigo]?.nivel ?? null;
-
   if (estado.visor.enfocarSalon(codigo)) {
     marcarNivelActivo(String(nivel));
     marcarVistaActiva(null);
-    $("mapaEstado").textContent = `Salón ${codigo} · ${nombreNivel(nivel)}`;
-    return;
-  }
-
-  if (nivel !== null && Number.isFinite(nivel)) {
+    estadoMapa(`Salón ${codigo} · ${nombreNivel(nivel)}`);
+  } else if (nivel !== null) {
     estado.visor.enfocarNivel(nivel);
     marcarNivelActivo(String(nivel));
-    $("mapaEstado").textContent = `Salón ${codigo} no está en el modelo · ${nombreNivel(nivel)}`;
+    estadoMapa(`Salón ${codigo} no está en el modelo · ${nombreNivel(nivel)}`);
   } else {
     estado.visor.verEdificio();
     marcarNivelActivo("todos");
   }
 }
 
-/** Ilumina varios salones a la vez (materia, maestro, clases ahora). */
+/** Ilumina varios salones (códigos L30010 o ids de área como "Grupo IDEA"). */
 function ubicarSalones(codigos, mensaje) {
   if (!estado.visor) return;
-  // Acepta códigos de salón (L30010) o ids de área (Grupo IDEA, ARX…).
   const areaDe = (c) => estado.salones[c] || estado.areasPorId[c];
   const unicos = [...new Set(codigos)].filter(areaDe);
   if (unicos.length <= 1) {
@@ -1252,136 +1128,78 @@ function ubicarSalones(codigos, mensaje) {
   const niveles = [...new Set(unicos.map((c) => areaDe(c).nivel))];
   marcarNivelActivo(niveles.length === 1 ? String(niveles[0]) : "todos");
   marcarVistaActiva(null);
-  $("mapaEstado").textContent = niveles.length === 1
+  estadoMapa(niveles.length === 1
     ? `${mensaje} · ${nombreNivel(niveles[0])}`
-    : `${mensaje} · ${niveles.length} pisos (pisos separados)`;
+    : `${mensaje} · ${niveles.length} pisos (pisos separados)`);
 }
 
 function marcarNivelActivo(nivel) {
-  document.querySelectorAll(".nivelBtn[data-nivel]").forEach((btn) => {
-    btn.classList.toggle("activo", btn.dataset.nivel === String(nivel));
-  });
+  document.querySelectorAll(".nivelBtn[data-nivel]").forEach((btn) => btn.classList.toggle("activo", btn.dataset.nivel === String(nivel)));
 }
 
 function marcarVistaActiva(vista) {
-  document.querySelectorAll(".vistaBtn").forEach((btn) => {
-    btn.classList.toggle("activo", btn.dataset.vista === String(vista));
-  });
+  document.querySelectorAll(".vistaBtn").forEach((btn) => btn.classList.toggle("activo", btn.dataset.vista === String(vista)));
 }
 
 function actualizarBotonesVisor() {
-  const plano = $("plano2dBtn");
-  if (plano && estado.visor) {
-    plano.textContent = estado.visor.modo2D ? "Vista 3D" : "Plano 2D";
-    plano.classList.toggle("activo", estado.visor.modo2D);
-  }
-  const techo = $("techoBtn");
-  if (techo) {
-    techo.textContent = estado.techoVisible ? "Techo: sí" : "Techo: no";
-    techo.classList.toggle("activo", estado.techoVisible);
-  }
-  const ventanas = $("ventanasBtn");
-  if (ventanas && estado.ventanas !== null) {
-    ventanas.textContent = estado.ventanas ? "Ventanas: sí" : "Ventanas: no";
-    ventanas.classList.toggle("activo", Boolean(estado.ventanas));
-  }
-  const separar = $("separarBtn");
-  if (separar) {
-    separar.textContent = estado.separado ? "Juntar pisos" : "Separar pisos";
-    separar.classList.toggle("activo", estado.separado);
-  }
+  const alternar = (id, activo, texto) => {
+    const btn = $(id);
+    btn.textContent = texto;
+    btn.classList.toggle("activo", activo);
+  };
+  const modo2D = Boolean(estado.visor?.modo2D);
+  alternar("plano2dBtn", modo2D, modo2D ? "Vista 3D" : "Plano 2D");
+  alternar("techoBtn", estado.techoVisible, estado.techoVisible ? "Techo: sí" : "Techo: no");
+  alternar("separarBtn", estado.separado, estado.separado ? "Juntar pisos" : "Separar pisos");
+  if (estado.ventanas !== null) alternar("ventanasBtn", estado.ventanas, estado.ventanas ? "Ventanas: sí" : "Ventanas: no");
 }
 
-const NOMBRE_TIPO = {
-  salon: "Salón de clases",
-  apoyo: "Área de gestión de apoyo",
-  grupo: "Grupo estudiantil",
-  servicio: "Servicio para alumnos",
-  restringido: "Solo personal autorizado",
-  bano: "Sanitarios",
-};
-
-/** Se llama al hacer clic en un área del modelo 3D. */
+/** Ficha del área al hacer clic en el modelo 3D. */
 function mostrarArea(area) {
   marcarNivelActivo(String(area.nivel));
   marcarVistaActiva(null);
-  $("mapaEstado").textContent = area.tipo === "bano"
+  estadoMapa(area.tipo === "bano"
     ? `${area.nombre} · descanso de la escalera`
-    : `${area.codigo || area.nombre} · ${nombreNivel(area.nivel)}`;
+    : `${area.codigo || area.nombre} · ${nombreNivel(area.nivel)}`);
   actualizarFotoProfesor(null);
 
-  const titulo = escapar(
-    [area.codigo, area.nombre !== area.codigo ? area.nombre : null, area.alias]
-      .filter(Boolean)
-      .join(" · ")
-  );
-  const grupos = area.codigo
-    ? estado.gruposOrdenados.filter((g) => g.salon === area.codigo)
-    : [];
+  const titulo = [area.codigo, area.nombre !== area.codigo ? area.nombre : null, area.alias].filter(Boolean).join(" · ");
+  const subtitulo = area.descripcion || `${NOMBRE_TIPO[area.tipo] || ""} · ${area.ubicacion || nombreNivel(area.nivel)}`;
+  const grupos = area.codigo ? estado.gruposOrdenados.filter((g) => g.salon === area.codigo) : [];
+  const lista = grupos.map((g) => tarjetaClase(g, "", horarioTexto(g) || "Horario pendiente", g.profesor)).join("");
 
-  const lista = grupos
-    .map((g) => {
-      const horario = (g.sesiones || []).map((s) => `${s.dia} ${s.hora}`).join(" · ");
-      return `
-        <article class="clase-card">
-          <div class="clase-head">
-            <button type="button" class="clase-grupo" data-grupo="${escapar(g.grupo)}">${escapar(g.grupo)}</button>
-            <span class="clase-salon">${escapar(horario || "Horario pendiente")}</span>
-          </div>
-          <p class="clase-materia">${escapar(g.materia)}</p>
-          <p class="clase-meta">${escapar(g.profesor)}</p>
-        </article>`;
-    })
-    .join("");
-
-  $("result").innerHTML = `
-    <div class="ficha-grupo">
-      <span class="grupo-codigo">${titulo}</span>
-      <span class="ficha-materia">${escapar(area.descripcion || `${NOMBRE_TIPO[area.tipo] || ""} · ${area.ubicacion || nombreNivel(area.nivel)}`)}</span>
-    </div>
-    ${area.descripcion && area.ubicacion ? `<p class="placeholder">${escapar(area.ubicacion)}.</p>` : ""}
-    ${area.tipo === "bano" ? "" : grupos.length
+  let cuerpo = "";
+  if (area.tipo !== "bano") {
+    cuerpo = grupos.length
       ? `<p><strong>${grupos.length}</strong> grupo(s) en este salón${estado.semestre ? ` (semestre ${escapar(estado.semestre)})` : ""}.</p>
          <div class="clase-lista">${lista}</div>`
-      : `<p class="placeholder">No hay grupos registrados en esta área.</p>`}
-  `;
-}
-
-function etiquetaVista(vista) {
-  const nombre = {
-    entrada: "Vista desde la entrada · poniente",
-    n: "Vista norte",
-    s: "Vista sur",
-    e: "Vista este",
-    o: "Vista oeste",
-    ne: "Isométrica noreste",
-    no: "Isométrica noroeste",
-    se: "Isométrica sureste",
-    so: "Isométrica suroeste",
-  }[vista] || "Vista del edificio";
-  return `${nombre} · clic derecho para mover`;
+      : `<p class="placeholder">No hay grupos registrados en esta área.</p>`;
+  }
+  $("result").innerHTML = `
+    <div class="ficha-grupo">
+      <span class="grupo-codigo">${escapar(titulo)}</span>
+      <span class="ficha-materia">${escapar(subtitulo)}</span>
+    </div>
+    ${area.descripcion && area.ubicacion ? `<p class="placeholder">${escapar(area.ubicacion)}.</p>` : ""}
+    ${cuerpo}`;
 }
 
 // ---------- errores ----------
 
-function marcarModeloNoDisponible() {
+function avisoVisor(texto) {
   const aviso = $("visorEstado");
   if (!aviso) return;
-  aviso.textContent =
-    "Modelo 3D no disponible. Genera data/edificio.json con scripts/generar_modelo.py.";
+  aviso.textContent = texto;
   aviso.classList.add("error");
 }
 
-function mostrarErrorCarga(error) {  $("result").innerHTML = `
+function mostrarErrorCarga(error) {
+  console.error(error);
+  $("result").innerHTML = `
     <p class="aviso">
-      No se pudieron cargar los datos (${escapar(error.message)}).
+      No se pudieron cargar los datos (${escapar(error?.message)}).
       Abre el proyecto con un servidor local, por ejemplo
-      <code>python -m http.server 8000</code>, y visita
-      <code>http://localhost:8000</code>.
+      <code>python -m http.server 8000</code>, y visita <code>http://localhost:8000</code>.
     </p>`;
-  const aviso = $("visorEstado");
-  if (aviso) {
-    aviso.textContent = "Modelo 3D no disponible.";
-    aviso.classList.add("error");
-  }
+  avisoVisor("Modelo 3D no disponible.");
 }

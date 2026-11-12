@@ -1,9 +1,7 @@
 import * as THREE from "three";
 
-// Orientación: AutoCAD Y (norte) = -z en Three.js. θ = 0 mira desde el sur.
+// Ejes: x = este, y = arriba, z = sur (AutoCAD Y norte = -z). θ = 0 mira desde el sur.
 const VISTAS = {
-  // Vista inicial: fachada norte con la escalera de emergencia y, a la derecha,
-  // el cancel de vidrio de la entrada.
   entrada: { theta: -Math.PI * 0.78, phi: 1.14, radio: 52, objetivo: [-10, 3, 0] },
   n: { theta: Math.PI, phi: 1.2 },
   s: { theta: 0, phi: 1.2 },
@@ -16,7 +14,7 @@ const VISTAS = {
 };
 
 // Mismos colores que los planos 2D del L3.
-export const COLORES_AREA = {
+const COLORES_AREA = {
   salon: "#f3e2c7",
   apoyo: "#1f5f73",
   grupo: "#8cc063",
@@ -28,87 +26,102 @@ export const COLORES_AREA = {
 const COLORES_ESTRUCTURA = {
   muro: "#ece8e0",
   losa: "#c9ced5",
-  puerta: "#1c2c6b",
+  columna: "#ece8e0",
   tapa_ventana: "#ece8e0",
+  puerta: "#1c2c6b",
   puerta_emergencia: "#1f9d55",
   marco_puerta: "#b9c0c7",
-  columna: "#ece8e0",
   barandal: "#9aa4ae",
   escalera: "#b79bc8",
   techo: "#a3adb8",
   otro: "#cccccc",
 };
+const COLOR_ESCALERA_EMERGENCIA = "#d98b4a";
+const COLOR_VIDRIO = "#5d8aa8";
 
-const RADIO_NIVEL = 52; // distancia de la vista de un piso = máximo alejamiento en ese modo
-// Plano 2D: cámara cenital con lente estrecha (casi sin perspectiva, como un plano).
+const RADIO_NIVEL = 52; // distancia de la vista de un piso y máximo alejamiento en ella
 const FOV_3D = 40;
-const FOV_2D = 12;
+const FOV_2D = 12; // lente estrecha: el plano 2D casi no tiene perspectiva
 const ESCALA_2D = Math.tan(THREE.MathUtils.degToRad(FOV_3D / 2)) / Math.tan(THREE.MathUtils.degToRad(FOV_2D / 2));
-const SEPARACION = 6; // metros extra entre pisos al separarlos
+const SEPARACION = 6; // metros entre pisos al separarlos
+const SUAVIZADO = 0.09;
 const DORADO = 0xffc21a;
+const NEGRO = new THREE.Color(0x000000);
+const BRILLO_RESALTADO = new THREE.Color(0x7a5400);
 
 export class VisorEdificio {
   constructor(contenedor) {
     this.contenedor = contenedor;
-    this.alSeleccionar = null; // callback(area) al hacer clic en un salón
+    this.alSeleccionar = null;
+    this.alCambiar2D = null;
 
     this.escena = new THREE.Scene();
-    this.camara = new THREE.PerspectiveCamera(FOV_3D, 1, 0.1, 2000);
+    this.camara = new THREE.PerspectiveCamera(FOV_3D, 1, 0.3, 2000);
     this.modo2D = false;
     this.fovDeseado = FOV_3D;
-    this.alCambiar2D = null; // callback(activo) para actualizar botones
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.autoUpdate = false; // las sombras se recalculan solo si cambia la escena
     this.renderer.setClearColor(0x000000, 0);
     contenedor.appendChild(this.renderer.domElement);
 
     this.escena.add(new THREE.HemisphereLight(0xffffff, 0x9aa6b5, 1.9));
-    const sol = new THREE.DirectionalLight(0xffffff, 2.0);
-    sol.position.set(30, 60, 25);
-    sol.castShadow = true;
-    this.sol = sol; // en el plano 2D se apagan las sombras
-    sol.shadow.mapSize.set(2048, 2048);
-    Object.assign(sol.shadow.camera, { left: -45, right: 45, top: 45, bottom: -45, near: 1, far: 200 });
-    sol.shadow.bias = -0.0005;
-    this.escena.add(sol);
+    this.sol = new THREE.DirectionalLight(0xffffff, 2.0);
+    this.sol.position.set(30, 60, 25);
+    this.sol.castShadow = true;
+    this.sol.shadow.mapSize.set(2048, 2048);
+    Object.assign(this.sol.shadow.camera, { left: -45, right: 45, top: 45, bottom: -45, near: 1, far: 200 });
+    this.sol.shadow.bias = -0.0005;
+    this.escena.add(this.sol);
     const relleno = new THREE.DirectionalLight(0xffffff, 0.7);
     relleno.position.set(-40, 30, -30);
     this.escena.add(relleno);
 
     this._crearEntorno();
-
     this.raiz = new THREE.Group();
     this.escena.add(this.raiz);
 
-    this.niveles = []; // {id, nombre, piso, grupo, offset, offsetDeseado}
+    this.niveles = [];
     this.techo = null;
-    this.tapas = []; // muro que cierra los huecos de ventana cuando se apagan
-    this.etiquetasPiso = []; // nombres de salones pintados en el piso
+    this.tapas = [];
+    this.fachada = [];
+    this.etiquetas = [];
     this.etiquetasVolteadas = null;
     this.etiquetasFlotan = null;
-    this.areas = {}; // id -> datos del área
+    this.areas = {};
     this.porCodigo = {};
-    this.resaltados = []; // salones resaltados (uno o varios)
+    this.resaltados = [];
     this.separado = false;
     this.techoVisible = true;
     this.nivelActivo = "todos";
     this.raycaster = new THREE.Raycaster();
+    this._candidatos = null;
+    this._pendiente = true;
+    this._ultimoHover = 0;
 
     this.actual = { theta: VISTAS.entrada.theta, phi: VISTAS.entrada.phi, radio: 80, objetivo: new THREE.Vector3(0, 4, 0) };
     this.deseado = { theta: VISTAS.entrada.theta, phi: VISTAS.entrada.phi, radio: 80, objetivo: new THREE.Vector3(0, 4, 0) };
 
     this._unirEventos();
     this._ajustarTamano();
-    this.observador = new ResizeObserver(() => this._ajustarTamano());
-    this.observador.observe(contenedor);
+    new ResizeObserver(() => this._ajustarTamano()).observe(contenedor);
 
     this.reloj = new THREE.Clock();
     this._animar = this._animar.bind(this);
     requestAnimationFrame(this._animar);
+  }
+
+  /** Pide redibujar; con escena=true también recalcula sombras y objetos clicables. */
+  _marcar(escena = false) {
+    this._pendiente = true;
+    if (escena) {
+      this.renderer.shadowMap.needsUpdate = true;
+      this._candidatos = null;
+    }
   }
 
   /* ---------------- entorno: cielo, pasto y plaza ---------------- */
@@ -117,7 +130,7 @@ export class VisorEdificio {
     const HORIZONTE = 0xd6e9f7;
     this.escena.fog = new THREE.Fog(HORIZONTE, 170, 520);
 
-    // Cielo: domo con degradado azul (más intenso arriba, claro en el horizonte).
+    // Cielo: degradado azul más intenso arriba.
     const cielo = new THREE.Mesh(
       new THREE.SphereGeometry(900, 32, 16),
       new THREE.ShaderMaterial({
@@ -152,7 +165,6 @@ export class VisorEdificio {
     cielo.renderOrder = -10;
     this.escena.add(cielo);
 
-    // Pasto: textura generada (manchas de varios verdes), repetida.
     const pasto = new THREE.Mesh(
       new THREE.PlaneGeometry(1200, 1200),
       new THREE.MeshStandardMaterial({ map: this._texturaPasto(), roughness: 1, metalness: 0 })
@@ -162,10 +174,9 @@ export class VisorEdificio {
     pasto.receiveShadow = true;
     this.escena.add(pasto);
 
-    // Plaza de adoquín hexagonal de cemento: 2.5 m alrededor del L3 (bloque
-    // principal + bloque de baños + franja bajo la escalera de emergencia).
-    // Contorno en coordenadas AutoCAD (X, Y), centro del dibujo en (1325.27, 2458.79).
-    const CX = 1325.27, CY = 2458.79;
+    // Plaza de adoquín: 2.5 m alrededor del L3 (contorno en coordenadas AutoCAD).
+    const CX = 1325.27;
+    const CY = 2458.79;
     const contorno = [
       [1297.67, 2442.29], [1310.17, 2442.29], [1310.17, 2447.19], [1352.87, 2447.19],
       [1352.87, 2465.29], [1336.62, 2465.29], [1336.62, 2475.29], [1326.72, 2475.29],
@@ -181,17 +192,26 @@ export class VisorEdificio {
     this.escena.add(plaza);
   }
 
-  /** Adoquín hexagonal de cemento gris (textura repetible). */
+  _texturaRepetible(canvas, repetirX, repetirY) {
+    const t = new THREE.CanvasTexture(canvas);
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.repeat.set(repetirX, repetirY);
+    t.anisotropy = 8;
+    return t;
+  }
+
+  /** Adoquín hexagonal de cemento gris (piezas de ~25 cm). */
   _texturaHexagonal() {
-    const R = 30;                       // radio del hexágono en píxeles
-    const w = Math.sqrt(3) * R;         // ancho de un hexágono (punta arriba)
-    const W = Math.round(2 * w);        // la textura abarca 2 columnas…
-    const H = 6 * R;                    // …y 4 filas (se repite sin cortes)
+    const R = 30;
+    const w = Math.sqrt(3) * R;
+    const W = Math.round(2 * w);
+    const H = 6 * R;
     const c = document.createElement("canvas");
     c.width = W;
     c.height = H;
     const ctx = c.getContext("2d");
-    ctx.fillStyle = "#6f7276";          // junta
+    ctx.fillStyle = "#6f7276";
     ctx.fillRect(0, 0, W, H);
     for (let fila = -1; fila <= 4; fila++) {
       const y = fila * 1.5 * R;
@@ -203,20 +223,14 @@ export class VisorEdificio {
         ctx.beginPath();
         for (let k = 0; k < 6; k++) {
           const ang = Math.PI / 6 + (k * Math.PI) / 3;
-          const r = R - 2.2;             // deja la junta visible
-          ctx.lineTo(x + r * Math.cos(ang), y + r * Math.sin(ang));
+          ctx.lineTo(x + (R - 2.2) * Math.cos(ang), y + (R - 2.2) * Math.sin(ang));
         }
         ctx.closePath();
         ctx.fill();
       }
     }
-    const t = new THREE.CanvasTexture(c);
-    t.colorSpace = THREE.SRGBColorSpace;
-    t.wrapS = t.wrapT = THREE.RepeatWrapping;
-    const RADIO_M = 0.14;               // adoquín de ~25 cm de lado a lado
-    t.repeat.set(1 / ((W / R) * RADIO_M), 1 / ((H / R) * RADIO_M));
-    t.anisotropy = 8;
-    return t;
+    const RADIO_M = 0.14;
+    return this._texturaRepetible(c, 1 / ((W / R) * RADIO_M), 1 / ((H / R) * RADIO_M));
   }
 
   _texturaPasto() {
@@ -229,26 +243,16 @@ export class VisorEdificio {
     for (let i = 0; i < 2600; i++) {
       ctx.fillStyle = verdes[i % verdes.length];
       ctx.globalAlpha = 0.35 + Math.random() * 0.45;
-      const x = Math.random() * 256;
-      const y = Math.random() * 256;
-      ctx.fillRect(x, y, 1 + Math.random() * 2, 2 + Math.random() * 4);
+      ctx.fillRect(Math.random() * 256, Math.random() * 256, 1 + Math.random() * 2, 2 + Math.random() * 4);
     }
-    ctx.globalAlpha = 1;
-    const t = new THREE.CanvasTexture(c);
-    t.colorSpace = THREE.SRGBColorSpace;
-    t.wrapS = t.wrapT = THREE.RepeatWrapping;
-    t.repeat.set(180, 180);
-    t.anisotropy = 8;
-    return t;
+    return this._texturaRepetible(c, 180, 180);
   }
 
   /* ---------------- construcción ---------------- */
 
   cargar(modelo) {
-    this.modelo = modelo;
     for (const nivel of modelo.niveles) {
       const grupo = new THREE.Group();
-      grupo.userData.nivel = nivel.id;
       this.raiz.add(grupo);
       this.niveles.push({ ...nivel, grupo, offset: 0, offsetDeseado: 0 });
     }
@@ -257,29 +261,25 @@ export class VisorEdificio {
 
     for (const obj of modelo.estructura) this._agregarEstructura(obj);
     for (const area of modelo.areas) this._agregarArea(area);
-
-    // Letreros de salida de emergencia sobre cada puerta.
     for (const salida of modelo.salidas || []) {
-      const letrero = this._crearEtiqueta("SALIDA DE EMERGENCIA", "salida");
+      const letrero = this._crearLetrero("SALIDA DE EMERGENCIA");
       letrero.position.set(...salida.posicion);
-      letrero.material.depthTest = true; // no se ve a través de los muros
-      letrero.scale.multiplyScalar(0.8);
       this._contenedorDe(salida.nivel).add(letrero);
     }
 
     this.verEdificio(false);
+    this._marcar(true);
   }
 
-  /** Capa opcional de ventanas (data/fachada.json). No toca los muros. */
+  /** Capa de ventanas (data/fachada.json). */
   cargarFachada(fachada) {
+    const vidrio = { color: COLOR_VIDRIO, metalness: 0.4, roughness: 0.08, transparent: true, opacity: 0.45, depthWrite: false };
     const materiales = {
-      // Translúcido, como la puerta de la entrada: detrás hay hueco en el muro.
-      vidrio: { color: "#5d8aa8", metalness: 0.4, roughness: 0.08, transparent: true, opacity: 0.45, depthWrite: false },
-      vidrio_torre: { color: "#5d8aa8", metalness: 0.4, roughness: 0.08, transparent: true, opacity: 0.45, depthWrite: false },
+      vidrio,
+      vidrio_torre: vidrio,
       marco: { color: "#8b939c", metalness: 0.55, roughness: 0.35 },
       persiana: { color: "#c3c8cd", metalness: 0.3, roughness: 0.5 },
     };
-    this.fachada = [];
     for (const pieza of fachada.piezas || []) {
       if (!pieza.indices?.length) continue;
       const malla = new THREE.Mesh(
@@ -287,16 +287,18 @@ export class VisorEdificio {
         new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, ...(materiales[pieza.tipo] || materiales.marco) })
       );
       malla.userData.fachada = true;
-      malla.castShadow = pieza.tipo !== "vidrio" && pieza.tipo !== "vidrio_torre";
+      malla.castShadow = materiales[pieza.tipo] !== vidrio;
       this._contenedorDe(pieza.nivel).add(malla);
       this.fachada.push(malla);
     }
+    this._marcar(true);
   }
 
-  /** Ventanas sí: vidrio + hueco abierto. Ventanas no: muro cerrado (tapas). */
+  /** Ventanas sí: vidrio y hueco abierto. Ventanas no: muro cerrado (tapas). */
   setVentanas(visible) {
-    for (const malla of this.fachada || []) malla.visible = Boolean(visible);
+    for (const malla of this.fachada) malla.visible = visible;
     for (const tapa of this.tapas) tapa.visible = !visible;
+    this._marcar(true);
   }
 
   _geometria(vertices, indices) {
@@ -314,10 +316,9 @@ export class VisorEdificio {
 
   _agregarEstructura(obj) {
     const geometria = this._geometria(obj.vertices, obj.indices);
-    let color = COLORES_ESTRUCTURA[obj.tipo] || COLORES_ESTRUCTURA.otro;
-    if (obj.tipo === "escalera" && obj.capa === "Escaleras de emergencia") color = "#d98b4a";
+    const emergencia = obj.tipo === "escalera" && obj.capa === "Escaleras de emergencia";
     const material = new THREE.MeshStandardMaterial({
-      color,
+      color: emergencia ? COLOR_ESCALERA_EMERGENCIA : COLORES_ESTRUCTURA[obj.tipo] || COLORES_ESTRUCTURA.otro,
       roughness: 0.85,
       metalness: 0.02,
       side: THREE.DoubleSide,
@@ -326,50 +327,37 @@ export class VisorEdificio {
       polygonOffsetUnits: 1,
     });
     if (obj.tipo === "puerta_emergencia") {
-      material.emissive = new THREE.Color("#1f9d55");
+      material.emissive.set("#1f9d55");
       material.emissiveIntensity = 0.45;
+    } else if (obj.tipo === "puerta_vidrio") {
+      Object.assign(material, { metalness: 0.4, roughness: 0.08, transparent: true, opacity: 0.5, depthWrite: false });
+      material.color.set(COLOR_VIDRIO);
+    } else if (obj.tipo === "barandal") {
+      Object.assign(material, { metalness: 0.25, roughness: 0.4 });
     }
-    if (obj.tipo === "puerta_vidrio") {
-      // Puerta principal de cristal, como el cancel de la entrada.
-      material.color.set("#5d8aa8");
-      material.metalness = 0.4;
-      material.roughness = 0.08;
-      material.transparent = true;
-      material.opacity = 0.5;
-      material.depthWrite = false;
-    }
-    if (obj.tipo === "barandal") {
-      material.metalness = 0.25;
-      material.roughness = 0.4;
-    }
+
     const malla = new THREE.Mesh(geometria, material);
-    if (obj.tipo === "tapa_ventana") this.tapas.push(malla);
     malla.castShadow = obj.tipo !== "losa";
     malla.receiveShadow = true;
-    malla.userData = { tipo: obj.tipo, capa: obj.capa };
+    if (obj.tipo === "tapa_ventana") this.tapas.push(malla);
     const destino = this._contenedorDe(obj.nivel);
     destino.add(malla);
 
     if (["muro", "losa", "techo", "escalera", "columna"].includes(obj.tipo)) {
-      let geoAristas = new THREE.EdgesGeometry(geometria, 25);
-      if (obj.tipo === "columna") geoAristas = this._soloVerticales(geoAristas);
-      const aristas = new THREE.LineSegments(
-        geoAristas,
-        new THREE.LineBasicMaterial({ color: 0x5b6470, transparent: true, opacity: 0.45 })
-      );
-      aristas.userData.esArista = true;
-      destino.add(aristas);
+      let aristas = new THREE.EdgesGeometry(geometria, 25);
+      if (obj.tipo === "columna") aristas = this._soloVerticales(aristas);
+      destino.add(new THREE.LineSegments(aristas, new THREE.LineBasicMaterial({ color: 0x5b6470, transparent: true, opacity: 0.45 })));
     }
   }
 
-  /** Deja solo las aristas verticales: las columnas se ven continuas entre pisos. */
-  _soloVerticales(geoAristas) {
-    const p = geoAristas.getAttribute("position").array;
+  /** Solo aristas verticales: las columnas se ven continuas entre pisos. */
+  _soloVerticales(aristas) {
+    const p = aristas.getAttribute("position").array;
     const salida = [];
     for (let i = 0; i < p.length; i += 6) {
       if (Math.abs(p[i + 1] - p[i + 4]) > 0.05) salida.push(p[i], p[i + 1], p[i + 2], p[i + 3], p[i + 4], p[i + 5]);
     }
-    geoAristas.dispose();
+    aristas.dispose();
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.Float32BufferAttribute(salida, 3));
     return g;
@@ -379,7 +367,6 @@ export class VisorEdificio {
     const destino = this._contenedorDe(area.nivel);
     const color = COLORES_AREA[area.tipo] || COLORES_AREA.salon;
 
-    // Piso coloreado (como en el plano 2D).
     const piso = new THREE.Mesh(
       this._geometria(area.piso.vertices, area.piso.indices),
       new THREE.MeshStandardMaterial({ color, roughness: 0.9, side: THREE.DoubleSide })
@@ -387,13 +374,13 @@ export class VisorEdificio {
     piso.receiveShadow = true;
     destino.add(piso);
 
-    // Volumen invisible: sirve para hacer clic y para el resaltado.
+    // Volumen invisible: recibe el clic y se ilumina al resaltar.
     const geoVolumen = this._geometria(area.vertices, area.indices);
     const volumen = new THREE.Mesh(
       geoVolumen,
       new THREE.MeshStandardMaterial({
         color: DORADO,
-        emissive: new THREE.Color(DORADO),
+        emissive: DORADO,
         emissiveIntensity: 0.4,
         transparent: true,
         opacity: 0,
@@ -407,15 +394,14 @@ export class VisorEdificio {
 
     const contorno = new THREE.LineSegments(
       new THREE.EdgesGeometry(geoVolumen, 20),
-      new THREE.LineBasicMaterial({ color: DORADO, transparent: true, opacity: 1, depthTest: false })
+      new THREE.LineBasicMaterial({ color: DORADO, transparent: true, depthTest: false })
     );
     contorno.visible = false;
     contorno.renderOrder = 6;
     contorno.userData.esContorno = true;
     destino.add(contorno);
 
-    const texto = area.etiqueta || area.codigo || area.nombre;
-    const etiqueta = this._crearEtiquetaPiso(area, texto, area.codigo ? "salon" : area.tipo);
+    const etiqueta = this._crearEtiqueta(area, area.etiqueta || area.codigo || area.nombre, Boolean(area.codigo));
     etiqueta.visible = false;
     destino.add(etiqueta);
 
@@ -425,20 +411,18 @@ export class VisorEdificio {
   }
 
   /**
-   * Etiqueta pintada sobre el piso del salón, en una caja compacta que cabe
-   * dentro del propio salón. Como los salones no se enciman, sus etiquetas
-   * tampoco, en ninguna vista. El texto se reparte en varias líneas
-   * ("Baño / Mujeres / P1") eligiendo el acomodo que permite la letra más grande.
+   * Nombre del salón en una caja que cabe dentro del propio salón, con el texto
+   * repartido en las líneas que permiten la letra más grande. En 2D va sobre el
+   * piso; en 3D flota por encima del salón mirando a la cámara.
    */
-  _crearEtiquetaPiso(area, texto, tipo) {
-    const ancho = (area.bbox[3] - area.bbox[0]) * 0.86; // espacio libre del salón (m)
+  _crearEtiqueta(area, texto, esSalon) {
+    const ancho = (area.bbox[3] - area.bbox[0]) * 0.86;
     const fondo = (area.bbox[5] - area.bbox[2]) * 0.8;
-    const esSalon = tipo === "salon";
-    const LETRA = 64; // px de la letra en la textura
+    const LETRA = 64;
     const ALTO_LINEA = 74;
     const PAD_X = 22;
     const PAD_Y = 14;
-    const maxLetra = esSalon ? 0.75 : 0.55; // m: tamaño máximo de la letra
+    const maxLetra = esSalon ? 0.75 : 0.55;
 
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
@@ -446,20 +430,18 @@ export class VisorEdificio {
     ctx.font = fuente;
 
     const palabras = texto.replace(/ · /g, " ").split(/\s+/).filter(Boolean);
+    const total = palabras.join(" ").length;
     const repartir = (n) => {
-      // Reparte las palabras en n líneas de largo parecido.
-      const total = palabras.join(" ").length;
       const lineas = [];
       let actual = [];
-      for (let i = 0; i < palabras.length; i++) {
-        actual.push(palabras[i]);
-        const quedan = palabras.length - i - 1;
+      palabras.forEach((palabra, i) => {
+        actual.push(palabra);
         const faltan = n - lineas.length - 1;
-        if (faltan > 0 && (actual.join(" ").length >= total / n || quedan === faltan)) {
+        if (faltan > 0 && (actual.join(" ").length >= total / n || palabras.length - i - 1 === faltan)) {
           lineas.push(actual.join(" "));
           actual = [];
         }
-      }
+      });
       if (actual.length) lineas.push(actual.join(" "));
       return lineas;
     };
@@ -469,7 +451,7 @@ export class VisorEdificio {
       const lineas = repartir(n);
       const w = Math.max(...lineas.map((l) => ctx.measureText(l).width)) + PAD_X * 2;
       const h = lineas.length * ALTO_LINEA + PAD_Y * 2;
-      const escala = Math.min(maxLetra / LETRA, ancho / w, fondo / h); // m por px
+      const escala = Math.min(maxLetra / LETRA, ancho / w, fondo / h);
       if (!mejor || escala > mejor.escala * 1.05) mejor = { lineas, w, h, escala };
     }
 
@@ -486,9 +468,7 @@ export class VisorEdificio {
     ctx.fillStyle = esSalon ? "#ffffff" : "#002b5c";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    mejor.lineas.forEach((linea, i) => {
-      ctx.fillText(linea, canvas.width / 2, PAD_Y + ALTO_LINEA * (i + 0.5) + 2);
-    });
+    mejor.lineas.forEach((linea, i) => ctx.fillText(linea, canvas.width / 2, PAD_Y + ALTO_LINEA * (i + 0.5) + 2));
 
     const textura = new THREE.CanvasTexture(canvas);
     textura.colorSpace = THREE.SRGBColorSpace;
@@ -498,59 +478,49 @@ export class VisorEdificio {
       new THREE.MeshBasicMaterial({
         map: textura,
         transparent: true,
-        alphaTest: 0.2, // las esquinas transparentes no tapan nada
+        alphaTest: 0.2,
         polygonOffset: true,
         polygonOffsetFactor: -4,
         polygonOffsetUnits: -4,
       })
     );
-    // Acostada sobre el piso, leyéndose como en los planos (se voltea con la cámara).
-    // En 2D va acostada sobre el piso; en 3D flota dentro del salón mirando a
-    // la cámara (con el mismo tamaño, para que no se encime con las vecinas).
-    malla.rotation.set(-Math.PI / 2, 0, Math.PI);
-    malla.position.set(area.centro[0], area.bbox[1] + 0.06, area.centro[2]);
+    const [x, z] = area.posEtiqueta || [area.centro[0], area.centro[2]];
+    malla.position.set(x, area.bbox[1] + 0.06, z);
     malla.userData.yPiso = area.bbox[1] + 0.06;
-    malla.userData.yFlotante = area.bbox[4] + 0.6; // en 3D, por encima del techo del salón (como antes)
-    malla.renderOrder = 4;
-    malla.userData.areaId = area.id; // clic en la etiqueta = clic en el salón
-    malla.userData.esEtiqueta = true;
+    malla.userData.yFlotante = area.bbox[4] + 0.6;
+    malla.userData.areaId = area.id;
     malla.userData.base = malla.scale.clone();
-    this.etiquetasPiso.push(malla);
+    this.etiquetas.push(malla);
     return malla;
   }
 
-  _crearEtiqueta(texto, tipo) {
+  /** Letrero de "SALIDA DE EMERGENCIA" (sprite verde). */
+  _crearLetrero(texto) {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
-    const fuente = 44;
-    ctx.font = `bold ${fuente}px Segoe UI, Arial`;
-    const ancho = Math.min(900, Math.ceil(ctx.measureText(texto).width) + 48);
+    const fuente = "bold 44px Segoe UI, Arial";
+    ctx.font = fuente;
+    const ancho = Math.ceil(ctx.measureText(texto).width) + 48;
     canvas.width = ancho;
     canvas.height = 76;
-    const esSalon = tipo === "salon";
-    const esSalida = tipo === "salida";
-    ctx.fillStyle = esSalida ? "#1f9d55" : esSalon ? "rgba(0, 43, 92, 0.94)" : "rgba(255, 255, 255, 0.92)";
+    ctx.fillStyle = "#1f9d55";
     ctx.beginPath();
     ctx.roundRect(2, 2, ancho - 4, 72, 14);
     ctx.fill();
-    ctx.strokeStyle = esSalida ? "#ffffff" : esSalon ? "#d4a72c" : "#002b5c";
+    ctx.strokeStyle = "#ffffff";
     ctx.lineWidth = 4;
     ctx.stroke();
-    ctx.fillStyle = esSalon || esSalida ? "#ffffff" : "#002b5c";
-    ctx.font = `bold ${fuente}px Segoe UI, Arial`;
+    ctx.font = fuente;
+    ctx.fillStyle = "#ffffff";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(texto, ancho / 2, 40);
 
     const textura = new THREE.CanvasTexture(canvas);
     textura.colorSpace = THREE.SRGBColorSpace;
-    const sprite = new THREE.Sprite(
-      new THREE.SpriteMaterial({ map: textura, transparent: true, depthTest: false, depthWrite: false })
-    );
-    const alto = esSalon ? 1.3 : 0.9;
-    sprite.scale.set((alto * ancho) / 76, alto, 1);
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: textura, transparent: true, depthWrite: false }));
+    sprite.scale.set((0.72 * ancho) / 76, 0.72, 1);
     sprite.renderOrder = 10;
-    sprite.userData.base = sprite.scale.clone();
     return sprite;
   }
 
@@ -571,7 +541,12 @@ export class VisorEdificio {
 
     lienzo.addEventListener("pointermove", (e) => {
       if (!arrastre) {
-        lienzo.style.cursor = this._areaBajo(e) ? "pointer" : "grab";
+        // Cursor de mano sobre los salones (como máximo cada 50 ms).
+        const t = performance.now();
+        if (t - this._ultimoHover > 50) {
+          this._ultimoHover = t;
+          lienzo.style.cursor = this._areaBajo(e) ? "pointer" : "grab";
+        }
         return;
       }
       const dx = e.clientX - arrastre.x;
@@ -579,7 +554,6 @@ export class VisorEdificio {
       arrastre.x = e.clientX;
       arrastre.y = e.clientY;
       if (arrastre.pan || this.modo2D) {
-        // En el plano 2D arrastrar mueve el plano (no lo gira).
         this._panear(dx, dy);
       } else {
         this.deseado.theta -= dx * 0.006;
@@ -587,6 +561,7 @@ export class VisorEdificio {
         this.actual.theta = this.deseado.theta;
         this.actual.phi = this.deseado.phi;
       }
+      this._marcar();
     });
 
     lienzo.addEventListener("pointerup", (e) => {
@@ -594,7 +569,7 @@ export class VisorEdificio {
         const area = this._areaBajo(e);
         if (area) {
           this.enfocarSalon(area.id);
-          if (this.alSeleccionar) this.alSeleccionar(area);
+          this.alSeleccionar?.(area);
         }
       }
       arrastre = null;
@@ -610,31 +585,32 @@ export class VisorEdificio {
         const k = this.modo2D ? ESCALA_2D : 1;
         const maximo = (this.nivelActivo === "todos" ? 220 : RADIO_NIVEL) * k;
         this.deseado.radio = THREE.MathUtils.clamp(this.deseado.radio * Math.exp(e.deltaY * 0.001), 6 * k, maximo);
+        this._marcar();
       },
       { passive: false }
     );
     lienzo.addEventListener("dblclick", () => this.verEdificio());
   }
 
+  /** Objetos que pueden recibir el clic (se recalcula solo si cambia la escena). */
+  _objetosClicables() {
+    if (!this._candidatos) {
+      this._candidatos = [];
+      this.raiz.traverseVisible((o) => {
+        if (o.isMesh && !o.material.userData.fantasma && !o.userData.fachada) this._candidatos.push(o);
+      });
+    }
+    return this._candidatos;
+  }
+
   _areaBajo(evento) {
     const r = this.renderer.domElement.getBoundingClientRect();
-    const puntero = new THREE.Vector2(
-      ((evento.clientX - r.left) / r.width) * 2 - 1,
-      -((evento.clientY - r.top) / r.height) * 2 + 1
-    );
+    const puntero = new THREE.Vector2(((evento.clientX - r.left) / r.width) * 2 - 1, -((evento.clientY - r.top) / r.height) * 2 + 1);
     this.raycaster.setFromCamera(puntero, this.camara);
-    const candidatos = [];
-    this.raiz.traverseVisible((o) => {
-      if (!o.isMesh) return;
-      if (o.material.userData?.fantasma) return;
-      if (o.userData.fachada) return; // las ventanas no bloquean el clic
-      candidatos.push(o);
-    });
-    for (const hit of this.raycaster.intersectObjects(candidatos, false)) {
+    for (const hit of this.raycaster.intersectObjects(this._objetosClicables(), false)) {
       const id = hit.object.userData.areaId;
       if (id) return this.areas[id];
-      // Un muro, losa o techo tapa lo que hay detrás.
-      if (hit.object.material.opacity > 0.5) return null;
+      if (hit.object.material.opacity > 0.5) return null; // muro, losa o techo de por medio
     }
     return null;
   }
@@ -644,8 +620,7 @@ export class VisorEdificio {
     const factor = (2 * this.deseado.radio * Math.tan(THREE.MathUtils.degToRad(this.camara.fov / 2))) / alto;
     const derecha = new THREE.Vector3().setFromMatrixColumn(this.camara.matrixWorld, 0);
     const arriba = new THREE.Vector3().setFromMatrixColumn(this.camara.matrixWorld, 1);
-    this.deseado.objetivo.addScaledVector(derecha, -dx * factor);
-    this.deseado.objetivo.addScaledVector(arriba, dy * factor);
+    this.deseado.objetivo.addScaledVector(derecha, -dx * factor).addScaledVector(arriba, dy * factor);
     this.deseado.objetivo.clamp(new THREE.Vector3(-60, -2, -40), new THREE.Vector3(60, 30, 40));
     this.actual.objetivo.copy(this.deseado.objetivo);
   }
@@ -661,6 +636,7 @@ export class VisorEdificio {
     for (const n of this.niveles) n.offsetDeseado = this.separado ? n.id * SEPARACION : 0;
   }
 
+  /** Vuelve transparente (o normal) un piso completo. */
   _fantasma(grupo, activo) {
     grupo.traverse((o) => {
       if (!o.material || o.isSprite) return;
@@ -668,27 +644,25 @@ export class VisorEdificio {
       if (m.userData.opacidadBase === undefined) {
         m.userData.opacidadBase = m.opacity;
         m.userData.transparenteBase = m.transparent;
+        o.userData.sombraBase = o.castShadow;
       }
       m.userData.fantasma = activo;
-      if (o.userData.areaId || o.userData.esContorno) return; // siguen invisibles
-      if (o.userData.sombraBase === undefined) o.userData.sombraBase = o.castShadow;
+      if (o.userData.areaId || o.userData.esContorno) return;
       o.castShadow = activo ? false : o.userData.sombraBase;
-      m.transparent = activo ? true : m.userData.transparenteBase;
+      m.transparent = activo || m.userData.transparenteBase;
       m.opacity = activo ? 0.1 : m.userData.opacidadBase;
       m.depthWrite = !activo;
     });
   }
 
+  /** Nombres visibles: los del piso activo; en "Edificio", si está abierto. */
   _mostrarEtiquetas(nivelId) {
-    // En "Edificio" se ven si los pisos están separados o no hay techo
-    // (antes se ocultaban siempre y por eso no aparecían los nombres).
     const edificioAbierto = nivelId === "todos" && (this.separado || !this.techoVisible);
     for (const area of Object.values(this.areas)) {
       area.etiqueta.visible = edificioAbierto || (nivelId !== "todos" && area.nivel === Number(nivelId));
     }
   }
 
-  /** Muestra los pisos según el nivel activo (y si están separados). */
   _actualizarVisibilidad() {
     const activo = this.nivelActivo;
     for (const n of this.niveles) {
@@ -703,23 +677,24 @@ export class VisorEdificio {
         this._fantasma(n.grupo, false);
       }
     }
-    this.techo.visible = activo === "todos" && this.techoVisible;
+    this.techo.visible = activo === "todos" && this.techoVisible && !this.modo2D;
     this._mostrarEtiquetas(activo);
+    this._marcar(true);
   }
 
   setTecho(visible) {
-    this.techoVisible = Boolean(visible);
+    this.techoVisible = visible;
     this._actualizarVisibilidad();
   }
 
-  /** Separa (o junta) los pisos verticalmente, como un despiece. */
+  /** Separa o junta los pisos verticalmente. */
   separar(activo) {
-    this.separado = Boolean(activo);
+    this.separado = activo;
     this._aplicarOffsets();
     this._actualizarVisibilidad();
     if (this.nivelActivo === "todos") {
-      this.deseado.objetivo.y = this.separado ? 9 : 4;
-      this.deseado.radio = this.separado ? 95 : 80;
+      this.deseado.objetivo.y = activo ? 9 : 4;
+      this.deseado.radio = activo ? 95 : 80;
     } else {
       this.deseado.objetivo.y = this._alturaPiso(this.nivelActivo) + 1.5;
     }
@@ -727,22 +702,17 @@ export class VisorEdificio {
 
   /* ---------------- cámara y resaltado ---------------- */
 
-  /** Ángulo equivalente (±2π) más cercano al actual: así siempre gira por el lado corto. */
+  /** Ángulo equivalente más cercano al actual: siempre gira por el lado corto. */
   _anguloCercano(theta) {
     const vuelta = Math.PI * 2;
-    const actual = this.deseado.theta;
-    return theta + Math.round((actual - theta) / vuelta) * vuelta;
+    return theta + Math.round((this.deseado.theta - theta) / vuelta) * vuelta;
   }
 
-  /* ---------------- plano 2D ---------------- */
-
-  /** Activa o desactiva el plano 2D (vista cenital de un piso, como los planos). */
+  /** Plano 2D: vista cenital de un piso, orientada como los planos. */
   set2D(activo) {
-    activo = Boolean(activo);
     if (activo === this.modo2D) return;
     this.modo2D = activo;
     this.fovDeseado = activo ? FOV_2D : FOV_3D;
-    // Sin sombras en el plano: cada muro proyectaba una franja que parecía otro muro.
     this.sol.castShadow = !activo;
     if (activo) {
       if (this.separado) {
@@ -750,7 +720,7 @@ export class VisorEdificio {
         this._aplicarOffsets();
       }
       if (this.nivelActivo === "todos") {
-        this.enfocarNivel(0, { conservarResaltado: true });
+        this.enfocarNivel(0, true);
       } else {
         this.deseado.radio = Math.min(this.deseado.radio, RADIO_NIVEL);
         this._actualizarVisibilidad();
@@ -761,29 +731,29 @@ export class VisorEdificio {
       this.deseado.phi = 0.72;
       this._actualizarVisibilidad();
     }
-    if (this.alCambiar2D) this.alCambiar2D(activo);
+    this.alCambiar2D?.(activo);
   }
 
-  /** Coloca la cámara arriba, orientada como los planos (Jefatura a la derecha). */
+  /** Cámara arriba del piso, con Jefatura a la derecha. */
   _ajustar2D() {
     if (!this.modo2D) return;
     this.deseado.phi = 0.0015;
     this.deseado.theta = this._anguloCercano(Math.PI);
     this.deseado.radio *= ESCALA_2D;
-    this.techo.visible = false;
   }
 
   vista(nombre) {
     const v = VISTAS[nombre] || VISTAS.entrada;
-    this.set2D(false); // las vistas N, S, E… son en 3D
+    this.set2D(false);
     this.limpiarResaltado();
     this.nivelActivo = "todos";
     this._actualizarVisibilidad();
-    this.deseado.objetivo.set(0, this.separado ? 9 : 4, 0);
-    this.deseado.radio = this.separado ? 95 : ["n", "s", "e", "o"].includes(nombre) ? 85 : 80;
     if (v.objetivo && !this.separado) {
       this.deseado.objetivo.set(...v.objetivo);
       this.deseado.radio = v.radio;
+    } else {
+      this.deseado.objetivo.set(0, this.separado ? 9 : 4, 0);
+      this.deseado.radio = this.separado ? 95 : ["n", "s", "e", "o"].includes(nombre) ? 85 : 80;
     }
     this.deseado.theta = this._anguloCercano(v.theta);
     this.deseado.phi = v.phi;
@@ -797,7 +767,7 @@ export class VisorEdificio {
     }
   }
 
-  enfocarNivel(id, { conservarResaltado = false } = {}) {
+  enfocarNivel(id, conservarResaltado = false) {
     if (!this.niveles.some((n) => n.id === Number(id))) return;
     if (!conservarResaltado) this.limpiarResaltado();
     this.nivelActivo = Number(id);
@@ -811,7 +781,7 @@ export class VisorEdificio {
   enfocarSalon(codigoOId) {
     const area = this.porCodigo[codigoOId] || this.areas[codigoOId];
     if (!area) return false;
-    this.enfocarNivel(area.nivel, { conservarResaltado: true });
+    this.enfocarNivel(area.nivel, true);
     this.resaltar(area);
     const nivel = this.niveles.find((n) => n.id === area.nivel);
     this.deseado.objetivo.set(area.centro[0], area.centro[1] + nivel.offsetDeseado + 1.2, area.centro[2]);
@@ -822,20 +792,17 @@ export class VisorEdificio {
   }
 
   /**
-   * Resalta varios salones a la vez (búsqueda por materia, clases ahora).
-   * Si todos están en un piso, enfoca ese piso; si están en varios, separa
-   * los pisos para que se vean todos. Devuelve cuántos encontró.
+   * Resalta varios salones. Si están en un piso, enfoca ese piso; si están en
+   * varios, separa los pisos (en 2D usa el piso con más salones).
    */
   enfocarSalones(codigos) {
     const areas = [...new Set(codigos)].map((c) => this.porCodigo[c] || this.areas[c]).filter(Boolean);
-    if (!areas.length) return 0;
-    if (areas.length === 1) {
-      this.enfocarSalon(areas[0].id);
-      return 1;
+    if (areas.length <= 1) {
+      if (areas.length) this.enfocarSalon(areas[0].id);
+      return areas.length;
     }
     let niveles = [...new Set(areas.map((a) => a.nivel))];
     if (this.modo2D && niveles.length > 1) {
-      // En el plano solo se ve un piso: el que tiene más salones resaltados.
       const conteo = (n) => areas.filter((a) => a.nivel === n).length;
       niveles = [niveles.sort((a, b) => conteo(b) - conteo(a))[0]];
     }
@@ -847,49 +814,48 @@ export class VisorEdificio {
       this._aplicarOffsets();
       this.nivelActivo = "todos";
       this._actualizarVisibilidad();
-      this.techo.visible = false; // para ver también el segundo piso
-      const v = VISTAS.entrada;
-      this.deseado.theta = this._anguloCercano(v.theta);
+      this.techo.visible = false;
+      this.deseado.theta = this._anguloCercano(VISTAS.entrada.theta);
       this.deseado.phi = 1.0;
       this.deseado.radio = 82;
       this.deseado.objetivo.set(-4, 9, 0);
     }
-    this.resaltar(areas, { etiquetasDelPiso: niveles.length === 1 });
+    this.resaltar(areas, niveles.length === 1);
     return areas.length;
   }
 
-  resaltar(areas, { etiquetasDelPiso = true } = {}) {
+  resaltar(areas, etiquetasDelPiso = true) {
     this.limpiarResaltado();
     const lista = Array.isArray(areas) ? areas : [areas];
     if (etiquetasDelPiso) {
       const niveles = new Set(lista.map((a) => a.nivel));
-      for (const otra of Object.values(this.areas)) {
-        if (niveles.has(otra.nivel)) otra.etiqueta.visible = true;
-      }
+      for (const otra of Object.values(this.areas)) if (niveles.has(otra.nivel)) otra.etiqueta.visible = true;
     }
     for (const area of lista) {
       area.contorno.visible = true;
       area.piso.material.color.set(DORADO);
-      area.piso.material.emissive = new THREE.Color(0x7a5400);
+      area.piso.material.emissive.copy(BRILLO_RESALTADO);
       area.etiqueta.material.color.set(0xffe08a);
       area.etiqueta.visible = true;
     }
     this.resaltados = lista;
+    this._marcar(true);
   }
 
   limpiarResaltado() {
-    for (const area of this.resaltados || []) {
+    for (const area of this.resaltados) {
       area.contorno.visible = false;
       area.volumen.material.opacity = 0;
       area.piso.material.color.set(area.colorBase);
-      area.piso.material.emissive = new THREE.Color(0x000000);
+      area.piso.material.emissive.copy(NEGRO);
       area.etiqueta.material.color.set(0xffffff);
       area.etiqueta.scale.copy(area.etiqueta.userData.base);
     }
     this.resaltados = [];
+    this._marcar();
   }
 
-  /* ---------------- ciclo ---------------- */
+  /* ---------------- ciclo de dibujo ---------------- */
 
   _ajustarTamano() {
     const ancho = this.contenedor.clientWidth || 640;
@@ -897,70 +863,69 @@ export class VisorEdificio {
     this.camara.aspect = ancho / alto;
     this.camara.updateProjectionMatrix();
     this.renderer.setSize(ancho, alto, false);
+    this._marcar();
+  }
+
+  /** Acerca un valor al deseado; devuelve true si todavía se está moviendo. */
+  _acercar(objeto, clave, meta, minimo) {
+    const dif = meta - objeto[clave];
+    if (Math.abs(dif) < minimo) {
+      objeto[clave] = meta;
+      return false;
+    }
+    objeto[clave] += dif * SUAVIZADO;
+    return true;
   }
 
   _animar() {
     requestAnimationFrame(this._animar);
-    const s = 0.09;
-    this.actual.theta += (this.deseado.theta - this.actual.theta) * s;
-    this.actual.phi += (this.deseado.phi - this.actual.phi) * s;
-    this.actual.radio += (this.deseado.radio - this.actual.radio) * s;
-    this.actual.objetivo.lerp(this.deseado.objetivo, s);
-    if (Math.abs(this.camara.fov - this.fovDeseado) > 0.01) {
-      this.camara.fov += (this.fovDeseado - this.camara.fov) * s;
+    const a = this.actual;
+    const d = this.deseado;
+
+    let camaraMovida = this._acercar(a, "theta", d.theta, 1e-4);
+    camaraMovida = this._acercar(a, "phi", d.phi, 1e-5) || camaraMovida;
+    camaraMovida = this._acercar(a, "radio", d.radio, 1e-3) || camaraMovida;
+    if (a.objetivo.distanceToSquared(d.objetivo) > 1e-6) {
+      a.objetivo.lerp(d.objetivo, SUAVIZADO);
+      camaraMovida = true;
+    } else {
+      a.objetivo.copy(d.objetivo);
+    }
+    if (this._acercar(this.camara, "fov", this.fovDeseado, 0.01)) {
       this.camara.updateProjectionMatrix();
+      camaraMovida = true;
     }
 
+    let pisosMovidos = false;
     for (const n of this.niveles) {
-      n.offset += (n.offsetDeseado - n.offset) * s;
+      if (this._acercar(n, "offset", n.offsetDeseado, 1e-3)) pisosMovidos = true;
       n.grupo.position.y = n.offset;
     }
-    const superior = this.niveles[this.niveles.length - 1];
-    if (superior) this.techo.position.y = superior.offset;
+    if (this.techo) this.techo.position.y = this.niveles.at(-1)?.offset ?? 0;
+    if (pisosMovidos) this._marcar(true);
 
-    const { theta, phi, radio, objetivo } = this.actual;
+    // Sin cambios ni salones parpadeando, no se vuelve a dibujar.
+    if (!camaraMovida && !this._pendiente && !this.resaltados.length) return;
+    this._pendiente = false;
+
     this.camara.position.set(
-      objetivo.x + radio * Math.sin(phi) * Math.sin(theta),
-      objetivo.y + radio * Math.cos(phi),
-      objetivo.z + radio * Math.sin(phi) * Math.cos(theta)
+      a.objetivo.x + a.radio * Math.sin(a.phi) * Math.sin(a.theta),
+      a.objetivo.y + a.radio * Math.cos(a.phi),
+      a.objetivo.z + a.radio * Math.sin(a.phi) * Math.cos(a.theta)
     );
-    this.camara.lookAt(objetivo);
+    this.camara.lookAt(a.objetivo);
 
-    // Precisión de profundidad: con la cámara lejos (plano 2D) se acerca el
-    // plano "near" para que el piso de un salón no se mezcle con la losa.
-    const near = this.modo2D ? Math.max(0.5, radio * 0.6) : 0.3;
+    // Plano "near" más lejos en 2D para que el piso no se mezcle con la losa.
+    const near = this.modo2D ? Math.max(0.5, a.radio * 0.6) : 0.3;
     if (Math.abs(this.camara.near - near) > 0.05) {
       this.camara.near = near;
       this.camara.updateProjectionMatrix();
     }
 
-    // Etiquetas: en 2D, sobre el piso (volteadas para no verse de cabeza);
-    // en 3D, flotando dentro del salón y siempre de frente a quien mira.
-    const flotan = !this.modo2D;
-    if (flotan !== this.etiquetasFlotan) {
-      this.etiquetasFlotan = flotan;
-      this.etiquetasVolteadas = null; // obliga a recalcular la orientación en 2D
-      for (const e of this.etiquetasPiso) {
-        e.position.y = flotan ? e.userData.yFlotante : e.userData.yPiso;
-        // En 3D se ven a través de los muros (como antes); en 2D, sobre su piso.
-        e.material.depthTest = !flotan;
-        e.material.depthWrite = !flotan;
-        e.renderOrder = flotan ? 10 : 4;
-      }
-    }
-    if (flotan) {
-      for (const e of this.etiquetasPiso) if (e.visible) e.quaternion.copy(this.camara.quaternion);
-    } else {
-      const voltear = Math.cos(theta) > 0;
-      if (voltear !== this.etiquetasVolteadas) {
-        this.etiquetasVolteadas = voltear;
-        for (const e of this.etiquetasPiso) e.rotation.set(-Math.PI / 2, 0, voltear ? 0 : Math.PI);
-      }
-    }
+    this._orientarEtiquetas();
 
     if (this.resaltados.length) {
-      const t = this.reloj.getElapsedTime() * 4;
-      const pulso = 0.5 + 0.5 * Math.sin(t);
+      const pulso = 0.5 + 0.5 * Math.sin(this.reloj.getElapsedTime() * 4);
       const k = 1 + 0.08 * pulso;
       for (const area of this.resaltados) {
         area.contorno.material.opacity = 0.35 + 0.65 * pulso;
@@ -971,5 +936,29 @@ export class VisorEdificio {
     }
 
     this.renderer.render(this.escena, this.camara);
+  }
+
+  /** En 3D las etiquetas flotan de frente a la cámara; en 2D van sobre el piso. */
+  _orientarEtiquetas() {
+    const flotan = !this.modo2D;
+    if (flotan !== this.etiquetasFlotan) {
+      this.etiquetasFlotan = flotan;
+      this.etiquetasVolteadas = null;
+      for (const e of this.etiquetas) {
+        e.position.y = flotan ? e.userData.yFlotante : e.userData.yPiso;
+        e.material.depthTest = !flotan;
+        e.material.depthWrite = !flotan;
+        e.renderOrder = flotan ? 10 : 4;
+      }
+    }
+    if (flotan) {
+      for (const e of this.etiquetas) if (e.visible) e.quaternion.copy(this.camara.quaternion);
+      return;
+    }
+    const voltear = Math.cos(this.actual.theta) > 0;
+    if (voltear !== this.etiquetasVolteadas) {
+      this.etiquetasVolteadas = voltear;
+      for (const e of this.etiquetas) e.rotation.set(-Math.PI / 2, 0, voltear ? 0 : Math.PI);
+    }
   }
 }

@@ -1,16 +1,10 @@
-"""Genera data/fachada.json: ventanas y vidrio de la fachada del L3 (OPCIONAL).
+"""Genera data/fachada.json: ventanas y vidrio de la fachada del L3.
 
-Es una capa aparte que se dibuja POR ENCIMA de los muros de AutoCAD sin
-modificarlos. Si no te gusta, basta con borrar data/fachada.json (o usar el
-botón "Ventanas" de la página): el modelo vuelve a ser solo muros.
-
-Aproxima lo que se ve en las fotos:
-  * ventanas corridas con persianas en las dos fachadas largas, entre columnas
-    (dejando libres las puertas de emergencia);
+Capa opcional que se dibuja sobre los muros (botón "Ventanas" de la página):
+  * ventanas corridas con persianas en las fachadas norte y sur, entre columnas;
   * cancel de vidrio en la entrada poniente (frente a las escaleras y el chaflán).
-  * El bloque de baños NO lleva vidrio: es puro muro.
 
-Uso:
+Uso (después de generar_modelo.py, que guarda el centro del dibujo):
     python scripts/generar_fachada.py
 """
 
@@ -18,7 +12,6 @@ import json
 from datetime import date
 from pathlib import Path
 
-import ezdxf
 from ezdxf.math import Vec3
 
 import generar_modelo as gm
@@ -51,11 +44,9 @@ PUERTA_CHAFLAN = (3.5, 5.1, 2.4)  # desde, hasta, altura del dintel
 BANDAS_NIVEL = {0: (0.05, 3.0), 1: (3.57, 6.57), 2: (6.97, 9.97)}
 
 
-def caja(acc, centro, x0, x1, y0, y1, z0, z1):
-    v = [Vec3(x0, y0, z0), Vec3(x1, y0, z0), Vec3(x1, y1, z0), Vec3(x0, y1, z0),
-         Vec3(x0, y0, z1), Vec3(x1, y0, z1), Vec3(x1, y1, z1), Vec3(x0, y1, z1)]
-    for cara in ((0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)):
-        acc.agregar_cara([v[i] for i in cara], centro)
+def caja(acc, centro, *medidas):
+    for cara in gm.caras_caja(*medidas):
+        acc.agregar_cara(cara, centro)
 
 
 def plano(acc, centro, puntos):
@@ -80,7 +71,7 @@ def ventanas_fachada(piezas, centro):
             yv = y + sentido * 0.02  # vidrio pegado al muro
             for a, b in tramos_entre_columnas(x_ini, x_fin, y):
                 plano(vidrio, centro, [(a, yv, z0), (b, yv, z0), (b, yv, z1), (a, yv, z1)])
-                # Marco: arriba, abajo y parteluces cada ~1.3 m.
+                # Marco: arriba, abajo y parteluces cada ~1.3 m
                 ym0, ym1 = sorted((y, y + sentido * 0.07))
                 caja(marco, centro, a, b, ym0, ym1, z0 - 0.05, z0)
                 caja(marco, centro, a, b, ym0, ym1, z1, z1 + 0.05)
@@ -88,7 +79,7 @@ def ventanas_fachada(piezas, centro):
                 for k in range(n + 1):
                     x = a + (b - a) * k / n
                     caja(marco, centro, x - 0.025, x + 0.025, ym0, ym1, z0, z1)
-                # Persianas horizontales por fuera.
+                # Persianas horizontales por fuera
                 yp0, yp1 = sorted((y + sentido * 0.08, y + sentido * 0.22))
                 for k in range(1, 5):
                     z = z0 + (z1 - z0) * k / 5
@@ -96,6 +87,15 @@ def ventanas_fachada(piezas, centro):
             for tipo, acc in (("vidrio", vidrio), ("marco", marco), ("persiana", persiana)):
                 if acc.indices:
                     piezas.append({"tipo": tipo, "nivel": nivel, "vertices": acc.vertices, "indices": acc.indices})
+
+
+def puntos_puerta_chaflan(a, b):
+    """Extremos en planta de la puerta de planta baja del chaflán."""
+    d0, d1, _ = PUERTA_CHAFLAN
+    av, bv = Vec3(a[0], a[1]), Vec3(b[0], b[1])
+    u = (bv - av).normalize()
+    p0, p1 = av + u * d0, av + u * d1
+    return (p0.x, p0.y), (p1.x, p1.y)
 
 
 def cancel(vidrio, marco, centro, a, b, n, z0, z1):
@@ -119,16 +119,11 @@ def vidrio_entrada(piezas, centro):
     for nivel, (z0, z1) in BANDAS_NIVEL.items():
         vidrio, marco = gm.Acumulador(), gm.Acumulador()
         for i, (a, b, n) in enumerate(ENTRADA):
-            es_chaflan = i == 1
-            if es_chaflan and nivel == 0:
-                # Deja libre la puerta de la planta baja (vidrio solo sobre el dintel).
-                d0, d1, dintel = PUERTA_CHAFLAN
-                av, bv = Vec3(a[0], a[1]), Vec3(b[0], b[1])
-                u = (bv - av).normalize()
-                p0, p1 = av + u * d0, av + u * d1
-                cancel(vidrio, marco, centro, a, (p0.x, p0.y), n, z0, z1)
-                cancel(vidrio, marco, centro, (p1.x, p1.y), b, n, z0, z1)
-                cancel(vidrio, marco, centro, (p0.x, p0.y), (p1.x, p1.y), n, dintel, z1)
+            if i == 1 and nivel == 0:  # chaflán: deja libre la puerta (vidrio solo sobre el dintel)
+                p0, p1 = puntos_puerta_chaflan(a, b)
+                cancel(vidrio, marco, centro, a, p0, n, z0, z1)
+                cancel(vidrio, marco, centro, p1, b, n, z0, z1)
+                cancel(vidrio, marco, centro, p0, p1, n, PUERTA_CHAFLAN[2], z1)
             else:
                 cancel(vidrio, marco, centro, a, b, n, z0, z1)
         piezas.append({"tipo": "vidrio_torre", "nivel": nivel, "vertices": vidrio.vertices, "indices": vidrio.indices})
@@ -136,10 +131,9 @@ def vidrio_entrada(piezas, centro):
 
 
 def huecos_ventanas():
-    """Rectángulos de las ventanas para abrir el hueco en el muro de atrás.
+    """Huecos que generar_modelo.py recorta en los muros detrás del vidrio.
 
-    Lo usa generar_modelo.py: así el vidrio deja ver el interior. Cada hueco:
-    a, b (extremos en planta, cara exterior), n (normal hacia afuera),
+    Cada hueco: a, b (extremos en planta, cara exterior), n (normal hacia afuera),
     z0, z1, nivel y grosor del muro.
     """
     huecos = []
@@ -153,22 +147,16 @@ def huecos_ventanas():
             grosor = 0.4 if i == 0 else 0.1  # muro poniente 0.40 m, chaflán 0.10 m
             tramos = [(a, b)]
             if i == 1 and nivel == 0:  # la puerta del chaflán ya es hueco
-                d0, d1, _ = PUERTA_CHAFLAN
-                av, bv = Vec3(a[0], a[1]), Vec3(b[0], b[1])
-                u = (bv - av).normalize()
-                p0, p1 = av + u * d0, av + u * d1
-                tramos = [(a, (p0.x, p0.y)), ((p1.x, p1.y), b)]
+                p0, p1 = puntos_puerta_chaflan(a, b)
+                tramos = [(a, p0), (p1, b)]
             for ta, tb in tramos:
                 huecos.append({"a": ta, "b": tb, "n": n, "z0": z0, "z1": z1, "nivel": nivel, "grosor": grosor})
     return huecos
 
 
 def main():
-    # Mismo origen que edificio.json (centro del dibujo completo).
-    doc = ezdxf.readfile(str(gm.DXF_POR_DEFECTO))
-    puntos = [p for _, _, caras in gm.recorrer_solidos(doc) for cara in caras for p in cara]
-    centro = ((min(p.x for p in puntos) + max(p.x for p in puntos)) / 2,
-              (min(p.y for p in puntos) + max(p.y for p in puntos)) / 2)
+    # Mismo origen que edificio.json.
+    centro = tuple(json.loads(gm.SALIDA.read_text(encoding="utf-8"))["meta"]["centro"])
 
     piezas = []
     ventanas_fachada(piezas, centro)

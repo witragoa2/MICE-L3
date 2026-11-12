@@ -30,15 +30,11 @@ NOMBRES_COLUMNA = {
     "PROFESOR": "profesor",
     "GRUPO": "grupo",
     "TIPO": "tipo",
-    "LUN": "LUN",
-    "MAR": "MAR",
-    "MIE": "MIE",
-    "JUE": "JUE",
-    "VIE": "VIE",
-    "SAB": "SAB",
     "SALON": "salon",
     "CUPO": "cupo",
 }
+# El PDF trae "DISEÃ?O" en algunas páginas.
+CORRECCIONES = {"DISEÃ?O": "DISEÑO", "DISEÃ‘O": "DISEÑO", "DISEÃ’O": "DISEÑO"}
 
 
 def normalizar_columna(texto):
@@ -79,12 +75,7 @@ def celda(fila, columnas, nombre):
     if valor is None:
         return ""
     texto = str(valor).strip()
-    # El PDF trae "DISEÃ?O" en algunas páginas; se corrige antes de guardar.
-    for erroneo, correcto in {
-        "DISEÃ?O": "DISEÑO",
-        "DISEÃ‘O": "DISEÑO",
-        "DISEÃ’O": "DISEÑO",
-    }.items():
+    for erroneo, correcto in CORRECCIONES.items():
         texto = texto.replace(erroneo, correcto)
     return texto
 
@@ -95,9 +86,7 @@ def horas_de_celda(texto):
         return []
     horas = re.findall(r"\b([01]?\d|2[0-3]):([0-5]\d)\b", texto)
     horas = [f"{int(h):02d}:{m}" for h, m in horas]
-    rangos = []
-    for i in range(0, len(horas) - 1, 2):
-        rangos.append(f"{horas[i]}-{horas[i + 1]}")
+    rangos = [f"{horas[i]}-{horas[i + 1]}" for i in range(0, len(horas) - 1, 2)]
     if len(horas) % 2 == 1:
         rangos.append(horas[-1])
     return rangos
@@ -113,11 +102,12 @@ def semestre_desde_pdf(pdf, ruta):
 
 
 def leer_grupos(ruta_pdf):
+    """(grupos, filas leídas, semestre) del PDF."""
     grupos = {}
-    orden = []
     filas_leidas = 0
 
     with pdfplumber.open(ruta_pdf) as pdf:
+        semestre = semestre_desde_pdf(pdf, ruta_pdf)
         for numero_pagina, pagina in enumerate(pdf.pages, start=1):
             tabla = pagina.extract_table()
             if not tabla:
@@ -163,7 +153,6 @@ def leer_grupos(ruta_pdf):
                         "cupo": int(cupo) if cupo.isdigit() else None,
                         "sesiones": [],
                     }
-                    orden.append(llave)
 
                 registro = grupos[llave]
                 for dia in DIAS:
@@ -174,7 +163,7 @@ def leer_grupos(ruta_pdf):
                             registro["sesiones"].append(sesion)
                 filas_leidas += 1
 
-    return [grupos[llave] for llave in orden], filas_leidas
+    return list(grupos.values()), filas_leidas, semestre
 
 
 def main():
@@ -189,10 +178,7 @@ def main():
     if not ruta_pdf.exists():
         sys.exit(f"No existe el PDF: {ruta_pdf}")
 
-    with pdfplumber.open(ruta_pdf) as pdf:
-        semestre = semestre_desde_pdf(pdf, ruta_pdf)
-
-    grupos, filas = leer_grupos(ruta_pdf)
+    grupos, filas, semestre = leer_grupos(ruta_pdf)
     grupos.sort(key=lambda g: (int(g["grupo"]), g["materia"]))
 
     sin_sesion = [g["grupo"] for g in grupos if not g["sesiones"]]
@@ -212,8 +198,7 @@ def main():
     }
 
     ruta_salida.parent.mkdir(parents=True, exist_ok=True)
-    with open(ruta_salida, "w", encoding="utf-8") as archivo:
-        json.dump(salida, archivo, ensure_ascii=False, indent=2)
+    ruta_salida.write_text(json.dumps(salida, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
     print(f"Semestre: {semestre or '(sin detectar)'}")
     print(f"Filas leídas: {filas}")
