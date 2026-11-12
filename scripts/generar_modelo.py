@@ -125,6 +125,20 @@ NOMBRE_ALTERNO = {
 #   P2 -> descanso entre primer y segundo piso   (z = 5.37 m)
 FUSIONAR = {}
 
+# Planta corregida de algunas áreas (coordenadas AutoCAD), para que no se
+# metan en muros ni columnas. Se extruye entre la altura del piso y el techo.
+AREA_PLANTA = {
+    # Baños P2: igual que los de P1, con el recorte de las columnas de las esquinas.
+    "Baño Hombres P2": [(1300.57, 2449.99), (1303.87, 2449.99), (1303.87, 2444.89),
+                        (1300.27, 2444.89), (1300.27, 2449.64), (1300.57, 2449.64)],
+    "Baño Mujeres P2": [(1303.97, 2444.89), (1303.97, 2449.99), (1307.27, 2449.99),
+                        (1307.27, 2449.69), (1307.57, 2449.69), (1307.57, 2444.89)],
+    # L32010 y Club de Mecatrónica: se metían 4 cm en el muro norte (Y 2453.60).
+    "L-32010": [(1310.87, 2453.60), (1317.62, 2453.60), (1317.62, 2450.49), (1310.87, 2450.49)],
+    "Club de mecatrónica": [(1324.02, 2453.60), (1324.83, 2452.81), (1324.83, 2450.49),
+                            (1317.72, 2450.49), (1317.72, 2453.60)],
+}
+
 # Áreas del DXF que no se muestran en el modelo.
 # SPA-1: hueco bajo la escalera interior, junto a Jefatura (no es un espacio real).
 AREAS_OMITIR = {"SPA-1"}
@@ -618,6 +632,9 @@ def main():
 
     for nombre, caras in por_area.items():
         zmin = min(p.z for cara in caras for p in cara)
+        if nombre in AREA_PLANTA:
+            zmax = max(p.z for cara in caras for p in cara)
+            caras = caras_prisma(AREA_PLANTA[nombre], zmin, zmax)
         codigo = codigo_salon(nombre)
         if True:
             visible, categoria = AREAS.get(nombre, (codigo, "salon"))

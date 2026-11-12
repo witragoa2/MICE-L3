@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Mapa Interactivo de Clases del Laboratorio 3, FES Aragón, UNAM.">
   <title>MICE L3 · FES Aragón</title>
-  <link rel="stylesheet" href="css/estilos.css?v=27">
+  <link rel="stylesheet" href="css/estilos.css?v=30">
 </head>
 
 <body>
@@ -22,11 +22,16 @@
         <span id="ltHora">—</span>
         <span id="ltEstado" class="lt-estado"></span>
       </div>
-      <div class="lt-pista" id="ltPista">
+      <div class="lt-pista" id="ltPista" title="Arrastra el marcador o haz clic para elegir una hora">
         <span class="lt-pasado" id="ltPasado"></span>
+        <span class="lt-ahora" id="ltAhora" title="Hora actual"></span>
         <span class="lt-marca" id="ltMarca"></span>
       </div>
-      <button type="button" id="ahoraBtn" class="ahora-btn">Clases en este momento</button>
+      <div class="lt-acciones">
+        <button type="button" id="ahoraBtn" class="ahora-btn">Clases en este momento</button>
+        <input type="time" id="ltHoraInput" class="lt-input" min="07:00" max="23:59" step="300" aria-label="Escribe una hora">
+        <button type="button" id="ltResetBtn" class="lt-reset" title="Volver a la hora actual" hidden>Ahora</button>
+      </div>
     </div>
 
     <div class="panel-foto" id="panelFoto">
@@ -105,9 +110,14 @@
         <button type="button" class="nivelBtn" data-nivel="0">Planta baja</button>
         <button type="button" class="nivelBtn" data-nivel="1">Primer piso</button>
         <button type="button" class="nivelBtn" data-nivel="2">Segundo piso</button>
-        <button type="button" class="nivelBtn" id="separarBtn">Separar pisos</button>
-        <button type="button" class="nivelBtn activo" id="techoBtn">Techo: sí</button>
-        <button type="button" class="nivelBtn activo" id="ventanasBtn">Ventanas: sí</button>
+      </div>
+
+      <!-- Opciones de la vista: arriba a la derecha -->
+      <div class="controles-visor" role="group" aria-label="Opciones de la vista">
+        <button type="button" class="ctrlBtn" id="plano2dBtn" title="Vista desde arriba, como los planos">Plano 2D</button>
+        <button type="button" class="ctrlBtn" id="separarBtn">Separar pisos</button>
+        <button type="button" class="ctrlBtn activo" id="techoBtn">Techo: sí</button>
+        <button type="button" class="ctrlBtn activo" id="ventanasBtn">Ventanas: sí</button>
       </div>
 
       <div class="vistas" role="group" aria-label="Vistas predeterminadas">
@@ -134,6 +144,6 @@
       }
     }
   </script>
-  <script type="module" src="js/principal.js?v=27"></script>
+  <script type="module" src="js/principal.js?v=30"></script>
 </body>
 </html>
