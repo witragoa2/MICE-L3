@@ -12,10 +12,7 @@
   document.documentElement.classList.add('intro-activa');  // la página de atrás no se desplaza
   const $ = id => document.getElementById(id);
   const NS='http://www.w3.org/2000/svg';
-  // en pantallas verticales (móvil) acercamos la cámara
   const svgEl=document.querySelector('#mice-intro svg');
-  const fit=()=>svgEl.setAttribute('viewBox', innerWidth/innerHeight<0.9 ? '150 -150 750 900' : '0 0 1000 600');
-  fit(); addEventListener('resize',fit);
 
   // ---- leyenda letra por letra (letras en trazos, misma tipografía que el logo SVG) ----
   const GLYPHS=[{"d": "M105.40799999999999 502.092V540.0H96.17399999999999V517.266L87.696 540.0H80.244L71.71199999999999 517.212V540.0H62.477999999999994V502.092H73.386L84.024 528.336L94.554 502.092Z", "x": 83.9}, {"d": "M128.284 502.092V540.0H119.05V502.092Z", "x": 123.7}, {"d": "M159.476 501.66Q166.226 501.66 171.032 505.22400000000005Q175.83800000000002 508.788 177.458 514.944H167.306Q166.172 512.568 164.09300000000002 511.326Q162.014 510.084 159.368 510.084Q155.102 510.084 152.45600000000002 513.054Q149.81 516.024 149.81 520.992Q149.81 525.96 152.45600000000002 528.9300000000001Q155.102 531.9 159.368 531.9Q162.014 531.9 164.09300000000002 530.658Q166.172 529.416 167.306 527.04H177.458Q175.83800000000002 533.196 171.032 536.733Q166.226 540.27 159.476 540.27Q153.96800000000002 540.27 149.621 537.813Q145.274 535.356 142.844 530.982Q140.41400000000002 526.608 140.41400000000002 520.992Q140.41400000000002 515.376 142.844 510.975Q145.274 506.574 149.621 504.117Q153.96800000000002 501.66 159.476 501.66Z", "x": 159.2}, {"d": "M199.362 509.49V517.158H211.728V524.286H199.362V532.602H213.348V540.0H190.12800000000001V502.092H213.348V509.49Z", "x": 201.4}, {"d": "M254.024 532.872H266.12V540.0H244.79000000000002V502.092H254.024Z", "x": 254.3}, {"d": "M290.4 499.662Q294.45 499.662 297.339 501.06600000000003Q300.228 502.47 301.71299999999997 504.9Q303.198 507.33 303.198 510.354Q303.198 513.918 301.416 516.159Q299.634 518.4 297.258 519.21V519.426Q300.336 520.452 302.118 522.828Q303.9 525.204 303.9 528.93Q303.9 532.278 302.361 534.8430000000001Q300.822 537.408 297.879 538.866Q294.936 540.324 290.88599999999997 540.324Q284.406 540.324 280.54499999999996 537.1379999999999Q276.68399999999997 533.952 276.46799999999996 527.526H285.432Q285.486 529.902 286.782 531.279Q288.078 532.656 290.562 532.656Q292.668 532.656 293.829 531.441Q294.99 530.226 294.99 528.228Q294.99 525.636 293.34299999999996 524.4749999999999Q291.69599999999997 523.314 288.078 523.314H286.34999999999997V515.808H288.078Q290.832 515.808 292.533 514.863Q294.234 513.918 294.234 511.488Q294.234 509.544 293.154 508.464Q292.074 507.384 290.18399999999997 507.384Q288.132 507.384 287.13300000000004 508.626Q286.134 509.868 285.972 511.704H276.954Q277.17 505.926 280.73400000000004 502.794Q284.298 499.662 290.4 499.662Z", "x": 290.5}];
@@ -80,12 +77,29 @@
   };
   const END = 6550;
 
+  // Cámara en pantallas verticales (celular): al inicio abierta y corrida a la derecha para que
+  // quepan el ratón y el "?"; cuando salta al símbolo se centra y se acerca (logo centrado al final).
+  const CAM_X = K([[0,640],[3000,640],[3500,500,'io']]);   // centro horizontal (unidades del SVG)
+  const CAM_W = K([[0,680],[3000,680],[3500,540,'io']]);   // ancho visible
+  const CAM_Y = 300;                                      // centro vertical del logo
+  let vista = '';
+  function encuadre(ms){
+    const asp = innerWidth/innerHeight;
+    let v = '0 0 1000 600';
+    if(asp < 0.9){
+      const w = CAM_W(ms), h = w/asp;
+      v = `${(CAM_X(ms)-w/2).toFixed(1)} ${(CAM_Y-h/2).toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`;
+    }
+    if(v !== vista){ svgEl.setAttribute('viewBox', v); vista = v; }
+  }
+
   const set=(id,v)=>$(id).setAttribute('transform',v);
 
   let start=null, raf, paused=false;
   function frame(now){
     if(start===null) start=now;
     const ms=(now-start)/SPEED;
+    encuadre(ms);
 
     // flotación suave mientras está solo
     const float = ms<2960 ? Math.sin(ms*.0045)*4 : 0;
@@ -129,12 +143,17 @@
     terminada = true; paused = true;
     cancelAnimationFrame(raf); intro.remove();
     document.documentElement.classList.remove('intro-activa');
-    removeEventListener('resize', fit); document.removeEventListener('keydown', alTeclear);
+    document.removeEventListener('keydown', alTeclear);
     document.dispatchEvent(new Event('mice-intro-end'));
   }
   // Clic, toque, Esc, Enter o espacio la saltan.
   const alTeclear = e => { if(e.key==='Escape'||e.key==='Enter'||e.key===' ') finish(); };
   intro.addEventListener('click',finish);
   document.addEventListener('keydown', alTeclear);
+  // Solo para revisar la animación (?depurar): miceIntro.ir(ms) congela la intro en ese instante.
+  if(new URLSearchParams(location.search).has('depurar')){
+    window.miceIntro = { ir: ms => { paused=true; cancelAnimationFrame(raf); start=0; frame(ms*SPEED); }, END };
+  }
+  encuadre(0);
   raf=requestAnimationFrame(frame);
 })();
