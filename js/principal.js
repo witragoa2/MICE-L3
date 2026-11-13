@@ -2,7 +2,7 @@
 // MICE L3 · búsqueda, horarios, secciones y visor 3D
 // ============================================================
 
-const VERSION = "44";
+const VERSION = "47";
 const $ = (id) => document.getElementById(id);
 
 const estado = {
@@ -139,10 +139,23 @@ function masParecidos(busqueda, opciones, cuantos = 4) {
     .map((x) => x.op);
 }
 
-async function cargarJSON(ruta) {
+/** Espera a que termine la intro animada (o 8 s como máximo, por si algo falla). */
+function esperarIntro() {
+  if (!document.getElementById("mice-intro")) return Promise.resolve();
+  return new Promise((listo) => {
+    document.addEventListener("mice-intro-end", listo, { once: true });
+    setTimeout(listo, 8000);
+  });
+}
+
+async function descargar(ruta) {
   const respuesta = await fetch(ruta, { cache: "no-cache" });
   if (!respuesta.ok) throw new Error(`${ruta}: HTTP ${respuesta.status}`);
-  return respuesta.json();
+  return respuesta;
+}
+
+async function cargarJSON(ruta) {
+  return (await descargar(ruta)).json();
 }
 
 function nivelDeSalon(codigo) {
@@ -229,14 +242,16 @@ document.addEventListener("DOMContentLoaded", iniciar);
 async function iniciar() {
   conectarInterfaz();
 
-  // Datos y visor 3D se piden en paralelo.
-  const [horarios, profesores, secciones, modelo, fachada, modulo3D] = await Promise.allSettled([
+  // Todo se descarga en paralelo, pero el modelo 3D (lo pesado) se arma cuando termina la intro,
+  // para que la animación no se trabe.
+  const pedidoModelo = descargar("data/edificio.json");
+  const pedidoFachada = descargar("data/fachada.json");
+  pedidoModelo.catch(() => {});
+  pedidoFachada.catch(() => {});
+  const [horarios, profesores, secciones] = await Promise.allSettled([
     cargarJSON("data/horarios.json"),
     cargarJSON("data/profesores.json"),
     cargarJSON("data/secciones.json"),
-    cargarJSON("data/edificio.json"),
-    cargarJSON("data/fachada.json"),
-    import(`./escena3d.js?v=${VERSION}`),
   ]);
 
   if (horarios.status === "rejected") {
@@ -257,12 +272,18 @@ async function iniciar() {
 
   iniciarLineaTiempo();
 
+  await esperarIntro();
+  const [modelo, fachada, modulo3D] = await Promise.allSettled([
+    pedidoModelo.then((r) => r.json()),
+    pedidoFachada.then((r) => r.json()),
+    import(`./escena3d.js?v=${VERSION}`),
+  ]);
   if (modelo.status === "fulfilled") {
     const areas = modelo.value.areas || [];
     estado.areasPorId = Object.fromEntries(areas.map((a) => [a.id, a]));
     estado.salones = Object.fromEntries(areas.filter((a) => a.codigo).map((a) => [a.codigo, a]));
     if (modulo3D.status === "fulfilled") {
-      iniciarVisor(modulo3D.value.VisorEdificio, modelo.value, fachada.status === "fulfilled" ? fachada.value : null);
+      await iniciarVisor(modulo3D.value.VisorEdificio, modelo.value, fachada.status === "fulfilled" ? fachada.value : null);
     } else {
       avisoVisor("No se pudo cargar el visor 3D. Revisa tu conexión (Three.js se carga desde internet).");
     }
@@ -1113,18 +1134,15 @@ function actualizarFotoProfesor(nombre, varios = false) {
 
 // ---------- visor 3D ----------
 
-function iniciarVisor(VisorEdificio, modelo, fachada) {
-  estado.visor = new VisorEdificio($("visor3d"));
-  estado.visor.cargar(modelo);
-  estado.visor.alSeleccionar = mostrarArea;
-  estado.visor.alCambiar2D = actualizarBotonesVisor;
-  if (fachada) {
-    estado.visor.cargarFachada(fachada);
-    estado.ventanas = true;
-  } else {
-    $("ventanasBtn").hidden = true;
-  }
-  estado.visor.setVentanas(Boolean(fachada));
+async function iniciarVisor(VisorEdificio, modelo, fachada) {
+  // El visor se arma por partes (sin trabar la intro); los botones lo usan solo cuando ya está listo.
+  const visor = new VisorEdificio($("visor3d"));
+  visor.alSeleccionar = mostrarArea;
+  visor.alCambiar2D = actualizarBotonesVisor;
+  await visor.cargar(modelo, fachada);
+  estado.visor = visor;
+  if (fachada) estado.ventanas = true;
+  else $("ventanasBtn").hidden = true;
   if (new URLSearchParams(window.location.search).has("depurar")) window.miceVisor = estado.visor;
 
   $("visorEstado")?.remove();
