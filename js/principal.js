@@ -2,7 +2,7 @@
 // MICE L3 · búsqueda, horarios, secciones y visor 3D
 // ============================================================
 
-const VERSION = "43";
+const VERSION = "44";
 const $ = (id) => document.getElementById(id);
 
 const estado = {
@@ -321,12 +321,12 @@ function conectarInterfaz() {
       if (!estado.visor) return;
       const nivel = btn.dataset.nivel;
       if (nivel === "todos") {
-        estado.visor.verEdificio();
+        estado.visor.verEdificio(true, true); // conserva los salones resaltados
         marcarNivelActivo("todos");
         marcarVistaActiva("entrada");
         estadoMapa(TEXTO_INICIO);
       } else {
-        estado.visor.enfocarNivel(nivel);
+        estado.visor.enfocarNivel(nivel, true);
         marcarNivelActivo(nivel);
         marcarVistaActiva(null);
         estadoMapa(textoNivel(Number(nivel)));
@@ -369,7 +369,7 @@ function conectarInterfaz() {
   document.querySelectorAll(".vistaBtn").forEach((btn) => {
     btn.addEventListener("click", () => {
       if (!estado.visor) return;
-      estado.visor.vista(btn.dataset.vista);
+      estado.visor.vista(btn.dataset.vista, true);
       marcarVistaActiva(btn.dataset.vista);
       marcarNivelActivo("todos");
       estadoMapa(`${NOMBRE_VISTA[btn.dataset.vista] || "Vista del edificio"} · ${AYUDA_MOVER}`);
