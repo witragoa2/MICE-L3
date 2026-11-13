@@ -44,6 +44,7 @@ const RADIO_NIVEL = 52; // distancia de la vista de un piso y máximo alejamient
 const FOV_3D = 40;
 const FOV_2D = 12; // lente estrecha: el plano 2D casi no tiene perspectiva
 const ESCALA_2D = Math.tan(THREE.MathUtils.degToRad(FOV_3D / 2)) / Math.tan(THREE.MathUtils.degToRad(FOV_2D / 2));
+const TAMANO_PASTO = 4000; // m; la niebla oculta su orilla
 const SEPARACION = 6; // metros entre pisos al separarlos
 const SUAVIZADO = 0.09;
 const DORADO = 0xffc21a;
@@ -57,7 +58,7 @@ export class VisorEdificio {
     this.alCambiar2D = null;
 
     this.escena = new THREE.Scene();
-    this.camara = new THREE.PerspectiveCamera(FOV_3D, 1, 0.3, 2000);
+    this.camara = new THREE.PerspectiveCamera(FOV_3D, 1, 0.3, 5000);
     this.modo2D = false;
     this.fovDeseado = FOV_3D;
 
@@ -129,11 +130,11 @@ export class VisorEdificio {
 
   _crearEntorno() {
     const HORIZONTE = 0xd6e9f7;
-    this.escena.fog = new THREE.Fog(HORIZONTE, 170, 520);
+    this.escena.fog = new THREE.Fog(HORIZONTE, 170, 520); // se recorre con la cámara en _animar
 
     // Cielo: degradado azul más intenso arriba.
     const cielo = new THREE.Mesh(
-      new THREE.SphereGeometry(900, 32, 16),
+      new THREE.SphereGeometry(2400, 32, 16),
       new THREE.ShaderMaterial({
         side: THREE.BackSide,
         depthWrite: false,
@@ -167,7 +168,7 @@ export class VisorEdificio {
     this.escena.add(cielo);
 
     const pasto = new THREE.Mesh(
-      new THREE.PlaneGeometry(1200, 1200),
+      new THREE.PlaneGeometry(TAMANO_PASTO, TAMANO_PASTO),
       new THREE.MeshStandardMaterial({ map: this._texturaPasto(), roughness: 1, metalness: 0 })
     );
     pasto.rotation.x = -Math.PI / 2;
@@ -246,7 +247,8 @@ export class VisorEdificio {
       ctx.globalAlpha = 0.35 + Math.random() * 0.45;
       ctx.fillRect(Math.random() * 256, Math.random() * 256, 1 + Math.random() * 2, 2 + Math.random() * 4);
     }
-    return this._texturaRepetible(c, 180, 180);
+    const repeticiones = TAMANO_PASTO * 0.15; // una baldosa de textura cada ~6.7 m
+    return this._texturaRepetible(c, repeticiones, repeticiones);
   }
 
   /* ---------------- construcción ---------------- */
@@ -966,6 +968,11 @@ export class VisorEdificio {
       a.objetivo.z + radio * Math.sin(a.phi) * Math.cos(a.theta)
     );
     this.camara.lookAt(a.objetivo);
+
+    // Niebla del horizonte a partir del edificio: en 2D (vista desde arriba) y en celular, donde
+    // la cámara está más lejos, no deslava el plano.
+    this.escena.fog.near = radio + 120;
+    this.escena.fog.far = radio + 470;
 
     // Plano "near" más lejos en 2D para que el piso no se mezcle con la losa.
     const near = this.modo2D ? Math.max(0.5, radio * 0.6) : 0.3;
