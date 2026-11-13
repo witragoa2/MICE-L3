@@ -626,7 +626,7 @@ export class VisorEdificio {
       },
       { passive: false }
     );
-    lienzo.addEventListener("dblclick", () => this.verEdificio());
+    lienzo.addEventListener("dblclick", () => this.verEdificio(true, true));
   }
 
   /** Acerca (factor < 1) o aleja la cámara; con un piso elegido no se aleja más que su vista. */
@@ -704,11 +704,14 @@ export class VisorEdificio {
     return area.nivel === nivel || (!this.separado && Boolean(area.nivelesEtiqueta?.includes(nivel)));
   }
 
-  /** Nombres visibles: los del piso activo; en "Edificio", si está abierto. */
+  /** Nombres visibles: los del piso activo; en "Edificio", si está abierto, y siempre los resaltados. */
   _mostrarEtiquetas(nivelId) {
-    const edificioAbierto = nivelId === "todos" && (this.separado || !this.techoVisible);
+    const todos = nivelId === "todos";
+    const edificioAbierto = todos && (this.separado || !this.techoVisible);
     for (const area of Object.values(this.areas)) {
-      area.etiqueta.visible = edificioAbierto || (nivelId !== "todos" && this._etiquetaEnPiso(area, Number(nivelId)));
+      area.etiqueta.visible = edificioAbierto
+        || (!todos && this._etiquetaEnPiso(area, Number(nivelId)))
+        || (todos && this.resaltados.includes(area));
     }
   }
 
@@ -791,10 +794,10 @@ export class VisorEdificio {
     this.deseado.radio *= ESCALA_2D;
   }
 
-  vista(nombre) {
+  vista(nombre, conservarResaltado = false) {
     const v = VISTAS[nombre] || VISTAS.entrada;
     this.set2D(false);
-    this.limpiarResaltado();
+    if (!conservarResaltado) this.limpiarResaltado();
     this.nivelActivo = "todos";
     this._actualizarVisibilidad();
     if (v.objetivo && !this.separado) {
@@ -808,8 +811,8 @@ export class VisorEdificio {
     this.deseado.phi = v.phi;
   }
 
-  verEdificio(animar = true) {
-    this.vista("entrada");
+  verEdificio(animar = true, conservarResaltado = false) {
+    this.vista("entrada", conservarResaltado);
     if (!animar) {
       Object.assign(this.actual, { theta: this.deseado.theta, phi: this.deseado.phi, radio: this.deseado.radio });
       this.actual.objetivo.copy(this.deseado.objetivo);
