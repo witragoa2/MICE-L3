@@ -2,7 +2,7 @@
 // MICE L3 · búsqueda, horarios, secciones y visor 3D
 // ============================================================
 
-const VERSION = "41";
+const VERSION = "42";
 const $ = (id) => document.getElementById(id);
 
 const estado = {

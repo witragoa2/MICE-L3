@@ -1080,6 +1080,58 @@ body {
   pointer-events: none;
 }
 
+/* ---------- Intro animada (js/intro.js) ---------- */
+#mice-intro {
+  --mice-blue: #0d47a1;
+  --mice-white: #ffffff;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  overflow: hidden;
+  background: var(--mice-blue);
+  cursor: pointer;
+  clip-path: circle(160% at 50% -5%);
+}
+
+#mice-intro svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+#mice-intro .w {
+  fill: var(--mice-white);
+}
+
+#mice-intro .part {
+  fill: var(--mice-white);
+  stroke: var(--mice-blue);
+  stroke-width: 10;
+  paint-order: stroke;
+  stroke-linejoin: round;
+}
+
+#mice-intro .det {
+  fill: none;
+  stroke: var(--mice-blue);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+#mice-intro .txt {
+  fill: var(--mice-white);
+  font-family: "Segoe UI", "Trebuchet MS", Arial, sans-serif;
+  font-weight: 800;
+  font-size: 58px;
+}
+
+/* Mientras corre la intro, la página de atrás no se desplaza */
+html.intro-activa,
+html.intro-activa body {
+  overflow: hidden;
+}
+
 /* Botones que solo aparecen en celular */
 .solo-movil {
   display: none;
