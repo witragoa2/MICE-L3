@@ -1098,6 +1098,12 @@ body {
   width: 100%;
   height: 100%;
   overflow: visible;
+  visibility: hidden; /* js/intro.js lo muestra ya acomodado en su primer cuadro (sin destello del logo) */
+}
+
+/* Visita repetida o "reducir movimiento": la intro no aparece ni un instante */
+html.sin-intro #mice-intro {
+  display: none;
 }
 
 #mice-intro .w {
