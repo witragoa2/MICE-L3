@@ -51,6 +51,19 @@ const DORADO = 0xffc21a;
 const NEGRO = new THREE.Color(0x000000);
 const BRILLO_RESALTADO = new THREE.Color(0x7a5400);
 
+/**
+ * Devuelve una función que, cuando el trabajo seguido pasa de `presupuestoMs`, cede el turno al navegador
+ * (para que la intro y la página sigan dibujando mientras se arma el modelo).
+ */
+function crearCeder(presupuestoMs = 6) {
+  let inicio = performance.now();
+  return async () => {
+    if (performance.now() - inicio < presupuestoMs) return;
+    await new Promise((r) => setTimeout(r, 0));
+    inicio = performance.now();
+  };
+}
+
 export class VisorEdificio {
   constructor(contenedor) {
     this.contenedor = contenedor;
@@ -83,7 +96,6 @@ export class VisorEdificio {
     relleno.position.set(-40, 30, -30);
     this.escena.add(relleno);
 
-    this._crearEntorno();
     this.raiz = new THREE.Group();
     this.escena.add(this.raiz);
 
@@ -103,6 +115,7 @@ export class VisorEdificio {
     this.raycaster = new THREE.Raycaster();
     this._candidatos = null;
     this._pendiente = true;
+    this._listo = false; // no se dibuja hasta que el modelo y sus gráficos estén preparados
     this._ultimoHover = 0;
 
     this.actual = { theta: VISTAS.entrada.theta, phi: VISTAS.entrada.phi, radio: 80, objetivo: new THREE.Vector3(0, 4, 0) };
@@ -253,7 +266,11 @@ export class VisorEdificio {
 
   /* ---------------- construcción ---------------- */
 
-  cargar(modelo) {
+  /** Arma el edificio por partes y prepara los gráficos sin congelar la página. */
+  async cargar(modelo, fachada = null) {
+    const ceder = crearCeder();
+    this._crearEntorno();
+    await ceder();
     for (const nivel of modelo.niveles) {
       const grupo = new THREE.Group();
       this.raiz.add(grupo);
@@ -262,16 +279,92 @@ export class VisorEdificio {
     this.techo = new THREE.Group();
     this.raiz.add(this.techo);
 
-    for (const obj of modelo.estructura) this._agregarEstructura(obj);
-    for (const area of modelo.areas) this._agregarArea(area);
+    for (const obj of modelo.estructura) {
+      this._agregarEstructura(obj);
+      await ceder();
+    }
+    for (const area of modelo.areas) {
+      this._agregarArea(area);
+      await ceder();
+    }
     for (const salida of modelo.salidas || []) {
       const letrero = this._crearLetrero("SALIDA DE EMERGENCIA");
       letrero.position.set(...salida.posicion);
       this._contenedorDe(salida.nivel).add(letrero);
     }
-
+    if (fachada) this.cargarFachada(fachada);
+    this.setVentanas(Boolean(fachada));
     this.verEdificio(false);
+    await this._prepararGraficos(ceder);
+    this._listo = true;
     this._marcar(true);
+  }
+
+  /** Compila los shaders en segundo plano y sube las texturas poco a poco (si no, el primer cuadro tarda ~1 s). */
+  async _prepararGraficos(ceder) {
+    this.camara.position.set(0, 40, 80);
+    this.camara.lookAt(this.actual.objetivo);
+    this.camara.updateMatrixWorld();
+    try {
+      await this.renderer.compileAsync(this.escena, this.camara);
+      // El plano 2D apaga la sombra del sol: esa variante también se prepara aquí.
+      this.sol.castShadow = false;
+      await this.renderer.compileAsync(this.escena, this.camara);
+      this.sol.castShadow = true;
+      // El shader de las sombras es interno de Three.js: se prepara aparte con un material igual,
+      // compilado hacia un lienzo auxiliar como lo hace el mapa de sombras.
+      // Con las mismas luces de la escena (el número de luces cambia la variante) y en las dos caras que usa la sombra.
+      const prueba = new THREE.Scene();
+      this.escena.traverse((o) => {
+        if (o.isLight) prueba.add(o.clone());
+      });
+      for (const side of [THREE.DoubleSide, THREE.BackSide]) {
+        prueba.add(new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, side })));
+      }
+      const auxiliar = new THREE.WebGLRenderTarget(1, 1);
+      const anterior = this.renderer.getRenderTarget();
+      this.renderer.setRenderTarget(auxiliar);
+      await this.renderer.compileAsync(prueba, this.sol.shadow.camera);
+      this.renderer.setRenderTarget(anterior);
+      auxiliar.dispose();
+    } catch {
+      // sin compilación en paralelo: se compila en el primer cuadro
+    }
+    const texturas = new Set();
+    this.escena.traverse((o) => {
+      for (const m of [o.material].flat()) if (m?.map) texturas.add(m.map);
+    });
+    for (const t of texturas) {
+      this.renderer.initTexture(t);
+      await ceder();
+    }
+
+    // Sube la geometría a la tarjeta gráfica por lotes, dibujando en un solo píxel del lienzo (mismos shaders).
+    const piezas = [];
+    this.escena.traverse((o) => {
+      if (o.isMesh || o.isLine || o.isSprite) piezas.push({ o, visible: o.visible, culling: o.frustumCulled });
+    });
+    for (const { o } of piezas) {
+      o.visible = false;
+      o.frustumCulled = false;
+    }
+    const r = this.renderer;
+    const tamano = r.getSize(new THREE.Vector2());
+    r.setViewport(0, 0, 1, 1);
+    r.setScissor(0, 0, 1, 1);
+    r.setScissorTest(true);
+    r.shadowMap.needsUpdate = true; // la primera pasada prepara también las sombras
+    for (let i = 0; i < piezas.length; i += 12) {
+      for (const p of piezas.slice(i, i + 12)) p.o.visible = p.visible;
+      r.render(this.escena, this.camara);
+      await ceder();
+    }
+    r.setScissorTest(false);
+    r.setViewport(0, 0, tamano.x, tamano.y);
+    for (const p of piezas) {
+      p.o.visible = p.visible;
+      p.o.frustumCulled = p.culling;
+    }
   }
 
   /** Capa de ventanas (data/fachada.json). */
@@ -935,6 +1028,7 @@ export class VisorEdificio {
 
   _animar() {
     requestAnimationFrame(this._animar);
+    if (!this._listo) return;
     const a = this.actual;
     const d = this.deseado;
 

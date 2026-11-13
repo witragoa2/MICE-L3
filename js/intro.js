@@ -95,10 +95,13 @@
 
   const set=(id,v)=>$(id).setAttribute('transform',v);
 
-  let start=null, raf, paused=false;
+  // Tiempo propio de la animación: si el navegador se traba un momento, avanza máximo 40 ms por cuadro
+  // (sigue donde iba en lugar de brincar hacia adelante).
+  let anterior=null, transcurrido=0, raf, paused=false;
   function frame(now){
-    if(start===null) start=now;
-    const ms=(now-start)/SPEED;
+    if(anterior===null) anterior=now;
+    transcurrido += Math.min(now-anterior, 40); anterior=now;
+    const ms=transcurrido/SPEED;
     encuadre(ms);
 
     // flotación suave mientras está solo
@@ -152,7 +155,10 @@
   document.addEventListener('keydown', alTeclear);
   // Solo para revisar la animación (?depurar): miceIntro.ir(ms) congela la intro en ese instante.
   if(new URLSearchParams(location.search).has('depurar')){
-    window.miceIntro = { ir: ms => { paused=true; cancelAnimationFrame(raf); start=0; frame(ms*SPEED); }, END };
+    // miceIntro.pausas: bloqueos del navegador (> 30 ms) mientras corre la intro, para medir tirones.
+    const pausas = []; let previo = performance.now();
+    (function vigilar(){ const t = performance.now(); if(t - previo > 30) pausas.push(Math.round(t - previo)); previo = t; if(!terminada) setTimeout(vigilar, 0); })();
+    window.miceIntro = { ir: ms => { paused=true; cancelAnimationFrame(raf); anterior=null; transcurrido=ms*SPEED; frame(performance.now()); }, END, pausas };
   }
   encuadre(0);
   raf=requestAnimationFrame(frame);
