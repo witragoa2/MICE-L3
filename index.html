@@ -6,7 +6,15 @@
   <meta name="description" content="Mapa Interactivo de Clases para Estudiantes del Laboratorio 3, FES Aragón, UNAM.">
   <title>MICE L3 · FES Aragón</title>
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
-  <link rel="stylesheet" href="css/estilos.css?v=46">
+  <script>
+    // Antes de pintar: si la intro ya se vio en esta visita (o se pidió menos movimiento), no se muestra ni un instante.
+    try {
+      if (sessionStorage.getItem("mice-intro-vista") === "1" || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        document.documentElement.classList.add("sin-intro");
+      }
+    } catch {}
+  </script>
+  <link rel="stylesheet" href="css/estilos.css?v=47">
   <script type="importmap">
     {
       "imports": {
@@ -63,7 +71,7 @@
  </g></g>
 </svg>
 </div>
-  <script src="js/intro.js?v=49"></script>
+  <script src="js/intro.js?v=50"></script>
 
   <header class="app-header">
     <img class="logo-mice" src="img/MICE.png" alt="Logo del MICE L3">

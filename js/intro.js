@@ -137,6 +137,7 @@
     set('mi-logo',`translate(0 ${T.ly(ms)}) translate(183 270) scale(${ls*T.lsx(ms)} ${ls*T.lsy(ms)}) translate(-183 -270)`);
     intro.style.clipPath=`circle(${T.cur(ms)}% at 50% -5%)`;
 
+    if(svgEl.style.visibility !== 'visible') svgEl.style.visibility = 'visible'; // ya acomodado: se muestra
     if(paused) return;
     if(ms<END) raf=requestAnimationFrame(frame); else finish();
   }
