@@ -101,6 +101,11 @@ body {
   letter-spacing: 0.04em;
 }
 
+/* Grupos de palabras que no se parten entre renglones (p. ej. "FES Aragón") */
+.sin-corte {
+  white-space: nowrap;
+}
+
 /* ---------- Botón y ventana de la guía de uso ---------- */
 
 .guia-btn {
