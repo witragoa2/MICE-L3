@@ -1,8 +1,8 @@
-﻿// ============================================================
+// ============================================================
 // MICE L3 · búsqueda, horarios, secciones y visor 3D
 // ============================================================
 
-const VERSION = "47";
+const VERSION = "49";
 const $ = (id) => document.getElementById(id);
 
 const estado = {
@@ -66,7 +66,6 @@ const AYUDA_MAPA = TACTIL
   : "Arrastra para girar · clic derecho, botón central o Shift+arrastrar para mover · rueda para acercar";
 const AYUDA_MOVER = TACTIL ? "dos dedos para mover" : "clic derecho para mover";
 const AYUDA_2D = TACTIL ? "un dedo para mover · pellizca para acercar" : "arrastra para mover · rueda para acercar";
-const FOTO_GENERICA = "img/profesor_generico.png";
 const SIN_BUSQUEDA = "<p class='placeholder'>Aún no hay búsqueda.</p>";
 
 // ---------- utilidades ----------
@@ -337,6 +336,14 @@ function conectarInterfaz() {
   });
   $("limpiarBtn").addEventListener("click", limpiarBusqueda);
 
+  // Guía de uso (ventana con Esc para cerrar; también se cierra al tocar fuera de ella).
+  const guia = $("guia");
+  $("guiaBtn").addEventListener("click", () => guia.showModal());
+  $("guiaCerrar").addEventListener("click", () => guia.close());
+  guia.addEventListener("click", (e) => {
+    if (e.target === guia) guia.close();
+  });
+
   document.querySelectorAll(".nivelBtn[data-nivel]").forEach((btn) => {
     btn.addEventListener("click", () => {
       if (!estado.visor) return;
@@ -430,7 +437,7 @@ function textoNivel(nivel) {
     : `${nombreNivel(nivel)} · ${TACTIL ? "toca" : "haz clic en"} un salón`;
 }
 
-// ---------- enlaces directos (?grupo=, ?maestro=, ?materia=, ?ahora, ?nivel=, ?vista=) ----------
+// ---------- enlaces directos (?grupo=, ?maestro=, ?materia=, ?ahora, ?nivel=, ?vista=, ?guia) ----------
 
 function aplicarParametrosDeEnlace() {
   const p = new URLSearchParams(window.location.search);
@@ -442,6 +449,7 @@ function aplicarParametrosDeEnlace() {
       return;
     }
   }
+  if (p.has("guia")) $("guia").showModal();
   if (p.has("ahora")) {
     clasesAhora();
     return;
@@ -472,7 +480,6 @@ function cambiarModo(modo) {
   input.placeholder = PLACEHOLDER_MODO[modo];
   ocultarAutocompletado();
   $("result").innerHTML = SIN_BUSQUEDA;
-  actualizarFotoProfesor(null);
   enfocar(input);
 }
 
@@ -593,7 +600,6 @@ function sugerencias(modo, opciones) {
 
 function sinResultados(mensaje, htmlSugerencias = "") {
   $("result").innerHTML = `<p class='placeholder'>${mensaje}</p>${htmlSugerencias}`;
-  actualizarFotoProfesor(null);
   if (estado.visor) {
     estado.visor.limpiarResaltado();
     estadoMapa(AYUDA_MAPA);
@@ -619,7 +625,6 @@ function buscarPorGrupo() {
   }
   $("searchInput").value = grupo.grupo;
   renderizarGrupo(grupo);
-  actualizarFotoProfesor(grupo.profesor);
   ubicarSalon(grupo.salon);
 }
 
@@ -666,7 +671,6 @@ function buscarPorMateria() {
     <p class="salones-chips">${salones.map((s) => `<span class="clase-salon">${escapar(nombreSalon(s))}</span>`).join(" ")}</p>
     ${bloques}`;
 
-  actualizarFotoProfesor(porProfesor.size === 1 ? grupos[0].profesor : null, porProfesor.size > 1);
   ubicarSalones(salones, `${materia} · ${salones.length} salón(es)`);
 }
 
@@ -684,12 +688,13 @@ function buscarPorMaestro() {
     );
     return;
   }
+  const nombres = [...new Set(clases.map((c) => c.profesor))];
+  const correo = nombres.length === 1 ? correoProfesor(nombres[0]) : "";
   $("result").innerHTML = `
     <p><strong>${clases.length}</strong> clase(s) encontrada(s) para “${escapar(texto)}”.</p>
+    ${correo ? `<p class="correo-linea">Correo: ${correo}</p>` : ""}
     <div class="clase-lista">${clases.map((c) => tarjetaClase(c)).join("")}</div>`;
 
-  const nombres = [...new Set(clases.map((c) => c.profesor))];
-  actualizarFotoProfesor(nombres.length === 1 ? nombres[0] : null, nombres.length > 1);
   if (nombres.length === 1) {
     const salones = [...new Set(clases.map((c) => c.salon))];
     ubicarSalones(salones, `${nombres[0]} · ${salones.length} salón(es)`);
@@ -734,7 +739,7 @@ function renderizarGrupo(grupo) {
     </div>
     <dl class="ficha-grid">
       <dt>Clave</dt><dd>${escapar(grupo.clave)}</dd>
-      <dt>Profesor</dt><dd>${escapar(grupo.profesor)}</dd>
+      <dt>Profesor</dt><dd>${escapar(grupo.profesor)}${correoProfesor(grupo.profesor) ? `<br>${correoProfesor(grupo.profesor)}` : ""}</dd>
       <dt>Salón</dt><dd>${escapar(nombreSalon(grupo.salon))}</dd>
       <dt>Tipo</dt><dd>${escapar(grupo.tipo || "—")}${grupo.cupo ? ` · Cupo ${escapar(grupo.cupo)}` : ""}</dd>
     </dl>
@@ -755,7 +760,6 @@ function cambiarSeccion(seccion) {
   $("seccionBusqueda").hidden = seccion !== "busqueda";
   $("seccionLista").hidden = seccion === "busqueda";
   ocultarAutocompletado();
-  actualizarFotoProfesor(null);
 
   if (seccion === "busqueda") {
     limpiarMapa();
@@ -862,7 +866,6 @@ function limpiarBusqueda() {
   $("searchInput").value = "";
   ocultarAutocompletado();
   $("result").innerHTML = SIN_BUSQUEDA;
-  actualizarFotoProfesor(null);
   limpiarMapa();
   if (window.location.search) history.replaceState(null, "", window.location.pathname);
   enfocar($("searchInput"));
@@ -903,7 +906,6 @@ function clasesAhora() {
       <div class="clase-lista">${tarjetas(siguientes, false)}</div>`;
   }
   $("result").innerHTML = html;
-  actualizarFotoProfesor(null, enCurso.length > 1);
 
   const resaltar = (enCurso.length ? enCurso : siguientes).map((s) => s.grupo.salon);
   if (resaltar.length) {
@@ -1099,37 +1101,15 @@ function conectarLineaTiempo() {
   $("ltResetBtn").addEventListener("click", () => volverAhora(true));
 }
 
-// ---------- panel del profesor ----------
+// ---------- correo del profesor ----------
 
-function actualizarFotoProfesor(nombre, varios = false) {
-  const foto = $("fotoProfesor");
-  const correo = $("correoProfesor");
-  correo.classList.remove("visible");
-  correo.replaceChildren();
-
-  if (!nombre) {
-    foto.src = FOTO_GENERICA;
-    foto.alt = varios ? "Varios profesores" : "Foto del profesor";
-    $("nombreProfesorFoto").textContent = varios ? "Varios maestros" : "Selecciona un maestro";
-    return;
-  }
-
-  const profesor = estado.profesores.find((p) => p.nombre === nombre);
-  foto.onerror = () => {
-    foto.onerror = null;
-    foto.src = FOTO_GENERICA;
-  };
-  foto.src = profesor?.foto || FOTO_GENERICA;
-  foto.alt = `Foto de ${nombre}`;
-  $("nombreProfesorFoto").textContent = nombre;
-
-  if (profesor?.correo) {
-    // Corte de línea permitido solo después de la @.
-    const [usuario, dominio] = profesor.correo.split("@");
-    correo.append(dominio ? `${usuario}@` : usuario);
-    if (dominio) correo.append(document.createElement("wbr"), dominio);
-    correo.classList.add("visible");
-  }
+/** Enlace al correo del profesor (si lo tiene registrado); vacío si no. */
+function correoProfesor(nombre) {
+  const correo = estado.profesores.find((p) => p.nombre === nombre)?.correo;
+  if (!correo) return "";
+  const [usuario, dominio] = escapar(correo).split("@");
+  // Corte de línea permitido solo después de la @.
+  return `<a class="correo-profesor" href="mailto:${escapar(correo)}">${usuario}@<wbr>${dominio || ""}</a>`;
 }
 
 // ---------- visor 3D ----------
@@ -1217,7 +1197,6 @@ function mostrarArea(area) {
   estadoMapa(area.tipo === "bano"
     ? `${area.nombre} · descanso de la escalera`
     : `${area.codigo || area.nombre} · ${nombreNivel(area.nivel)}`);
-  actualizarFotoProfesor(null);
 
   const titulo = [area.codigo, area.nombre !== area.codigo ? area.nombre : null, area.alias].filter(Boolean).join(" · ");
   const subtitulo = area.descripcion || `${NOMBRE_TIPO[area.tipo] || ""} · ${area.ubicacion || nombreNivel(area.nivel)}`;

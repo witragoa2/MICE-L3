@@ -37,8 +37,8 @@ python scripts/actualizar_semestre.py --correos
 | --- | --- |
 | Horarios | Reemplaza por completo `data/horarios.json` con los grupos del PDF nuevo. |
 | PDF anteriores | Mueve los PDF de semestres pasados a `pdf_origen/anteriores/` (no los borra). |
-| Profesores | `data/profesores.json` queda solo con los profesores del semestre: conserva correo y foto de los que siguen, agrega a los nuevos y quita a los que ya no dan clase. |
-| Profesores que se van | Se guardan en `data/profesores_anteriores.json`; si regresan otro semestre, recuperan su correo y foto solos. |
+| Profesores | `data/profesores.json` queda solo con los profesores del semestre: conserva el correo de los que siguen, agrega a los nuevos y quita a los que ya no dan clase. |
+| Profesores que se van | Se guardan en `data/profesores_anteriores.json`; si regresan otro semestre, recuperan su correo solos. |
 | Correos (`--correos`) | Busca en el [directorio de profesores del L3](https://sites.google.com/aragon.unam.mx/laboratorio-l3/directorio/profesores) los correos que falten. Solo asigna los que coinciden claramente con el nombre (los dos apellidos). Los dudosos se listan para revisarlos a mano. Si la página trae un correo distinto al guardado, lo avisa y conserva el guardado. |
 | Revisión | Revisa los datos y muestra errores, avisos e información. |
 
@@ -61,11 +61,12 @@ Otras opciones:
 | Horas fuera de 7:00-24:00 | Una hora no cabe en la línea del tiempo o está al revés. | Revisa el PDF. |
 | Profesores sin correo | No se encontró su correo. | Escríbelo a mano en `data/profesores.json`. |
 
-## Correos y fotos de profesores
+## Correos de profesores
 
 - **Correo:** en `data/profesores.json`, campo `"correo"`. Lo que escribas a mano se conserva en las siguientes actualizaciones.
 - **Página oficial de correos:** el directorio de profesores del L3 en Google Sites. Su dirección está en `URL_CORREOS`, en `scripts/correos_l3.py`; si cambia, actualízala ahí.
-- **Foto:** guarda la imagen en `img/profesores/` con los apellidos y nombre en minúsculas, sin acentos y con guiones bajos. Por ejemplo, para GARZÓN ACEVES MAX OSWALDO usa `garzon_aceves_max_oswaldo.jpg` (también sirven `.png` y `.webp`). Al actualizar se liga sola; sin foto se usa la genérica.
+- **Fotos:** la página no muestra fotos de profesores (no se autorizó su uso).
+- **Dónde se ve:** el correo aparece en la ficha de cada grupo y al buscar por profesor.
 
 ## Grupos estudiantiles y servicios para alumnos
 
@@ -90,7 +91,7 @@ python scripts/generar_fachada.py
 python -m http.server 8765
 ```
 
-Abre `http://localhost:8765`. Agrega `?depurar` a la dirección para poder revisar el visor 3D desde la consola del navegador (`window.miceVisor`).
+Abre `http://localhost:8765`. Agrega `?guia` para abrir la guía de uso al entrar, o `?depurar` para poder revisar el visor 3D desde la consola del navegador (`window.miceVisor`).
 
 Los datos (`data/*.json`) se recargan solos. Si cambias **JavaScript o CSS**, sube el número de versión en dos lugares para que los navegadores no usen la copia vieja:
 
@@ -103,7 +104,7 @@ Los datos (`data/*.json`) se recargan solos. Si cambias **JavaScript o CSS**, su
 | --- | --- |
 | `index.html`, `css/`, `js/` | La página. `js/principal.js` (búsquedas, línea del tiempo, pestañas) y `js/escena3d.js` (visor 3D). |
 | `data/` | Datos que lee la página: `horarios.json`, `profesores.json`, `secciones.json`, `edificio.json`, `fachada.json`. |
-| `img/` | Logo, foto genérica y `profesores/` con las fotos. |
+| `img/` | Logo. |
 | `pdf_origen/` | PDF de horarios del semestre actual (y `anteriores/`). |
 | `modelos/` | Archivos de AutoCAD del edificio. |
 | `scripts/` | Scripts de Python que generan los datos. |

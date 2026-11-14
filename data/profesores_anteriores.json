@@ -1,6 +1,6 @@
 {
   "meta": {
-    "nota": "Profesores de semestres anteriores; no lo usa la página. Sirve para recuperar su correo y foto si regresan."
+    "nota": "Se genera con scripts/actualizar_semestre.py: solo los profesores del semestre. El correo se puede editar a mano y se conserva al actualizar; sin correo no se muestra."
   },
   "profesores": []
 }

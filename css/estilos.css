@@ -101,52 +101,191 @@ body {
   letter-spacing: 0.04em;
 }
 
-.panel-foto {
+/* ---------- Botón y ventana de la guía de uso ---------- */
+
+.guia-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  padding: 8px 16px 8px 8px;
+  background: transparent;
+  border: 2px solid var(--dorado);
+  border-radius: 999px;
+  color: var(--blanco);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.guia-btn:hover,
+.guia-btn:focus-visible {
+  background: var(--dorado);
+  color: var(--azul);
+}
+
+.guia-icono {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--dorado);
+  color: var(--azul);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.guia {
+  width: min(720px, calc(100vw - 32px));
+  max-height: min(86vh, 900px);
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  box-shadow: 0 24px 60px rgba(0, 20, 50, 0.35);
+  color: var(--texto, #1d2733);
+}
+
+.guia::backdrop {
+  background: rgba(0, 25, 55, 0.55);
+}
+
+.guia[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.guia-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: var(--azul);
+  border-bottom: 3px solid var(--dorado);
+  color: var(--blanco);
+}
+
+.guia-cabecera h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.guia-cerrar {
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  color: var(--blanco);
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.guia-cerrar:hover,
+.guia-cerrar:focus-visible {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.guia-cuerpo {
+  overflow-y: auto;
+  padding: 6px 22px 20px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.guia-intro {
+  margin: 12px 0 4px;
+  font-size: 15px;
+}
+
+.guia section {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--linea);
+}
+
+.guia h3 {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-left: auto;
-  min-width: 0;
+  margin: 0 0 6px;
+  color: var(--azul);
+  font-size: 16px;
 }
 
-.foto-nombre {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.panel-foto img {
-  width: 58px;
-  height: 58px;
+.guia-num {
+  display: grid;
+  place-items: center;
+  flex: 0 0 26px;
+  height: 26px;
   border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid var(--dorado);
-  background: var(--azul-claro);
+  background: var(--dorado);
+  color: var(--azul);
+  font-size: 13px;
+  font-weight: 800;
 }
 
-.foto-nombre p {
+.guia ul {
   margin: 0;
-  max-width: 230px;
-  color: var(--blanco);
-  font-size: 11px;
+  padding-left: 20px;
+}
+
+.guia li {
+  margin: 3px 0;
+}
+
+.guia p {
+  margin: 0;
+}
+
+.guia-tabla {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--linea);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.guia-tabla > div {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--linea);
+}
+
+.guia-tabla > div:nth-child(odd) {
+  border-right: 1px solid var(--linea);
+}
+
+.guia-tabla > div:nth-child(-n + 2) {
+  background: var(--azul-claro);
+  color: var(--azul);
+}
+
+.guia-tabla > div:nth-last-child(-n + 2) {
+  border-bottom: 0;
+}
+
+.guia-leyenda {
+  padding-left: 0 !important;
+}
+
+.guia-nota {
+  margin-top: 14px !important;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Correo del profesor en las fichas de resultados */
+.correo-profesor {
+  color: var(--azul-medio);
   font-weight: 600;
-  text-align: center;
-  letter-spacing: 0;
+  overflow-wrap: anywhere;
 }
 
-/* Correo debajo del nombre, en dorado (información pública, con permiso). */
-.correo-box {
-  display: none;
-  max-width: 230px;
-  color: var(--dorado-claro);
-  font-size: 11px;
-  font-weight: 700;
-  text-align: center;
-}
-
-.correo-box.visible {
-  display: block;
+.correo-linea {
+  margin: 4px 0 8px;
 }
 
 /* ---------- Distribución ---------- */
@@ -1241,10 +1380,6 @@ html.intro-activa body {
     bottom: 62px;
   }
 
-  .panel-foto {
-    margin-left: 0;
-  }
-
   .app-header {
     flex-wrap: wrap;
     gap: 12px;
@@ -1262,10 +1397,6 @@ html.intro-activa body {
     margin: 4px 0 0;
   }
 
-  .panel-foto {
-    flex: 1 1 100%;
-    justify-content: flex-start;
-  }
 }
 
 @media (max-width: 560px) {
@@ -1304,34 +1435,34 @@ html.intro-activa body {
     height: 48px;
   }
 
-  /* Profesor centrado: foto pequeña y nombre en una fila, correo debajo. */
-  .panel-foto {
-    justify-content: center;
+  /* Guía: botón compacto junto al título y ventana a pantalla completa */
+  .guia-btn {
+    align-self: flex-start;
+    padding: 6px 12px 6px 6px;
+    font-size: 13px;
   }
 
-  .foto-nombre {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    column-gap: 10px;
-    row-gap: 2px;
+  .guia-icono {
+    width: 22px;
+    height: 22px;
+    font-size: 14px;
   }
 
-  .panel-foto img {
-    width: 40px;
-    height: 40px;
-  }
-
-  .foto-nombre p {
-    max-width: calc(100% - 50px);
-    text-align: center;
-  }
-
-  .correo-box {
-    flex-basis: 100%;
+  .guia {
+    width: 100vw;
     max-width: none;
-    text-align: center;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .guia-cuerpo {
+    padding: 4px 16px 24px;
+  }
+
+  .guia-tabla {
+    font-size: 13px;
   }
 
   .layout {
