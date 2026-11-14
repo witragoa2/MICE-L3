@@ -3,283 +3,228 @@
     "semestre": "2027-I",
     "actualizado": "2026-11-12",
     "total": 55,
-    "nota": "Se genera con scripts/actualizar_semestre.py: solo los profesores del semestre. correo y foto se pueden editar a mano y se conservan al actualizar. Sin foto se usa la genérica; sin correo no se muestra."
+    "nota": "Se genera con scripts/actualizar_semestre.py: solo los profesores del semestre. El correo se puede editar a mano y se conserva al actualizar; sin correo no se muestra."
   },
   "profesores": [
     {
       "nombre": "ABREU GONZALEZ MARIA BRENDA",
-      "correo": "vinculacion@aragon.unam.mx",
-      "foto": null
+      "correo": "vinculacion@aragon.unam.mx"
     },
     {
       "nombre": "AGUIRRE GUTIERREZ SALVADOR",
-      "correo": "salvadoraguirre55@aragon.unam.mx",
-      "foto": null
+      "correo": "salvadoraguirre55@aragon.unam.mx"
     },
     {
       "nombre": "ARELLANO RIVERA ESTEBAN",
-      "correo": "estebanriverac1@aragon.unam.mx",
-      "foto": null
+      "correo": "estebanriverac1@aragon.unam.mx"
     },
     {
       "nombre": "CLEMENTE DE BLAS SINUE SAMUEL",
-      "correo": "l3.sinueclemente@aragon.unam.mx",
-      "foto": null
+      "correo": "l3.sinueclemente@aragon.unam.mx"
     },
     {
       "nombre": "ESTRADA GARCIA JOSE LUIS",
-      "correo": "luisgarciaca@aragon.unam.mx",
-      "foto": null
+      "correo": "luisgarciaca@aragon.unam.mx"
     },
     {
       "nombre": "ESTRIBERO GONZALEZ FRANCISCO",
-      "correo": "franciscoestriberow4@aragon.unam.mx",
-      "foto": null
+      "correo": "franciscoestriberow4@aragon.unam.mx"
     },
     {
       "nombre": "GARCIA CASTREJON ROBERTO AGUSTIN",
-      "correo": "l3.robertogarcia@aragon.unam.mx",
-      "foto": null
+      "correo": "l3.robertogarcia@aragon.unam.mx"
     },
     {
       "nombre": "GARCIA GUZMAN ENRIQUE",
-      "correo": "enriquegarcia6u4@aragon.unam.mx",
-      "foto": null
+      "correo": "enriquegarcia6u4@aragon.unam.mx"
     },
     {
       "nombre": "GARCIA HERNANDEZ SERGIO",
-      "correo": "sergiogarciagah@aragon.unam.mx",
-      "foto": null
+      "correo": "sergiogarciagah@aragon.unam.mx"
     },
     {
       "nombre": "GARZON ACEVES MAX OSWALDO",
-      "correo": "maxgarzon6t5@aragon.unam.mx",
-      "foto": "img/profesores/garzon_aceves_max_oswaldo.jpg"
+      "correo": "maxgarzon6t5@aragon.unam.mx"
     },
     {
       "nombre": "GONZALEZ BETANCOURT NORA ABIGAIL",
-      "correo": "abigailbetancourtd5@aragon.unam.mx",
-      "foto": null
+      "correo": "abigailbetancourtd5@aragon.unam.mx"
     },
     {
       "nombre": "GONZALEZ HERNANDEZ GERARDO",
-      "correo": "gerardogonzalezgoh@aragon.unam.mx",
-      "foto": null
+      "correo": "gerardogonzalezgoh@aragon.unam.mx"
     },
     {
       "nombre": "GONZALEZ LEDESMA ALBERTO",
-      "correo": "cae@aragon.unam.mx",
-      "foto": null
+      "correo": "cae@aragon.unam.mx"
     },
     {
       "nombre": "GONZALEZ MAXINEZ DAVID JAIME",
-      "correo": "davidmaxinezs2@aragon.unam.mx",
-      "foto": null
+      "correo": "davidmaxinezs2@aragon.unam.mx"
     },
     {
       "nombre": "GONZALEZ MONDRAGON NOE",
-      "correo": "noegonzalezx1@aragon.unam.mx",
-      "foto": null
+      "correo": "noegonzalezx1@aragon.unam.mx"
     },
     {
       "nombre": "GONZALEZ MONDRAGON VICTOR MANUEL",
-      "correo": "victorgonzalez37@aragon.unam.mx",
-      "foto": null
+      "correo": "victorgonzalez37@aragon.unam.mx"
     },
     {
       "nombre": "HERNANDEZ CONTRERAS JUAN MANUEL",
-      "correo": "juanhernandez1z7@aragon.unam.mx",
-      "foto": null
+      "correo": "juanhernandez1z7@aragon.unam.mx"
     },
     {
       "nombre": "HERNANDEZ HERNANDEZ HORACIO ALDO",
-      "correo": "aldohernandezya@aragon.unam.mx",
-      "foto": null
+      "correo": "aldohernandezya@aragon.unam.mx"
     },
     {
       "nombre": "HERNANDEZ HERNANDEZ MARTIN",
-      "correo": "martinhernandez5u8@aragon.unam.mx",
-      "foto": null
+      "correo": "martinhernandez5u8@aragon.unam.mx"
     },
     {
       "nombre": "HERRERA HIDALGO ENRIQUE",
-      "correo": "enriqueherreraheh@aragon.unam.mx",
-      "foto": null
+      "correo": "enriqueherreraheh@aragon.unam.mx"
     },
     {
       "nombre": "LECHUGA ALARCON LUIS ALBERTO",
-      "correo": "albertoalarconf2@aragon.unam.mx",
-      "foto": null
+      "correo": "albertoalarconf2@aragon.unam.mx"
     },
     {
       "nombre": "LOREDO LOPEZ GERARDO",
-      "correo": "ingerardo1@yahoo.com.mx",
-      "foto": null
+      "correo": "ingerardo1@yahoo.com.mx"
     },
     {
       "nombre": "LOZANO MENDEZ EFREN",
-      "correo": "efrenlozanogg2@aragon.unam.mx",
-      "foto": null
+      "correo": "efrenlozanogg2@aragon.unam.mx"
     },
     {
       "nombre": "MARQUEZ RAMIREZ RAFAEL ANTONIO",
-      "correo": "rafaelmarquezmar@aragon.unam.mx",
-      "foto": null
+      "correo": "rafaelmarquezmar@aragon.unam.mx"
     },
     {
       "nombre": "MARTINEZ CASTILLO GERARDO",
-      "correo": "gerardocastilloj5@aragon.unam.mx",
-      "foto": null
+      "correo": "gerardocastilloj5@aragon.unam.mx"
     },
     {
       "nombre": "MARTINEZ ROMERO KARINA",
-      "correo": "karinamartineziu0@aragon.unam.mx",
-      "foto": null
+      "correo": "karinamartineziu0@aragon.unam.mx"
     },
     {
       "nombre": "MORENO ESPINOZA OSCAR GUADALUPE",
-      "correo": "oscarespinozaf3@aragon.unam.mx",
-      "foto": null
+      "correo": "oscarespinozaf3@aragon.unam.mx"
     },
     {
       "nombre": "MUNGUIA MOLINA JUAN",
-      "correo": "juanmolina31@aragon.unam.mx",
-      "foto": null
+      "correo": "juanmolina31@aragon.unam.mx"
     },
     {
       "nombre": "OCON VALDEZ RODRIGO",
-      "correo": "rodrigoocon99@aragon.unam.mx",
-      "foto": null
+      "correo": "rodrigoocon99@aragon.unam.mx"
     },
     {
       "nombre": "OLMOS HERNANDEZ MONICA JAZMIN",
-      "correo": "monicaolmosb4@aragon.unam.mx",
-      "foto": null
+      "correo": "monicaolmosb4@aragon.unam.mx"
     },
     {
       "nombre": "ONTIVEROS SALGADO MAURICIO",
-      "correo": "mauricioontiveros39@aragon.unam.mx",
-      "foto": null
+      "correo": "mauricioontiveros39@aragon.unam.mx"
     },
     {
       "nombre": "ORTEGA NAVA CARLOS FERNANDO",
-      "correo": "fernandonava16@aragon.unam.mx",
-      "foto": null
+      "correo": "fernandonava16@aragon.unam.mx"
     },
     {
       "nombre": "PAREDES ROMERO ADRIAN",
-      "correo": "adrianparedespar@aragon.unam.mx",
-      "foto": null
+      "correo": "adrianparedespar@aragon.unam.mx"
     },
     {
       "nombre": "PATIÑO RODRIGUEZ RAMON",
-      "correo": "ramonrodriguezn9@aragon.unam.mx",
-      "foto": null
+      "correo": "ramonrodriguezn9@aragon.unam.mx"
     },
     {
       "nombre": "PEREZ GARCIA CHRISTIAN JAIR",
-      "correo": "christianperezr4@aragon.unam.mx",
-      "foto": null
+      "correo": "christianperezr4@aragon.unam.mx"
     },
     {
       "nombre": "PEREZ LUIS CARLOS JAVIER",
-      "correo": "carlosperez82@aragon.unam.mx",
-      "foto": null
+      "correo": "carlosperez82@aragon.unam.mx"
     },
     {
       "nombre": "PISCIL RUBIO ULISES TADEO",
-      "correo": "ulisespiscil86@aragon.unam.mx",
-      "foto": null
+      "correo": "ulisespiscil86@aragon.unam.mx"
     },
     {
       "nombre": "RAMIREZ FLORES ANTONIO",
-      "correo": "antonioramirezb9@aragon.unam.mx",
-      "foto": null
+      "correo": "antonioramirezb9@aragon.unam.mx"
     },
     {
       "nombre": "RAMIREZ RAMIREZ SERGIO",
-      "correo": "sergioramirezrar@aragon.unam.mx",
-      "foto": null
+      "correo": "sergioramirezrar@aragon.unam.mx"
     },
     {
       "nombre": "REYES ESCALERA OSCAR",
-      "correo": "oscarreyes55a@aragon.unam.mx",
-      "foto": null
+      "correo": "oscarreyes55a@aragon.unam.mx"
     },
     {
       "nombre": "RODRIGUEZ ARGUMEDO URIEL",
-      "correo": "l3.urielrodriguez@aragon.unam.mx",
-      "foto": null
+      "correo": "l3.urielrodriguez@aragon.unam.mx"
     },
     {
       "nombre": "RODRIGUEZ GARCIA ARTURO",
-      "correo": "arturorodriguez35@aragon.unam.mx",
-      "foto": null
+      "correo": "arturorodriguez35@aragon.unam.mx"
     },
     {
       "nombre": "ROMERO BADILLO NORMA ANGELICA",
-      "correo": "normaromerorob@aragon.unam.mx",
-      "foto": null
+      "correo": "normaromerorob@aragon.unam.mx"
     },
     {
       "nombre": "SERAPIO CARMONA ALEJANDRO ANDRES",
-      "correo": "alejandroserapiod3@aragon.unam.mx",
-      "foto": null
+      "correo": "alejandroserapiod3@aragon.unam.mx"
     },
     {
       "nombre": "SOTO DURAN CHARLIE MICHEL EDUARDO",
-      "correo": "charlieduranwa@aragon.unam.mx",
-      "foto": null
+      "correo": "charlieduranwa@aragon.unam.mx"
     },
     {
       "nombre": "SUAREZ PINEDA MANUEL",
-      "correo": "manuelsuarez32@aragon.unam.mx",
-      "foto": null
+      "correo": "manuelsuarez32@aragon.unam.mx"
     },
     {
       "nombre": "VAZQUEZ MARTINEZ FERNANDO XAVIER",
-      "correo": "fernandovazquezia@aragon.unam.mx",
-      "foto": null
+      "correo": "fernandovazquezia@aragon.unam.mx"
     },
     {
       "nombre": "VEGA SALOME RAUL",
-      "correo": "raulvegac2@aragon.unam.mx",
-      "foto": null
+      "correo": "raulvegac2@aragon.unam.mx"
     },
     {
       "nombre": "VERDE CRUZ ABEL",
-      "correo": "abelverde53@aragon.unam.mx",
-      "foto": null
+      "correo": "abelverde53@aragon.unam.mx"
     },
     {
       "nombre": "VILLAFUERTE GARCIA ALEJANDRO",
-      "correo": "alejandrovillafuerteea4@aragon.unam.mx",
-      "foto": null
+      "correo": "alejandrovillafuerteea4@aragon.unam.mx"
     },
     {
       "nombre": "VILLANUEVA ORTEGA JUAN ANTONIO",
-      "correo": "juanvillanuevavio@aragon.unam.mx",
-      "foto": null
+      "correo": "juanvillanuevavio@aragon.unam.mx"
     },
     {
       "nombre": "VILLAR PEREZ ILEBARDO JOEL",
-      "correo": "joelvillar99@aragon.unam.mx",
-      "foto": null
+      "correo": "joelvillar99@aragon.unam.mx"
     },
     {
       "nombre": "VILLEGAS JIMENEZ ERNESTO ALONSO",
-      "correo": "ernestovillegas723@aragon.unam.mx",
-      "foto": null
+      "correo": "ernestovillegas723@aragon.unam.mx"
     },
     {
       "nombre": "ZEPEDA CERVANTES ERIKA ANDREA",
-      "correo": "erikazepedac1@aragon.unam.mx",
-      "foto": null
+      "correo": "erikazepedac1@aragon.unam.mx"
     },
     {
       "nombre": "ZUÑIGA VILLEGAS BENITO",
-      "correo": "benitozunigalp4@aragon.unam.mx",
-      "foto": null
+      "correo": "benitozunigalp4@aragon.unam.mx"
     }
   ]
 }

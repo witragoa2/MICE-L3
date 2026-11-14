@@ -4,9 +4,9 @@ Pasos (todos automáticos):
   1. Toma el PDF del semestre más reciente de pdf_origen/ y REEMPLAZA data/horarios.json.
      Los PDF de semestres anteriores se mueven a pdf_origen/anteriores/.
   2. Deja en data/profesores.json solo a los profesores de este semestre: conserva
-     el correo y la foto de los que siguen, agrega a los nuevos y quita a los que ya
-     no dan clase. Los quitados se guardan en data/profesores_anteriores.json para
-     recuperar su correo y foto si regresan otro semestre.
+     el correo de los que siguen, agrega a los nuevos y quita a los que ya no dan
+     clase. Los quitados se guardan en data/profesores_anteriores.json para recuperar
+     su correo si regresan otro semestre.
   3. Con --correos, busca en la página oficial del L3 los correos que falten.
   4. Revisa los datos y muestra un reporte (salones que no existen en el modelo, etc.).
 
@@ -36,13 +36,10 @@ PROFESORES = DATOS / "profesores.json"
 ANTERIORES = DATOS / "profesores_anteriores.json"
 EDIFICIO = DATOS / "edificio.json"
 SECCIONES = DATOS / "secciones.json"
-DIR_FOTOS = RAIZ / "img" / "profesores"
-EXTENSIONES_FOTO = (".jpg", ".jpeg", ".png", ".webp")
 HORA_MIN, HORA_MAX = 7 * 60, 24 * 60  # rango de la línea del tiempo de la página
 NOTA_PROFESORES = (
     "Se genera con scripts/actualizar_semestre.py: solo los profesores del semestre. "
-    "correo y foto se pueden editar a mano y se conservan al actualizar. "
-    "Sin foto se usa la genérica; sin correo no se muestra."
+    "El correo se puede editar a mano y se conserva al actualizar; sin correo no se muestra."
 )
 
 
@@ -58,22 +55,6 @@ def guardar_json(ruta, datos, compacto=False):
 
 def clave(nombre):
     return " ".join(correos_l3.plano(nombre))
-
-
-def nombre_archivo(nombre):
-    """'GARZÓN ACEVES MAX' -> 'garzon_aceves_max' (nombre esperado de su foto)."""
-    return "_".join(correos_l3.plano(nombre)).lower()
-
-
-def foto_de(nombre, previa):
-    """Foto existente: la que ya tenía o img/profesores/<nombre>.jpg|png|webp."""
-    if previa and (RAIZ / previa).exists():
-        return previa
-    for ext in EXTENSIONES_FOTO:
-        ruta = DIR_FOTOS / f"{nombre_archivo(nombre)}{ext}"
-        if ruta.exists():
-            return ruta.relative_to(RAIZ).as_posix()
-    return None
 
 
 def minutos(hhmm):
@@ -93,18 +74,14 @@ def sincronizar_profesores(nombres_semestre, actuales, anteriores):
     for nombre in sorted(nombres_semestre, key=clave):
         k = clave(nombre)
         previo = conocidos.get(k)
-        profesores.append({
-            "nombre": nombre,
-            "correo": (previo or {}).get("correo") or None,
-            "foto": foto_de(nombre, (previo or {}).get("foto")),
-        })
+        profesores.append({"nombre": nombre, "correo": (previo or {}).get("correo") or None})
         if k not in claves_actuales:
             (recuperados if k in claves_anteriores else agregados).append(nombre)
 
     claves_semestre = {clave(n) for n in nombres_semestre}
     quitados = [p for p in actuales if clave(p["nombre"]) not in claves_semestre]
     historial = {clave(p["nombre"]): p for p in anteriores if clave(p["nombre"]) not in claves_semestre}
-    historial.update({clave(p["nombre"]): p for p in quitados if p.get("correo") or p.get("foto")})
+    historial.update({clave(p["nombre"]): p for p in quitados if p.get("correo")})
     anteriores_nuevos = sorted(historial.values(), key=lambda p: clave(p["nombre"]))
     return profesores, anteriores_nuevos, {"agregados": agregados, "recuperados": recuperados, "quitados": [p["nombre"] for p in quitados]}
 
@@ -182,8 +159,6 @@ def revisar(horarios, profesores, edificio, secciones):
             if s.get("area") not in ids:
                 errores.append(f"secciones.json: '{s.get('nombre')}' apunta al área '{s.get('area')}', que no existe en el modelo.")
 
-    con_foto = sum(1 for p in profesores if p["foto"])
-    info.append(f"{con_foto} de {len(profesores)} profesores con foto (img/profesores/<apellidos_nombre>.jpg)")
     vacios = sorted(c for c in codigos if c not in por_salon)
     if vacios:
         info.append(f"Salones sin clases este semestre: {', '.join(vacios)}")
@@ -235,7 +210,7 @@ def main():
         print(f"Profesores del semestre: {len(profesores)}"
               f" · nuevos {len(cambios['agregados'])} · regresan {len(cambios['recuperados'])} · ya no dan clase {len(cambios['quitados'])}")
         imprimir_lista("Profesores nuevos:", cambios["agregados"])
-        imprimir_lista("Profesores que regresan (se recuperó su correo/foto):", cambios["recuperados"])
+        imprimir_lista("Profesores que regresan (se recuperó su correo):", cambios["recuperados"])
         imprimir_lista("Profesores que ya no dan clase:", cambios["quitados"])
 
         if args.correos is not None:
@@ -260,7 +235,7 @@ def main():
             })
             guardar_json(ANTERIORES, {
                 "meta": {"nota": "Profesores de semestres anteriores; no lo usa la página. "
-                                 "Sirve para recuperar su correo y foto si regresan."},
+                                 "Sirve para recuperar su correo si regresan."},
                 "profesores": anteriores_nuevos,
             })
             archivar_pdfs_anteriores(ruta_pdf)
