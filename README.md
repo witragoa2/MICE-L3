@@ -1,6 +1,6 @@
 # MICE L3
 
-**Mapa Interactivo de Clases para Estudiantes del Laboratorio 3 · FES Aragón**
+**Mapa Interactivo de Clases para Estudiantes del Laboratorio L-3 “Silvia Torres Castilleja” · FES Aragón**
 
 Página web estática (HTML, CSS, JavaScript y Three.js) que muestra el edificio del L3 en 3D y en plano 2D, y permite buscar dónde y cuándo es cada clase por grupo, profesor o materia. Los datos salen de archivos JSON que generan los scripts de Python de `scripts/`.
 
