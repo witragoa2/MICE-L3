@@ -2,7 +2,7 @@
 // MICE L3 · búsqueda, horarios, secciones y visor 3D
 // ============================================================
 
-const VERSION = "51";
+const VERSION = "52";
 const $ = (id) => document.getElementById(id);
 
 const estado = {
@@ -147,14 +147,10 @@ function esperarIntro() {
   });
 }
 
-async function descargar(ruta) {
+async function cargarJSON(ruta) {
   const respuesta = await fetch(ruta, { cache: "no-cache" });
   if (!respuesta.ok) throw new Error(`${ruta}: HTTP ${respuesta.status}`);
-  return respuesta;
-}
-
-async function cargarJSON(ruta) {
-  return (await descargar(ruta)).json();
+  return respuesta.json();
 }
 
 function nivelDeSalon(codigo) {
@@ -241,12 +237,13 @@ document.addEventListener("DOMContentLoaded", iniciar);
 async function iniciar() {
   conectarInterfaz();
 
-  // Todo se descarga en paralelo, pero el modelo 3D (lo pesado) se arma cuando termina la intro,
-  // para que la animación no se trabe.
-  const pedidoModelo = descargar("data/edificio.json");
-  const pedidoFachada = descargar("data/fachada.json");
-  pedidoModelo.catch(() => {});
-  pedidoFachada.catch(() => {});
+  // Durante la intro se descarga y lee el modelo y se carga Three.js; el modelo 3D se arma
+  // cuando termina, porque armarlo antes traba la animación.
+  const preparar3D = Promise.allSettled([
+    cargarJSON("data/edificio.json"),
+    cargarJSON("data/fachada.json"),
+    import(`./escena3d.js?v=${VERSION}`),
+  ]);
   const [horarios, profesores, secciones] = await Promise.allSettled([
     cargarJSON("data/horarios.json"),
     cargarJSON("data/profesores.json"),
@@ -272,11 +269,7 @@ async function iniciar() {
   iniciarLineaTiempo();
 
   await esperarIntro();
-  const [modelo, fachada, modulo3D] = await Promise.allSettled([
-    pedidoModelo.then((r) => r.json()),
-    pedidoFachada.then((r) => r.json()),
-    import(`./escena3d.js?v=${VERSION}`),
-  ]);
+  const [modelo, fachada, modulo3D] = await preparar3D;
   if (modelo.status === "fulfilled") {
     const areas = modelo.value.areas || [];
     estado.areasPorId = Object.fromEntries(areas.map((a) => [a.id, a]));
