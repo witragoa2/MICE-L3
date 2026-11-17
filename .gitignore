@@ -11,3 +11,6 @@ desktop.ini
 .DS_Store
 .vscode/
 .claude/
+
+# Planos del edificio: no se publican (GitHub Pages sirve todo el repositorio)
+modelos/

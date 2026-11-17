@@ -82,6 +82,7 @@ python scripts/generar_fachada.py
 ```
 
 - El origen es `modelos/Laboratorio_3_Edificio_Completo_3D.dxf`; el plano 2D de referencia es `modelos/Laboratorio_3_2D.dxf`.
+- **Los planos no se suben a GitHub** (`modelos/` está en `.gitignore`): todo lo del repositorio queda público en la página. Pídelos al administrador y cópialos en `modelos/` solo cuando haya que regenerar el modelo.
 - Nombres, categorías (colores), puertas y ajustes del modelo están al inicio de `scripts/generar_modelo.py` (`AREAS`, `NOMBRE_ALTERNO`, `UBICACION`, `DESCRIPCION`, etc.).
 - `generar_fachada.py` se corre después, porque usa el centro que guarda `generar_modelo.py`.
 
@@ -106,5 +107,5 @@ Los datos (`data/*.json`) se recargan solos. Si cambias **JavaScript o CSS**, su
 | `data/` | Datos que lee la página: `horarios.json`, `profesores.json`, `secciones.json`, `edificio.json`, `fachada.json`. |
 | `img/` | Logo. |
 | `pdf_origen/` | PDF de horarios del semestre actual (y `anteriores/`). |
-| `modelos/` | Archivos de AutoCAD del edificio. |
+| `modelos/` | Archivos de AutoCAD del edificio (solo en tu computadora; no se suben). |
 | `scripts/` | Scripts de Python que generan los datos. |

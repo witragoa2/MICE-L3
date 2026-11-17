@@ -194,6 +194,12 @@ def main():
         profesores = actuales
         print(f"Revisando datos actuales · semestre {horarios.get('meta', {}).get('semestre', '?')}")
     else:
+        # Sin el semestre en el nombre, el PDF quedaría detrás del anterior y se volvería a publicar el horario viejo.
+        sin_semestre = [p.name for p in generar_json.pdfs_de_horarios() if generar_json.semestre_de_nombre(p) == (0, 0)]
+        if sin_semestre and not args.pdf:
+            sys.exit(f"ERROR: estos PDF no traen el semestre en el nombre: {', '.join(sin_semestre)}\n"
+                     "Renómbralos como Horarios_L3_AÑO-PERIODO.pdf (periodo en romanos, ej. Horarios_L3_2028-I.pdf) "
+                     "y vuelve a ejecutar. No se cambió nada.")
         ruta_pdf = Path(args.pdf).resolve() if args.pdf else generar_json.localizar_pdf()
         if not ruta_pdf.exists():
             sys.exit(f"No existe el PDF: {ruta_pdf}")

@@ -47,6 +47,7 @@ const ESCALA_2D = Math.tan(THREE.MathUtils.degToRad(FOV_3D / 2)) / Math.tan(THRE
 const TAMANO_PASTO = 4000; // m; la niebla oculta su orilla
 const SEPARACION = 6; // metros entre pisos al separarlos
 const SUAVIZADO = 0.09;
+const DURACION_PULSO = 8; // s que parpadea un salón resaltado; después queda fijo y deja de redibujarse
 const DORADO = 0xffc21a;
 const NEGRO = new THREE.Color(0x000000);
 const BRILLO_RESALTADO = new THREE.Color(0x7a5400);
@@ -986,6 +987,7 @@ export class VisorEdificio {
       area.etiqueta.visible = true;
     }
     this.resaltados = lista;
+    this._inicioPulso = this.reloj.getElapsedTime();
     this._marcar(true);
   }
 
@@ -1054,8 +1056,12 @@ export class VisorEdificio {
     if (this.techo) this.techo.position.y = this.niveles.at(-1)?.offset ?? 0;
     if (pisosMovidos) this._marcar(true);
 
-    // Sin cambios ni salones parpadeando, no se vuelve a dibujar.
-    if (!camaraMovida && !this._pendiente && !this.resaltados.length) return;
+    // Sin cambios ni salones parpadeando, no se vuelve a dibujar (al terminar el parpadeo, un cuadro más fijo).
+    const t = this.reloj.getElapsedTime();
+    const latiendo = this.resaltados.length > 0 && t - this._inicioPulso < DURACION_PULSO;
+    if (this._latiendo && !latiendo) this._pendiente = true;
+    this._latiendo = latiendo;
+    if (!camaraMovida && !this._pendiente && !latiendo) return;
     this._pendiente = false;
 
     const radio = a.radio * this._factorAspecto;
@@ -1081,7 +1087,7 @@ export class VisorEdificio {
     this._orientarEtiquetas();
 
     if (this.resaltados.length) {
-      const pulso = 0.5 + 0.5 * Math.sin(this.reloj.getElapsedTime() * 4);
+      const pulso = latiendo ? 0.5 + 0.5 * Math.sin(t * 4) : 1;
       const k = 1 + 0.08 * pulso;
       for (const area of this.resaltados) {
         area.contorno.material.opacity = 0.35 + 0.65 * pulso;
