@@ -2,7 +2,7 @@
 // MICE L3 · búsqueda, horarios, secciones y visor 3D
 // ============================================================
 
-const VERSION = "50";
+const VERSION = "51";
 const $ = (id) => document.getElementById(id);
 
 const estado = {
@@ -515,7 +515,7 @@ function mostrarMaterias(texto) {
 function mostrarGrupos(texto) {
   const digitos = limpiarGrupo(texto);
   const grupos = estado.gruposOrdenados
-    .filter((g) => !digitos || g.grupo.startsWith(digitos))
+    .filter((g, i, lista) => (!digitos || g.grupo.startsWith(digitos)) && g.grupo !== lista[i - 1]?.grupo)
     .map((g) => ({ valor: g.grupo, texto: g.grupo, detalle: `${g.materia} · ${nombreSalon(g.salon)}` }));
   mostrarAutocompletado(grupos, true);
 }
@@ -612,7 +612,8 @@ function buscarPorGrupo() {
     $("result").innerHTML = "<p class='placeholder'>Escribe un número de grupo.</p>";
     return;
   }
-  const grupo = estado.grupos.find((g) => g.grupo === texto);
+  const grupos = estado.gruposOrdenados.filter((g) => g.grupo === texto);
+  const grupo = grupos[0];
   if (!grupo) {
     let parecidos = estado.gruposOrdenados.filter((g) => g.grupo.startsWith(texto));
     if (!parecidos.length) {
@@ -624,6 +625,14 @@ function buscarPorGrupo() {
     return;
   }
   $("searchInput").value = grupo.grupo;
+  if (grupos.length > 1) {
+    // El mismo número de grupo con varias materias o salones en el PDF: se muestran todas.
+    $("result").innerHTML = `
+      <p>El grupo <strong>${escapar(grupo.grupo)}</strong> tiene <strong>${grupos.length}</strong> clases.</p>
+      <div class="clase-lista">${grupos.map((g) => tarjetaClase(g)).join("")}</div>`;
+    ubicarSalones(grupos.map((g) => g.salon), `Grupo ${grupo.grupo}`);
+    return;
+  }
   renderizarGrupo(grupo);
   ubicarSalon(grupo.salon);
 }
