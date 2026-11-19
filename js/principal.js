@@ -2,7 +2,7 @@
 // MICE L3 · búsqueda, horarios, secciones y visor 3D
 // ============================================================
 
-const VERSION = "61";
+const VERSION = "64";
 const $ = (id) => document.getElementById(id);
 
 const estado = {
@@ -766,7 +766,8 @@ function renderizarGrupo(grupo) {
 
 // ---------- secciones: Grupos Estudiantiles / Servicios para Alumnos ----------
 
-function cambiarSeccion(seccion) {
+/** Cambia de pestaña; con `conservarMapa`, Búsqueda no regresa el mapa a la vista inicial. */
+function cambiarSeccion(seccion, conservarMapa = false) {
   estado.seccion = seccion;
   document.querySelectorAll(".seccionBtn").forEach((btn) => {
     const activo = btn.dataset.seccion === seccion;
@@ -780,7 +781,7 @@ function cambiarSeccion(seccion) {
   $("leyendaAreas").hidden = false;
 
   if (seccion === "busqueda") {
-    limpiarMapa();
+    if (!conservarMapa) limpiarMapa();
     return;
   }
   $("filtroSeccion").value = "";
@@ -831,14 +832,13 @@ function renderListaSeccion() {
   } else {
     $("listaSeccion").innerHTML = items
       .map((item) => {
-        const { piso, salon } = datosLugar(item);
+        const { salon } = datosLugar(item);
         return `
           <button type="button" class="clase-card seccion-card" data-area="${escapar(item.area)}">
             <span class="clase-head">
               <span class="seccion-nombre">${escapar(tituloSeccion(item))}</span>
               ${salon ? `<span class="clase-salon">${escapar(salon)}</span>` : ""}
             </span>
-            <span class="clase-meta">${escapar(piso)}</span>
             <span class="clase-meta">${escapar(item.actividades || item.descripcion || "Información pendiente")}</span>
           </button>`;
       })
@@ -854,7 +854,7 @@ function fichaSeccion(item, esGrupo) {
     ["Horario", item.horario],
   ].filter(([, valor]) => valor);
   return `
-    ${item.actividades ? `<p><strong>Actividades:</strong> ${escapar(item.actividades)}</p>` : ""}
+    ${item.actividades ? `<p>${escapar(item.actividades)}</p>` : ""}
     ${item.descripcion ? `<p>${enlazar(item.descripcion)}</p>` : item.web ? "" : `<p class="placeholder">Información pendiente: se agregará próximamente.</p>`}
     ${item.web ? `<p>${enlazar(item.web, "Abrir página web")}</p>` : ""}
     ${campos.length ? `<dl class="ficha-grid">${campos.map(([k, v]) => `<dt>${k}</dt><dd>${enlazar(v)}</dd>`).join("")}</dl>` : ""}
@@ -881,7 +881,7 @@ function mostrarDetalleSeccion(id) {
   verFicha(true);
   $("detalleSeccion").innerHTML = `
     <div class="ficha-grupo"><span class="ficha-materia ficha-materia-grande">${escapar(tituloSeccion(item))}</span></div>
-    <p>${escapar([salon, piso].filter(Boolean).join(" · "))}</p>
+    ${salon ? `<p>${escapar(salon)}</p>` : ""}
     ${fichaSeccion(item, estado.seccion === "grupos")}`;
   // En pantallas bajas la leyenda de colores se oculta para que la ficha quepa sin barra de desplazamiento.
   const panel = document.querySelector(".panel-busqueda");
@@ -1247,6 +1247,16 @@ function actualizarBotonesVisor() {
 
 /** Ficha del área al hacer clic en el modelo 3D. */
 function mostrarArea(area) {
+  // Desde Grupos o Servicios: si el área es de esa pestaña se abre su ficha ahí; si no (un baño,
+  // un salón), se pasa a Búsqueda para que su ficha se vea.
+  const [seccion, item] = seccionDeArea(area.id) || [];
+  if (estado.seccion !== "busqueda") {
+    if (seccion === estado.seccion) {
+      mostrarDetalleSeccion(area.id);
+      return;
+    }
+    cambiarSeccion("busqueda", true);
+  }
   marcarNivelActivo(String(area.nivel));
   marcarVistaActiva(null);
   estadoMapa(area.tipo === "bano"
@@ -1254,8 +1264,7 @@ function mostrarArea(area) {
     : `${area.codigo || area.nombre} · ${nombreNivel(area.nivel)}`);
 
   const titulo = [area.codigo, area.nombre !== area.codigo ? area.nombre : null, area.alias].filter(Boolean).join(" · ");
-  const subtitulo = `${NOMBRE_TIPO[area.tipo] || ""} · ${area.ubicacion || nombreNivel(area.nivel)}`;
-  const [seccion, item] = seccionDeArea(area.id) || [];
+  const subtitulo = NOMBRE_TIPO[area.tipo] || "";
   const grupos = area.codigo ? estado.gruposOrdenados.filter((g) => g.salon === area.codigo) : [];
   const lista = grupos.map((g) => tarjetaClase(g, "", horarioTexto(g) || "Horario pendiente", g.profesor)).join("");
 
@@ -1271,7 +1280,7 @@ function mostrarArea(area) {
       <span class="grupo-codigo">${escapar(titulo)}</span>
       <span class="ficha-materia">${escapar(subtitulo)}</span>
     </div>
-    ${area.descripcion ? `<p>${escapar(area.descripcion)}</p>` : ""}
+    ${(area.descripcion || "").split("\n").filter(Boolean).map((linea) => `<p>${escapar(linea)}</p>`).join("")}
     ${item ? `<p><strong>${escapar(tituloSeccion(item))}</strong></p>${fichaSeccion(item, seccion === "grupos")}` : ""}
     ${cuerpo}`;
 }
