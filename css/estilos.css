@@ -949,6 +949,11 @@ body {
   margin: 0 0 6px;
 }
 
+/* Ficha de grupo o servicio: párrafos más juntos para que quepa sin barra de desplazamiento. */
+#detalleSeccion p {
+  margin-bottom: 4px;
+}
+
 .resultado p:last-child {
   margin-bottom: 0;
 }

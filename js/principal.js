@@ -2,7 +2,7 @@
 // MICE L3 · búsqueda, horarios, secciones y visor 3D
 // ============================================================
 
-const VERSION = "59";
+const VERSION = "60";
 const $ = (id) => document.getElementById(id);
 
 const estado = {
@@ -66,7 +66,9 @@ const AYUDA_MAPA = TACTIL
   : "Arrastra para girar · clic derecho, botón central o Shift+arrastrar para mover · rueda para acercar";
 const AYUDA_MOVER = TACTIL ? "dos dedos para mover" : "clic derecho para mover";
 const AYUDA_2D = TACTIL ? "un dedo para mover · pellizca para acercar" : "arrastra para mover · rueda para acercar";
-const SIN_BUSQUEDA = "<p class='placeholder'>Aún no hay búsqueda.</p>";
+// Se muestra en todos los servicios para alumnos (también en los que se agreguen después).
+const NOTA_SERVICIOS = "si se encuentra cerrado, acércate y pregunta a jefatura por apoyo.";
+const SIN_BUSQUEDA ="<p class='placeholder'>Aún no hay búsqueda.</p>";
 
 // ---------- utilidades ----------
 
@@ -854,6 +856,7 @@ function fichaSeccion(item, esGrupo) {
   return `
     ${item.actividades ? `<p><strong>Actividades:</strong> ${escapar(item.actividades)}</p>` : ""}
     ${item.descripcion ? `<p>${enlazar(item.descripcion)}</p>` : item.web ? "" : `<p class="placeholder">Información pendiente: se agregará próximamente.</p>`}
+    ${esGrupo ? "" : `<p><strong>Nota:</strong> ${NOTA_SERVICIOS}</p>`}
     ${item.web ? `<p>${enlazar(item.web, "Abrir página web")}</p>` : ""}
     ${campos.length ? `<dl class="ficha-grid">${campos.map(([k, v]) => `<dt>${k}</dt><dd>${enlazar(v)}</dd>`).join("")}</dl>` : ""}`;
 }
