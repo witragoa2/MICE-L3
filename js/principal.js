@@ -2,7 +2,7 @@
 // MICE L3 · búsqueda, horarios, secciones y visor 3D
 // ============================================================
 
-const VERSION = "52";
+const VERSION = "59";
 const $ = (id) => document.getElementById(id);
 
 const estado = {
@@ -100,6 +100,18 @@ function coincidePalabras(texto, busqueda) {
   const objetivo = plano(texto);
   const palabras = plano(busqueda).split(" ").filter(Boolean);
   return palabras.length > 0 && palabras.every((p) => objetivo.includes(p));
+}
+
+/** Texto escapado con sus direcciones web y correos convertidos en enlaces (con `etiqueta`, ese texto en lugar de la dirección). */
+function enlazar(texto, etiqueta) {
+  return escapar(texto).replace(/https?:\/\/[^\s<]+|[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g, (m) => {
+    const web = m.startsWith("http");
+    let visible = etiqueta ?? m;
+    try {
+      if (!etiqueta) visible = decodeURI(m).replaceAll("<", "&lt;"); // "sal%C3%B3n" -> "salón"
+    } catch {}
+    return `<a class="enlace" href="${web ? "" : "mailto:"}${m}"${web ? ' target="_blank" rel="noopener"' : ""}>${visible}${web ? " ↗" : ""}</a>`;
+  });
 }
 
 /** "08419", "84-19" -> "8419". */
@@ -328,6 +340,7 @@ function conectarInterfaz() {
     if (tarjeta) mostrarDetalleSeccion(tarjeta.dataset.area);
   });
   $("limpiarBtn").addEventListener("click", limpiarBusqueda);
+  $("atrasBtn").addEventListener("click", volverALista);
 
   // Guía de uso (ventana con Esc para cerrar; también se cierra al tocar fuera de ella).
   const guia = $("guia");
@@ -762,6 +775,7 @@ function cambiarSeccion(seccion) {
   $("seccionBusqueda").hidden = seccion !== "busqueda";
   $("seccionLista").hidden = seccion === "busqueda";
   ocultarAutocompletado();
+  $("leyendaAreas").hidden = false;
 
   if (seccion === "busqueda") {
     limpiarMapa();
@@ -769,11 +783,25 @@ function cambiarSeccion(seccion) {
   }
   $("filtroSeccion").value = "";
   $("filtroSeccion").placeholder = SECCIONES[seccion].filtro;
-  $("detalleSeccion").hidden = true;
-  renderListaSeccion();
+  volverALista();
+}
 
+/** Lista de grupos o servicios (sin ficha abierta) con todos sus lugares resaltados en el mapa. */
+function volverALista() {
+  verFicha(false);
+  renderListaSeccion();
+  const seccion = estado.seccion;
   const ids = estado.secciones[seccion].map((item) => item.area).filter((id) => estado.areasPorId[id]);
   if (ids.length) ubicarSalones(ids, `${SECCIONES[seccion].titulo} · ${ids.length} lugar(es)`);
+}
+
+/** Con una ficha abierta se oculta la lista y aparece "Atrás". */
+function verFicha(abierta) {
+  $("detalleSeccion").hidden = !abierta;
+  $("listaSeccion").hidden = abierta;
+  $("filtroSeccion").hidden = abierta;
+  $("atrasBtn").hidden = !abierta;
+  $("leyendaAreas").hidden = false;
 }
 
 function datosLugar(item) {
@@ -791,7 +819,7 @@ function renderListaSeccion() {
   const todos = estado.secciones[seccion];
   const filtro = $("filtroSeccion").value;
   const items = plano(filtro)
-    ? todos.filter((item) => coincidePalabras(`${item.nombre} ${item.area} ${item.descripcion || ""}`, filtro))
+    ? todos.filter((item) => coincidePalabras(`${item.nombre} ${item.significado || ""} ${item.actividades || ""} ${item.area} ${item.descripcion || ""}`, filtro))
     : todos;
 
   if (!todos.length) {
@@ -805,14 +833,41 @@ function renderListaSeccion() {
         return `
           <button type="button" class="clase-card seccion-card" data-area="${escapar(item.area)}">
             <span class="clase-head">
-              <span class="seccion-nombre">${escapar(item.nombre)}</span>
+              <span class="seccion-nombre">${escapar(tituloSeccion(item))}</span>
               ${salon ? `<span class="clase-salon">${escapar(salon)}</span>` : ""}
             </span>
             <span class="clase-meta">${escapar(piso)}</span>
-            <span class="clase-meta">${escapar(item.descripcion || "Información pendiente")}</span>
+            <span class="clase-meta">${escapar(item.actividades || item.descripcion || "Información pendiente")}</span>
           </button>`;
       })
       .join("");
+  }
+}
+
+/** Actividades, descripción (o leyenda para unirse), enlace a su página, responsable, contacto y horario de un grupo o servicio (los vacíos no se muestran). */
+function fichaSeccion(item, esGrupo) {
+  const campos = [
+    [esGrupo ? "Docente responsable" : "Responsable", item.responsable],
+    ["Contacto", item.contacto],
+    ["Horario", item.horario],
+  ].filter(([, valor]) => valor);
+  return `
+    ${item.actividades ? `<p><strong>Actividades:</strong> ${escapar(item.actividades)}</p>` : ""}
+    ${item.descripcion ? `<p>${enlazar(item.descripcion)}</p>` : item.web ? "" : `<p class="placeholder">Información pendiente: se agregará próximamente.</p>`}
+    ${item.web ? `<p>${enlazar(item.web, "Abrir página web")}</p>` : ""}
+    ${campos.length ? `<dl class="ficha-grid">${campos.map(([k, v]) => `<dt>${k}</dt><dd>${enlazar(v)}</dd>`).join("")}</dl>` : ""}`;
+}
+
+/** "IASE - Investigación Aplicada de Sistemas Eléctricos" (solo el nombre si no tiene siglas). */
+function tituloSeccion(item) {
+  return item.significado ? `${item.nombre} - ${item.significado}` : item.nombre;
+}
+
+/** Grupo o servicio que ocupa un área del mapa: [sección, datos] o undefined. */
+function seccionDeArea(id) {
+  for (const seccion of ["grupos", "servicios"]) {
+    const item = estado.secciones[seccion].find((x) => x.area === id);
+    if (item) return [seccion, item];
   }
 }
 
@@ -820,19 +875,14 @@ function mostrarDetalleSeccion(id) {
   const item = estado.secciones[estado.seccion].find((x) => x.area === id);
   if (!item) return;
   const { area, piso, salon } = datosLugar(item);
-  const campos = [
-    ["Responsable", item.responsable],
-    ["Contacto", item.contacto],
-    ["Horario", item.horario],
-    ["Redes", item.redes],
-  ].filter(([, valor]) => valor);
-
-  $("detalleSeccion").hidden = false;
+  verFicha(true);
   $("detalleSeccion").innerHTML = `
-    <div class="ficha-grupo"><span class="ficha-materia ficha-materia-grande">${escapar(item.nombre)}</span></div>
+    <div class="ficha-grupo"><span class="ficha-materia ficha-materia-grande">${escapar(tituloSeccion(item))}</span></div>
     <p>${escapar([salon, piso].filter(Boolean).join(" · "))}</p>
-    ${item.descripcion ? `<p>${escapar(item.descripcion)}</p>` : `<p class="placeholder">Información pendiente: se agregará próximamente.</p>`}
-    ${campos.length ? `<dl class="ficha-grid">${campos.map(([k, v]) => `<dt>${k}</dt><dd>${escapar(v)}</dd>`).join("")}</dl>` : ""}`;
+    ${fichaSeccion(item, estado.seccion === "grupos")}`;
+  // En pantallas bajas la leyenda de colores se oculta para que la ficha quepa sin barra de desplazamiento.
+  const panel = document.querySelector(".panel-busqueda");
+  $("leyendaAreas").hidden = panel.scrollHeight > panel.clientHeight;
   document.querySelectorAll(".seccion-card").forEach((c) => c.classList.toggle("activa", c.dataset.area === id));
   if (area && estado.visor) {
     estado.visor.enfocarSalon(area.id);
@@ -859,7 +909,7 @@ function limpiarMapa() {
 function limpiarBusqueda() {
   if (estado.seccion !== "busqueda") {
     $("filtroSeccion").value = "";
-    $("detalleSeccion").hidden = true;
+    verFicha(false);
     renderListaSeccion();
     limpiarMapa();
     enfocar($("filtroSeccion"));
@@ -1201,7 +1251,8 @@ function mostrarArea(area) {
     : `${area.codigo || area.nombre} · ${nombreNivel(area.nivel)}`);
 
   const titulo = [area.codigo, area.nombre !== area.codigo ? area.nombre : null, area.alias].filter(Boolean).join(" · ");
-  const subtitulo = area.descripcion || `${NOMBRE_TIPO[area.tipo] || ""} · ${area.ubicacion || nombreNivel(area.nivel)}`;
+  const subtitulo = `${NOMBRE_TIPO[area.tipo] || ""} · ${area.ubicacion || nombreNivel(area.nivel)}`;
+  const [seccion, item] = seccionDeArea(area.id) || [];
   const grupos = area.codigo ? estado.gruposOrdenados.filter((g) => g.salon === area.codigo) : [];
   const lista = grupos.map((g) => tarjetaClase(g, "", horarioTexto(g) || "Horario pendiente", g.profesor)).join("");
 
@@ -1217,7 +1268,8 @@ function mostrarArea(area) {
       <span class="grupo-codigo">${escapar(titulo)}</span>
       <span class="ficha-materia">${escapar(subtitulo)}</span>
     </div>
-    ${area.descripcion && area.ubicacion ? `<p class="placeholder">${escapar(area.ubicacion)}.</p>` : ""}
+    ${area.descripcion ? `<p>${escapar(area.descripcion)}</p>` : ""}
+    ${item ? `<p><strong>${escapar(tituloSeccion(item))}</strong></p>${fichaSeccion(item, seccion === "grupos")}` : ""}
     ${cuerpo}`;
 }
 

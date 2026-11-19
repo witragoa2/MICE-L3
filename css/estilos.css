@@ -40,6 +40,11 @@ body {
   line-height: 1.45;
 }
 
+/* "hidden" siempre oculta, aunque la clase del elemento le dé otro display. */
+[hidden] {
+  display: none !important;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -289,8 +294,44 @@ body {
   overflow-wrap: anywhere;
 }
 
+/* Páginas web y correos de grupos y servicios */
+.enlace {
+  color: var(--azul-medio);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--dorado);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+
+.enlace:hover,
+.enlace:focus-visible {
+  background: var(--dorado-claro);
+  color: var(--azul);
+}
+
 .correo-linea {
   margin: 4px 0 8px;
+}
+
+/* ---------- Pie de página con logos ---------- */
+
+.pie {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(8px, 3vw, 40px);
+  padding: 10px 12px;
+  background: linear-gradient(120deg, var(--azul) 0%, var(--azul-medio) 100%);
+  border-top: 4px solid var(--dorado);
+}
+
+/* Los 5 caben en una fila hasta en un celular de 320 px. */
+.pie img {
+  height: min(48px, calc((100vw - 72px) / 6));
+  width: auto;
 }
 
 /* ---------- Distribución ---------- */
@@ -436,11 +477,44 @@ body {
 }
 
 .busqueda-cabecera .eyebrow {
+  flex: 1 1 auto;
+  min-width: 0;
   margin: 0;
 }
 
+/* "Atrás": regresa de la ficha de un grupo o servicio a la lista. */
+.atras-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  padding: 3px 10px 3px 6px;
+  white-space: nowrap;
+  background: var(--blanco);
+  border: 1px solid var(--azul);
+  border-radius: 4px;
+  color: var(--azul);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.atras-flecha {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.atras-btn:hover,
+.atras-btn:focus-visible {
+  background: var(--azul);
+  color: var(--blanco);
+}
+
 .limpiar-btn {
+  flex: 0 0 auto;
   padding: 6px 12px;
+  white-space: nowrap;
   background: #c62828;
   border: 0;
   border-radius: 4px;
@@ -1025,8 +1099,8 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 6px 12px;
-  margin: 16px 0 0;
-  padding: 12px 0 0;
+  margin: 12px 0 0;
+  padding: 10px 0 0;
   border-top: 1px solid var(--linea);
   list-style: none;
   color: var(--muted);
@@ -1283,10 +1357,6 @@ html.intro-activa body {
   cursor: pointer;
 }
 
-.ir-mapa[hidden] {
-  display: none;
-}
-
 /* Instructivo de gestos sobre el mapa (solo celular y tableta) */
 .instructivo {
   display: none;
@@ -1418,9 +1488,27 @@ html.intro-activa body {
     height: 48px;
   }
 
+  /* Fila 1: logo, título y guía a la misma altura; fila 2: la descripción a todo lo ancho. */
+  .texto-encabezado {
+    display: contents;
+  }
+
+  .app-header h1 {
+    flex: 1 1 auto;
+  }
+
+  .app-header p {
+    order: 1;
+    flex: 1 1 100%;
+    margin: 0;
+  }
+
+  .linea-tiempo {
+    order: 2;
+  }
+
   /* Guía: botón compacto junto al título y ventana a pantalla completa */
   .guia-btn {
-    align-self: flex-start;
     padding: 6px 12px 6px 6px;
     font-size: 13px;
   }

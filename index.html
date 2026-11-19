@@ -14,7 +14,7 @@
       }
     } catch {}
   </script>
-  <link rel="stylesheet" href="css/estilos.css?v=52">
+  <link rel="stylesheet" href="css/estilos.css?v=57">
   <script type="importmap">
     {
       "imports": {
@@ -136,7 +136,7 @@
       </g>
     </svg>
   </div>
-  <script src="js/intro.js?v=52"></script>
+  <script src="js/intro.js?v=53"></script>
 
   <header class="app-header">
     <img class="logo-l3" src="img/logo-l3.png" alt="Logo del Laboratorio L-3">
@@ -185,6 +185,7 @@
       <section class="panel-busqueda" aria-labelledby="tituloBusqueda">
         <div class="busqueda-cabecera">
           <p class="eyebrow" id="tituloBusqueda">Buscar</p>
+          <button type="button" id="atrasBtn" class="atras-btn" title="Regresa a la lista" hidden><span class="atras-flecha" aria-hidden="true">←</span>Atrás</button>
           <button type="button" id="limpiarBtn" class="limpiar-btn" title="Borra la búsqueda y regresa el mapa a la vista inicial">Limpiar búsqueda</button>
         </div>
 
@@ -218,7 +219,7 @@
           <div id="detalleSeccion" class="resultado" aria-live="polite" hidden></div>
         </div>
 
-        <ul class="leyenda-areas" aria-label="Códigos de color">
+        <ul class="leyenda-areas" id="leyendaAreas" aria-label="Códigos de color">
           <li><span style="background:#f3e2c7"></span>Salón de clases</li>
           <li><span style="background:#1f5f73"></span>Áreas de gestión de apoyo</li>
           <li><span style="background:#8cc063"></span>Grupos estudiantiles</li>
@@ -272,6 +273,14 @@
       <p class="mapa-estado" id="mapaEstado">Cargando…</p>
     </section>
   </main>
+
+  <footer class="pie">
+    <img src="img/pie-unam.png" width="286" height="321" alt="Universidad Nacional Autónoma de México">
+    <img src="img/pie-475.png" width="461" height="291" alt="475 años de la Universidad de México, 1551-2026">
+    <img src="img/pie-fes.png" width="323" height="321" alt="FES Aragón, UNAM">
+    <img src="img/pie-50.png" width="369" height="262" alt="50 años de la FES Aragón">
+    <img src="img/pie-l3.png" width="318" height="317" alt="Laboratorio L-3">
+  </footer>
 
   <button type="button" id="irMapaBtn" class="ir-mapa" hidden>Ver mapa ↓</button>
 
@@ -346,6 +355,6 @@
     </div>
   </dialog>
 
-  <script type="module" src="js/principal.js?v=52"></script>
+  <script type="module" src="js/principal.js?v=59"></script>
 </body>
 </html>

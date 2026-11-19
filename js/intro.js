@@ -223,7 +223,7 @@
       L.g.style.opacity = a * (1 - b);
     });
 
-    // todo: crece, toma impulso y sale
+    // el logo completo crece, toma impulso y sale
     const ls = T.ls(ms);
     set('l3-logo', `translate(0 ${T.ly(ms)}) translate(113 140) scale(${ls * T.lsx(ms)} ${ls * T.lsy(ms)}) translate(-113 -140)`);
     intro.style.clipPath = `circle(${T.cur(ms)}% at 50% -5%)`;

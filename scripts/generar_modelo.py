@@ -63,7 +63,7 @@ NIVELES = [
 ]
 CAPAS_ESTRUCTURA = {"0": 0, "Primer Nivel": 1, "Segundo Nivel": 2}
 
-# Nombre visible y categoría (colores de los planos 2D).
+# Nombre visible y categoría (colores de los planos 2D). La llave es el nombre del sólido en AutoCAD.
 AREAS = {
     "JEFATURA": ("Jefatura L3", "apoyo"),
     "Jefatura L3": ("Jefatura L3", "apoyo"),
@@ -74,9 +74,9 @@ AREAS = {
     "SPA-3": ("Solo personal autorizado", "restringido"),
     "SPA-4": ("Solo personal autorizado", "restringido"),
     "SPA-5": ("Solo personal autorizado", "restringido"),
-    "Grupo IMED": ("Grupo IMED", "grupo"),
-    "Centro de Canje": ("Centro de Canje", "servicio"),
-    "Salón de Servicio Social": ("Servicio Social L3", "apoyo"),
+    "Grupo IMED": ("LIMA", "grupo"),
+    "Centro de Canje": ("El Cambalache", "servicio"),
+    "Salón de Servicio Social": ("ADN PUMA", "servicio"),
     "Almacén de Electrónica": ("Almacén Electrónica", "apoyo"),
     "Almacén de medición e instrumentación": ("Almacén Medición e Instrumentación", "apoyo"),
     "Baño Hombres P1": ("Baño Hombres P1", "bano"),
@@ -84,24 +84,23 @@ AREAS = {
     "Baño Hombres P2": ("Baño Hombres P2", "bano"),
     "Baño Mujeres P2": ("Baño Mujeres P2", "bano"),
     "Grupo IDEA": ("Grupo IDEA", "grupo"),
-    "Grupo REX": ("Grupo REX", "grupo"),
+    "Grupo REX": ("Grupo REEX", "grupo"),
     "Club de mecatrónica": ("Club de Mecatrónica", "grupo"),
-    "ARX": ("ARX", "grupo"),
-    "MAKER": ("MAKER", "servicio"),
+    "ARX": ("ARX Robotics", "grupo"),
+    "MAKER": ("Salón Maker", "servicio"),
     "Almacén de control": ("Almacén Control", "apoyo"),
     "Almacén de comunicación": ("Almacén Comunicaciones", "apoyo"),
 }
 
 # Áreas que en el horario aparecen con un código de salón.
-ALIAS_CODIGO = {"Grupo REX": "L32012"}
+ALIAS_CODIGO = {"Grupo REX": "L32012", "Salón de Servicio Social": "L31001"}
 
 # Segundo nombre según los planos: (nombre completo, texto corto, categoría o None).
 NOMBRE_ALTERNO = {
     "L-30010": ("EYM", "EYM", None),
     "L-30011": ("ACE", "ACE", None),
     "L-30022": ("IASE", "IASE", "grupo"),
-    "L-30024": ("AMPERIO Aprendices", "AMPERIO", "grupo"),
-    "Grupo IMED": ("LIMA", "LIMA", "grupo"),
+    "L-30024": ("Club Amperio Aprendices", "AMPERIO", "grupo"),
     "L-31020": ("Centro de Cómputo y Capacitación de Proyectos de Ingeniería L3", "Centro de Cómputo", None),
     "L-32015": ("3D", "3D", None),
 }
@@ -134,9 +133,16 @@ UBICACION = {
 }
 _DESC_P1 = "Sanitarios - Exclusivo para profesores y personal de laboratorio."
 _DESC_P2 = "Sanitarios - Favor de solicitar las llaves en jefatura para entrar y usarlos."
+_TECNICO = "Técnico Académico del área: "
 DESCRIPCION = {
     "Baño Hombres P1": _DESC_P1, "Baño Mujeres P1": _DESC_P1,
     "Baño Hombres P2": _DESC_P2, "Baño Mujeres P2": _DESC_P2,
+    "Almacén EYM y ACE": _TECNICO + "Mtro. Noé González Mondragón",
+    "Almacén de máquinas de electricidad y magnetismo": _TECNICO + "Dr. Sergio García Hernández",
+    "Almacén de Electrónica": "Técnicos Académicos del área: Ing. Enrique Herrera Hidalgo e Ing. Martín Hernández Hernández",
+    "Almacén de medición e instrumentación": _TECNICO + "Mtro. Adrián Paredes Romero",
+    "Almacén de control": _TECNICO + "Mtro. Alejandro Andrés Serapio Carmona",
+    "Almacén de comunicación": _TECNICO + "Ing. Raúl Vega Salome",
 }
 
 # Puertas que faltan en el DXF: (punto A, punto B, z piso, z techo, grosor, nivel).

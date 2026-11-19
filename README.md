@@ -70,7 +70,7 @@ Otras opciones:
 
 ## Grupos estudiantiles y servicios para alumnos
 
-Se editan a mano en `data/secciones.json`. Cada bloque tiene `area` (el id del área en el mapa, no cambiarlo), `nombre`, `descripcion`, `responsable`, `contacto`, `horario` y `redes`. Los campos vacíos se muestran como "Información pendiente". Para agregar uno, copia un bloque y cambia sus datos.
+Se editan a mano en `data/secciones.json`. Cada bloque tiene `area` (el id del área en el mapa, no cambiarlo), `nombre`, `significado` (lo que quieren decir las siglas), `actividades` (solo grupos: lo que se hace en el grupo), `descripcion` (en grupos, la leyenda «Si te interesa unirte…»), `responsable`, `contacto`, `horario` y `web`. Las direcciones web y los correos se muestran como enlaces. Los campos vacíos se muestran como "Información pendiente". Para agregar uno, copia un bloque y cambia sus datos.
 
 ## Modelo 3D
 
@@ -84,6 +84,7 @@ python scripts/generar_fachada.py
 - El origen es `modelos/Laboratorio_3_Edificio_Completo_3D.dxf`; el plano 2D de referencia es `modelos/Laboratorio_3_2D.dxf`.
 - **Los planos no se suben a GitHub** (`modelos/` está en `.gitignore`): todo lo del repositorio queda público en la página. Pídelos al administrador y cópialos en `modelos/` solo cuando haya que regenerar el modelo.
 - Nombres, categorías (colores), puertas y ajustes del modelo están al inicio de `scripts/generar_modelo.py` (`AREAS`, `NOMBRE_ALTERNO`, `UBICACION`, `DESCRIPCION`, etc.).
+- **Cambiar el nombre de un área no requiere tocar AutoCAD:** en `AREAS`, la llave es el nombre del sólido en el DXF y el valor es el nombre que muestra la página. Los técnicos académicos de los almacenes están en `DESCRIPCION`.
 - `generar_fachada.py` se corre después, porque usa el centro que guarda `generar_modelo.py`.
 
 ## Probar la página en tu computadora
