@@ -2,7 +2,7 @@
 // MICE L3 · búsqueda, horarios, secciones y visor 3D
 // ============================================================
 
-const VERSION = "60";
+const VERSION = "61";
 const $ = (id) => document.getElementById(id);
 
 const estado = {
@@ -856,9 +856,9 @@ function fichaSeccion(item, esGrupo) {
   return `
     ${item.actividades ? `<p><strong>Actividades:</strong> ${escapar(item.actividades)}</p>` : ""}
     ${item.descripcion ? `<p>${enlazar(item.descripcion)}</p>` : item.web ? "" : `<p class="placeholder">Información pendiente: se agregará próximamente.</p>`}
-    ${esGrupo ? "" : `<p><strong>Nota:</strong> ${NOTA_SERVICIOS}</p>`}
     ${item.web ? `<p>${enlazar(item.web, "Abrir página web")}</p>` : ""}
-    ${campos.length ? `<dl class="ficha-grid">${campos.map(([k, v]) => `<dt>${k}</dt><dd>${enlazar(v)}</dd>`).join("")}</dl>` : ""}`;
+    ${campos.length ? `<dl class="ficha-grid">${campos.map(([k, v]) => `<dt>${k}</dt><dd>${enlazar(v)}</dd>`).join("")}</dl>` : ""}
+    ${esGrupo ? "" : `<p class="nota-servicio">Nota: ${NOTA_SERVICIOS}</p>`}`;
 }
 
 /** "IASE - Investigación Aplicada de Sistemas Eléctricos" (solo el nombre si no tiene siglas). */

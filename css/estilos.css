@@ -954,6 +954,12 @@ body {
   margin-bottom: 4px;
 }
 
+/* Nota de los servicios, debajo del horario. */
+.nota-servicio {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .resultado p:last-child {
   margin-bottom: 0;
 }
