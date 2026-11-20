@@ -141,7 +141,7 @@ UBICACION = {
 _DESC_P1 = "Exclusivo para profesores y personal de laboratorio."
 _DESC_P2 = "Sanitarios de uso general.\nFavor de solicitar las llaves en jefatura para entrar y usarlos."  # cada renglón, un párrafo
 _TECNICO = "Técnico Académico del área: "
-_JEFATURA = "Área principal para la gestión del edificio. Encargada: Ing. Karla Itzel Otero Torres."
+_JEFATURA = "Área principal para la gestión del edificio.\nEncargada: Ing. Karla Itzel Otero Torres."  # cada renglón, un párrafo
 DESCRIPCION = {
     "JEFATURA": _JEFATURA, "Jefatura L3": _JEFATURA,
     "Baño Hombres P1": _DESC_P1, "Baño Mujeres P1": _DESC_P1,
