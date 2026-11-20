@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -7,7 +7,7 @@
   <title>MICE L3 · FES Aragón</title>
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
   <script>
-    // Antes de pintar: si la intro ya se vio en esta visita (o se pidió menos movimiento), no se muestra ni un instante.
+    // Antes de pintar: si la intro ya se vio en esta visita, no se muestra ni un instante.
     try {
       if (sessionStorage.getItem("mice-intro-vista") === "1" || matchMedia("(prefers-reduced-motion: reduce)").matches) {
         document.documentElement.classList.add("sin-intro");
@@ -30,7 +30,7 @@
   <div id="mice-intro" aria-hidden="true" title="Clic para saltar">
     <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">
       <defs>
-        <!-- la herramienta pasa por detrás del engranaje (con su separación) -->
+        <!-- la herramienta pasa por detrás del engranaje -->
         <mask id="l3-toolmask" maskUnits="userSpaceOnUse" x="-2000" y="-2000" width="5000" height="5000">
           <rect x="-2000" y="-2000" width="5000" height="5000" fill="#fff"/>
           <path id="l3-sil" d="
@@ -55,7 +55,7 @@
             149.38,66.38 151.50,65.38 153.62,63.00 154.12,61.62 154.00,54.12 153.12,52.38 151.38,50.62
             150.50,50.12 147.62,49.50 134.00,49.50 133.00,49.75 93.25,49.50Z" fill="#000"/>
         </mask>
-        <!-- nivel del líquido -->
+        <!-- Nivel del líquido -->
         <clipPath id="l3-liqclip">
           <path id="l3-level" d="M0,0Z"/>
         </clipPath>
@@ -146,7 +146,7 @@
       <p>Mapa Interactivo de Clases para Estudiantes del<br><span class="sin-corte">Laboratorio L-3</span> <span class="sin-corte">“Silvia Torres Castilleja”</span> <span class="sin-corte">· FES Aragón</span></p>
     </div>
 
-    <!-- Línea del tiempo -->
+    <!-- Línea del tiempo superior en la página -->
     <div class="linea-tiempo" aria-label="Línea del tiempo de hoy, de 7:00 a 24:00">
       <div class="lt-cabecera">
         <span id="ltHora">—</span>
@@ -175,7 +175,7 @@
 
   <main class="layout">
     <div class="columna-busqueda">
-      <!-- Pestañas -->
+      <!-- Secciones por tipo busqueda, grupos o servicios -->
       <div class="secciones" role="tablist" aria-label="Secciones">
         <button type="button" class="seccionBtn activo" data-seccion="busqueda" role="tab" aria-selected="true">Búsqueda</button>
         <button type="button" class="seccionBtn" data-seccion="grupos" role="tab" aria-selected="false">Grupos Estudiantiles</button>
@@ -237,6 +237,7 @@
       <li><span class="gesto" aria-hidden="true">👆</span><b>Toque</b> seleccionar salón</li>
     </ul>
 
+    <!-- Carga del modelo 3D del Laboratorio L-3 -->
     <section class="panel-mapa" aria-label="Modelo 3D del Laboratorio L-3">
       <div id="visor3d" class="visor3d">
         <p class="visor-cargando" id="visorEstado">Cargando modelo 3D…</p>
@@ -257,7 +258,7 @@
         <button type="button" class="ctrlBtn solo-movil" id="vistasBtn" aria-expanded="false" aria-controls="vistas">Vistas</button>
       </div>
 
-      <!-- Rosa de los vientos: NO N NE / O Entrada E / SO S SE -->
+      <!-- Vistas del modelo: NO N NE / O Entrada E / SO S SE -->
       <div class="vistas" id="vistas" role="group" aria-label="Vistas predeterminadas">
         <button type="button" class="vistaBtn" data-vista="no" title="Isométrica noroeste">NO</button>
         <button type="button" class="vistaBtn" data-vista="n" title="Vista desde el norte">N</button>
@@ -284,7 +285,7 @@
 
   <button type="button" id="irMapaBtn" class="ir-mapa" hidden>Ver mapa ↓</button>
 
-  <!-- Guía de uso para el público (botón "Guía de uso" del encabezado o enlace con ?guia) -->
+  <!-- Guía de uso para el público -->
   <dialog id="guia" class="guia" aria-labelledby="guiaTitulo">
     <div class="guia-cabecera">
       <h2 id="guiaTitulo">Guía de uso</h2>

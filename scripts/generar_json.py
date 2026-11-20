@@ -1,11 +1,11 @@
 """Convierte el PDF oficial de horarios del L3 en data/horarios.json.
 
-Normalmente no se usa solo: scripts/actualizar_semestre.py lo llama y además
+El script no funciona solo, scripts/actualizar_semestre.py lo llama y además
 actualiza los profesores y revisa los datos.
 
 Uso:
     python scripts/generar_json.py
-    python scripts/generar_json.py pdf_origen/Horarios_L3_2027-I.pdf data/horarios.json
+    python scripts/generar_json.py pdf_origen/Horarios_L3_20XX-I o II.pdf data/horarios.json
 
 Detecta las columnas a partir del encabezado de cada página y agrupa todas las
 sesiones de un mismo grupo.
@@ -35,7 +35,7 @@ NOMBRES_COLUMNA = {
     "SALON": "salon",
     "CUPO": "cupo",
 }
-# El PDF trae "DISEÃ?O" en algunas páginas.
+# Corrige all PDF que trae "DISEÃ?O" en algunas páginas.
 CORRECCIONES = {"DISEÃ?O": "DISEÑO", "DISEÃ‘O": "DISEÑO", "DISEÃ’O": "DISEÑO"}
 
 

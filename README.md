@@ -15,7 +15,7 @@ pip install pdfplumber ezdxf
 
 ## Formato del horario que lee el programa
 
-El programa lee el PDF **tal como lo exporta el programa de horarios del laboratorio** (como el del 2027-I: carta horizontal, un renglón por grupo, líneas reales en la tabla y «SEM 2027-I» en el encabezado). **No lo abras ni lo vuelvas a guardar en Word u otro editor**: Word convierte las líneas de la tabla en rectángulos de fondo y el programa parte los renglones (así pasó con una versión del 2026-II editada en Word).
+El programa lee el PDF **tal como lo exporta el programa de horarios del laboratorio** (como el del 2027-I: carta horizontal, un renglón por grupo, líneas reales en la tabla y «SEM 2027-I» en el encabezado). **No lo abras ni lo vuelvas a guardar en Word u otro editor**: Word convierte las líneas de la tabla en rectángulos de fondo y el programa parte los renglones.
 
 - Si hace falta corregir algo, se corrige en el programa de horarios y se vuelve a exportar el PDF.
 - Si el PDF trae un salón `SINDEF` (sin definir), el reporte lo marca como error: hay que asignar el salón en el programa de horarios y exportar de nuevo.
@@ -95,7 +95,7 @@ python scripts/generar_fachada.py
 - **Cambiar el nombre de un área no requiere tocar AutoCAD:** en `AREAS`, la llave es el nombre del sólido en el DXF y el valor es el nombre que muestra la página. Los técnicos académicos de los almacenes están en `DESCRIPCION`.
 - `generar_fachada.py` se corre después, porque usa el centro que guarda `generar_modelo.py`.
 
-## Probar la página en tu computadora
+## Probar la página en la computadora
 
 ```bash
 python -m http.server 8765
@@ -116,5 +116,5 @@ Los datos (`data/*.json`) se recargan solos. Si cambias **JavaScript o CSS**, su
 | `data/` | Datos que lee la página: `horarios.json`, `profesores.json`, `secciones.json`, `edificio.json`, `fachada.json`. |
 | `img/` | Logo. |
 | `pdf_origen/` | PDF de horarios del semestre actual (y `anteriores/`). |
-| `modelos/` | Archivos de AutoCAD del edificio (solo en tu computadora; no se suben). |
+| `modelos/` | Archivos de AutoCAD del edificio|
 | `scripts/` | Scripts de Python que generan los datos. |

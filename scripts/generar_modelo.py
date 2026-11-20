@@ -12,6 +12,12 @@ Reglas del DXF:
   * Muros y losas en las capas "0", "Primer Nivel" y "Segundo Nivel"; puertas en
     "A-Puertas"; escaleras en "A-Escaleras" y "Escaleras de emergencia"; techo en "Techo".
   * Solo caras planas.
+
+¡ADVERTENCIA!
+Bajo ninguna razón borrar algún salón, capa o modificar algún bloque sin haber hecho alguna copia previa.
+ezdxf es una herramienta que permite leer cada SOLIDO3D, se le agrego un parche que permite editar y codificar un
+salón asociado al mismo, cualquier movimiento en el modelo puede llegar a romper la lectura de data/edificios.json
+y scripts/generar_modelo.py leería incorrectamente las formas y ubicación del modelo.
 """
 
 import argparse

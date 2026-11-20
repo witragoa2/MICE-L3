@@ -3,7 +3,7 @@
 Lee la página (HTML o PDF), encuentra cada correo y lo asigna al profesor cuyo
 nombre aparece junto a él (o cuyo nombre forma el correo, p. ej.
 salvadoraguirre55@ -> AGUIRRE GUTIERREZ SALVADOR). Solo asigna un correo cuando
-la coincidencia es clara; los dudosos se reportan para revisarlos a mano.
+la coincidencia es clara; los que no son claros se reportan para revisarlos a mano.
 
 Lo usa scripts/actualizar_semestre.py con la opción --correos.
 """
@@ -14,6 +14,7 @@ import unicodedata
 from html.parser import HTMLParser
 from urllib.request import Request, urlopen
 
+# ¡IMPORTATE! SOLO MODIFICAR LA DIRECCIÓN URL EN CASO DE CAMBIO O MIGRACIÓN DE CORREOS DE PROFESORES, CASO CONTRARIO, NO TOCAR
 # Página oficial con los correos de los profesores del L3.
 URL_CORREOS = "https://sites.google.com/aragon.unam.mx/laboratorio-l3/directorio/profesores"
 
