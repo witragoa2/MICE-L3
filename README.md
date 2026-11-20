@@ -13,6 +13,14 @@ Página web estática (HTML, CSS, JavaScript y Three.js) que muestra el edificio
 pip install pdfplumber ezdxf
 ```
 
+## Formato del horario que lee el programa
+
+El programa lee el PDF **tal como lo exporta el programa de horarios del laboratorio** (como el del 2027-I: carta horizontal, un renglón por grupo, líneas reales en la tabla y «SEM 2027-I» en el encabezado). **No lo abras ni lo vuelvas a guardar en Word u otro editor**: Word convierte las líneas de la tabla en rectángulos de fondo y el programa parte los renglones (así pasó con una versión del 2026-II editada en Word).
+
+- Si hace falta corregir algo, se corrige en el programa de horarios y se vuelve a exportar el PDF.
+- Si el PDF trae un salón `SINDEF` (sin definir), el reporte lo marca como error: hay que asignar el salón en el programa de horarios y exportar de nuevo.
+- Los PDF de semestres anteriores pueden quedarse en `pdf_origen/`: el programa usa el del semestre más reciente según el nombre del archivo y, al actualizar, mueve los anteriores a `pdf_origen/anteriores/`.
+
 ## Cada semestre: actualizar horarios y profesores
 
 1. Copia el PDF oficial de horarios en `pdf_origen/` con el nombre `Horarios_L3_<semestre>.pdf`, por ejemplo `Horarios_L3_2027-II.pdf`. El semestre del nombre decide cuál es el más reciente.
