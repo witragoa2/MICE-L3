@@ -14,7 +14,7 @@ import unicodedata
 from html.parser import HTMLParser
 from urllib.request import Request, urlopen
 
-# ¡IMPORTATE! SOLO MODIFICAR LA DIRECCIÓN URL EN CASO DE CAMBIO O MIGRACIÓN DE CORREOS DE PROFESORES, CASO CONTRARIO, NO TOCAR
+# ¡IMPORTANTE! SOLO MODIFICAR LA DIRECCIÓN URL EN CASO DE CAMBIO O MIGRACIÓN DE CORREOS DE PROFESORES, CASO CONTRARIO, NO TOCAR
 # Página oficial con los correos de los profesores del L3.
 URL_CORREOS = "https://sites.google.com/aragon.unam.mx/laboratorio-l3/directorio/profesores"
 

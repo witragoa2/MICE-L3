@@ -1,6 +1,6 @@
 """Convierte el PDF oficial de horarios del L3 en data/horarios.json.
 
-El script no funciona solo, scripts/actualizar_semestre.py lo llama y además
+Puede usarse solo, pero normalmente lo llama scripts/actualizar_semestre.py, que además
 actualiza los profesores y revisa los datos.
 
 Uso:
@@ -35,7 +35,7 @@ NOMBRES_COLUMNA = {
     "SALON": "salon",
     "CUPO": "cupo",
 }
-# Corrige all PDF que trae "DISEÃ?O" en algunas páginas.
+# Corrige el PDF que trae "DISEÃ?O" en algunas páginas.
 CORRECCIONES = {"DISEÃ?O": "DISEÑO", "DISEÃ‘O": "DISEÑO", "DISEÃ’O": "DISEÑO"}
 
 

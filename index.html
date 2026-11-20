@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -7,7 +7,7 @@
   <title>MICE L3 · FES Aragón</title>
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
   <script>
-    // Antes de pintar: si la intro ya se vio en esta visita, no se muestra ni un instante.
+    // Antes de pintar: si la intro ya se vio en esta visita (o el sistema pide menos movimiento), no se muestra ni un instante.
     try {
       if (sessionStorage.getItem("mice-intro-vista") === "1" || matchMedia("(prefers-reduced-motion: reduce)").matches) {
         document.documentElement.classList.add("sin-intro");
@@ -136,7 +136,7 @@
       </g>
     </svg>
   </div>
-  <script src="js/intro.js?v=53"></script>
+  <script src="js/intro.js?v=54"></script>
 
   <header class="app-header">
     <img class="logo-l3" src="img/logo-l3.png" alt="Logo del Laboratorio L-3">

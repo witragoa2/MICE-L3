@@ -116,5 +116,5 @@ Los datos (`data/*.json`) se recargan solos. Si cambias **JavaScript o CSS**, su
 | `data/` | Datos que lee la página: `horarios.json`, `profesores.json`, `secciones.json`, `edificio.json`, `fachada.json`. |
 | `img/` | Logo. |
 | `pdf_origen/` | PDF de horarios del semestre actual (y `anteriores/`). |
-| `modelos/` | Archivos de AutoCAD del edificio|
+| `modelos/` | Archivos de AutoCAD del edificio |
 | `scripts/` | Scripts de Python que generan los datos. |

@@ -15,9 +15,9 @@ Reglas del DXF:
 
 ¡ADVERTENCIA!
 Bajo ninguna razón borrar algún salón, capa o modificar algún bloque sin haber hecho alguna copia previa.
-ezdxf es una herramienta que permite leer cada SOLIDO3D, se le agrego un parche que permite editar y codificar un
-salón asociado al mismo, cualquier movimiento en el modelo puede llegar a romper la lectura de data/edificios.json
-y scripts/generar_modelo.py leería incorrectamente las formas y ubicación del modelo.
+ezdxf es una herramienta que permite leer cada SÓLIDO 3D; se le agregó un parche que permite leer la posición de cada
+sólido, y así cada salón queda asociado a su forma. Cualquier movimiento en el modelo puede romper esa lectura:
+scripts/generar_modelo.py leería incorrectamente las formas y la ubicación del modelo en data/edificio.json.
 """
 
 import argparse
