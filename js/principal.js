@@ -2,7 +2,7 @@
 // MICE L3 · búsqueda, horarios, secciones y visor 3D
 // ============================================================
 
-const VERSION = "64";
+const VERSION = "65";
 const $ = (id) => document.getElementById(id);
 
 const estado = {
@@ -1261,7 +1261,7 @@ function mostrarArea(area) {
   marcarVistaActiva(null);
   estadoMapa(area.tipo === "bano"
     ? `${area.nombre} · descanso de la escalera`
-    : `${area.codigo || area.nombre} · ${nombreNivel(area.nivel)}`);
+    : `${area.codigo || estado.areasPorId[area.id]?.etiqueta || area.nombre} · ${nombreNivel(area.nivel)}`);
 
   const titulo = [area.codigo, area.nombre !== area.codigo ? area.nombre : null, area.alias].filter(Boolean).join(" · ");
   const subtitulo = NOMBRE_TIPO[area.tipo] || "";

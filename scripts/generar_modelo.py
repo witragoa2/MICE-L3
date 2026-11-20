@@ -69,10 +69,11 @@ NIVELES = [
 ]
 CAPAS_ESTRUCTURA = {"0": 0, "Primer Nivel": 1, "Segundo Nivel": 2}
 
+_NOMBRE_JEFATURA = "Jefatura de Sección Académica del Laboratorio L-3 “Silvia Torres Castilleja”"
 # Nombre visible y categoría (colores de los planos 2D). La llave es el nombre del sólido en AutoCAD.
 AREAS = {
-    "JEFATURA": ("Jefatura L3", "apoyo"),
-    "Jefatura L3": ("Jefatura L3", "apoyo"),
+    "JEFATURA": (_NOMBRE_JEFATURA, "apoyo"),
+    "Jefatura L3": (_NOMBRE_JEFATURA, "apoyo"),
     "Almacén EYM y ACE": ("Almacén EYM/ACE", "apoyo"),
     "Almacén de máquinas de electricidad y magnetismo": ("Almacén máq. eléc. y de potencia", "apoyo"),
     "SPA-1": ("Solo personal autorizado", "restringido"),
@@ -164,6 +165,9 @@ PUERTAS_EXTRA = [
     ((1322.62, 2450.49), (1322.62, 2451.24), 0.00, 3.00, 0.10, 0),  # Almacén EYM/ACE
 ]
 # Punto de la etiqueta cuando el centro del área queda tapado por otra (X, Y en planta).
+# Texto corto de la etiqueta del mapa cuando el nombre completo no cabe en el área.
+ETIQUETA_CORTA = {"JEFATURA": "Jefatura L-3", "Jefatura L3": "Jefatura L-3"}
+
 POSICION_ETIQUETA = {
     "Almacén de medición e instrumentación": (1336.045, 2455.44),  # parte libre, fuera de L31015
 }
@@ -561,7 +565,7 @@ def construir_area(nombre, caras, centro):
         "codigo": codigo,
         "nombre": visible,
         "alias": alias,
-        "etiqueta": " · ".join(p for p in (codigo, visible if visible != codigo else None, alias_corto) if p),
+        "etiqueta": ETIQUETA_CORTA.get(nombre) or " · ".join(p for p in (codigo, visible if visible != codigo else None, alias_corto) if p),
         "tipo": categoria_plano or categoria,
         "nivel": NIVEL_FORZADO.get(nombre, nivel_por_altura(zmin)),
         "nivelesEtiqueta": ETIQUETA_TAMBIEN_EN.get(nombre),
